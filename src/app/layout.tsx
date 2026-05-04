@@ -30,7 +30,7 @@ export default async function RootLayout({
       <body className="min-h-screen">
         <ThemeProvider
           attribute="data-theme"
-          defaultTheme="dark"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
