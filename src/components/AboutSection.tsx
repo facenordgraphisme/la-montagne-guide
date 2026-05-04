@@ -45,7 +45,7 @@ const AboutSection = ({
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center font-bold">{experience}+</div>
                 <div>
-                  <p className="text-xs text-white/60 uppercase tracking-wider font-bold">Années d'expérience</p>
+                  <p className="text-xs text-foreground/60 uppercase tracking-wider font-bold">Années d'expérience</p>
                   <p className="font-medium">Guide de Haute Montagne</p>
                 </div>
               </div>

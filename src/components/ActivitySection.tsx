@@ -61,18 +61,18 @@ const ActivitySection = ({
 }: ActivitySectionProps) => {
   const safeData = data?.length > 0 ? data : activities;
   return (
-    <section id="activites" className="py-24 px-6 bg-[#0a0a0a]">
+    <section id="activites" className="py-24 px-6 bg-background transition-colors duration-300">
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
           <div className="max-w-2xl">
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 uppercase">
               {title} <br /> <span className="text-accent italic">{titleAccent}</span>
             </h2>
-            <p className="text-white/60 text-lg">
+            <p className="text-foreground/60 text-lg">
               {description}
             </p>
           </div>
-          <button className="text-sm font-bold tracking-widest uppercase border-b border-accent pb-1 hover:text-accent transition-colors">
+          <button className="text-sm font-bold tracking-widest uppercase border-b border-accent pb-1 text-foreground/60 hover:text-accent transition-colors">
             Voir tout
           </button>
         </div>
