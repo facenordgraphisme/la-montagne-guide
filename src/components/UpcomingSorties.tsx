@@ -7,61 +7,87 @@ import Link from 'next/link'
 
 const categories = ['Tout voir', 'Alpinisme', 'Escalade', 'Ski']
 
-const sorties = [
+const FALLBACK_SORTIES = [
   {
-    id: 1,
+    id: '1',
     title: "Traversée des Écrins",
-    category: "Alpinisme",
+    activityType: "alpinisme",
     date: "15 Juin 2026",
     image: "/photos/DSC_6701.jpg",
     slug: "traversee-ecrins"
   },
   {
-    id: 2,
+    id: '2',
     title: "Grandes Voies Ailefroide",
-    category: "Escalade",
+    activityType: "escalade",
     date: "12 Juillet 2026",
     image: "/images/escalade.jpg",
     slug: "escalade-ailefroide"
-  },
-  {
-    id: 3,
-    title: "Sommet du Mont Rose",
-    category: "Ski",
-    date: "15 Mars 2026",
-    image: "/images/ski.jpg",
-    slug: "mont-rose-ski"
-  },
-  {
-    id: 4,
-    title: "Meije par l'Arête Promontoire",
-    category: "Alpinisme",
-    date: "20 Août 2026",
-    image: "/images/alpinisme.jpg",
-    slug: "meije-promontoire"
   }
 ]
 
-interface UpcomingSortiesProps {
-
-  initialFilter?: string;
-  showFilters?: boolean;
+interface Sortie {
+  id?: string
+  title: string
+  activityType: string
+  date: string
+  image: string
+  slug: string
+  isFull?: boolean
 }
 
-const UpcomingSorties = ({ initialFilter = 'Tout voir', showFilters = true }: UpcomingSortiesProps) => {
+interface UpcomingSortiesProps {
+  initialFilter?: string;
+  showFilters?: boolean;
+  data?: Sortie[];
+  badge?: string
+  title?: string
+  titleAccent?: string
+}
+
+const UpcomingSorties = ({ 
+  initialFilter = 'Tout voir', 
+  showFilters = true, 
+  data = [],
+  badge = "Prochaines sorties",
+  title = "REJOIGNEZ",
+  titleAccent = "L'AVENTURE"
+}: UpcomingSortiesProps) => {
   const [filter, setFilter] = useState(initialFilter)
 
+  // Mapping Sanity activityType to UI categories if they differ
+  const getCategory = (type: string) => {
+    const map: Record<string, string> = {
+      'alpinisme': 'Alpinisme',
+      'ski': 'Ski',
+      'escalade': 'Escalade',
+      'voyage': 'Voyage'
+    }
+    return map[type] || type
+  }
+
+  const safeData = data || []
+  const list = safeData.length > 0 ? safeData.map(s => ({
+    ...s,
+    category: getCategory(s.activityType)
+  })) : FALLBACK_SORTIES.map(s => ({
+    ...s,
+    category: getCategory(s.activityType)
+  }))
+
   const filteredSorties = filter === 'Tout voir'
-    ? sorties
-    : sorties.filter(s => s.category === filter)
+    ? list
+    : list.filter(s => s.category === filter)
 
   return (
     <section className="py-24 px-6 bg-background">
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
           <div>
-            <span className="text-accent font-bold tracking-widest uppercase text-sm mb-4 block">Prochaines sorties</span>
-            <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase">REJOIGNEZ <br /> <span className="text-accent italic">L'AVENTURE</span></h2>
+            <span className="text-accent font-bold tracking-widest uppercase text-sm mb-4 block">{badge}</span>
+            <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase">
+              {title} <br /> <span className="text-accent italic">{titleAccent}</span>
+            </h2>
           </div>
 
           {showFilters && (
@@ -99,6 +125,7 @@ const UpcomingSorties = ({ initialFilter = 'Tout voir', showFilters = true }: Up
                   src={s.image}
                   alt={s.title}
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />

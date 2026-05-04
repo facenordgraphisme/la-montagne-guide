@@ -2,8 +2,32 @@ import React from 'react'
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Image from 'next/image';
+import { client } from "@/sanity/lib/client";
+import { guideQuery } from "@/sanity/lib/queries";
+import { PortableText } from "@portabletext/react";
 
-export default function GuidePage() {
+export default async function GuidePage() {
+  const data = await client.fetch(guideQuery);
+
+  const fallback = {
+    badge: "Votre Guide",
+    titleNormal: "NICOLAS",
+    titleAccent: "DRAPERI",
+    quote: "Laissez le rêve être votre guide.",
+    image: "/images/guide.jpg",
+    bioTitle: "Une passion née dans les Hautes-Alpes",
+    certification: "UIAGM",
+    certificationSub: "Certification Internationale",
+    experience: "15+",
+    experienceSub: "Années d'expérience",
+    values: [
+      { title: "Sécurité", description: "La base de toute aventure. Une analyse constante des conditions pour un plaisir serein." },
+      { title: "Adaptabilité", description: "La montagne impose son rythme, je m'adapte pour que votre expérience soit optimale." },
+      { title: "Pédagogie", description: "Plus qu'un guide, je suis là pour vous apprendre à devenir autonome en montagne." }
+    ]
+  };
+
+  const guide = data || fallback;
   return (
     <main className="relative min-h-screen">
       <Navbar />
@@ -12,12 +36,12 @@ export default function GuidePage() {
       <section className="relative pt-48 pb-20 overflow-hidden">
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl">
-            <span className="text-accent font-bold tracking-widest uppercase text-sm mb-4 block">Votre Guide</span>
-            <h1 className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 text-gradient">
-              NICOLAS <br /> DRAPERI
+            <span className="text-accent font-bold tracking-widest uppercase text-sm mb-4 block">{guide.badge}</span>
+            <h1 className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 text-gradient uppercase">
+              {guide.titleNormal} <br /> {guide.titleAccent}
             </h1>
             <p className="text-xl text-foreground/60 leading-relaxed italic border-l-4 border-accent pl-8 py-2">
-              "Laissez le rêve être votre guide."
+              "{guide.quote}"
             </p>
           </div>
         </div>
@@ -29,33 +53,39 @@ export default function GuidePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
             <div className="relative aspect-[4/5] rounded-[60px] overflow-hidden shadow-2xl">
               <Image
-                src="/images/guide.jpg"
+                src={guide.image || "/images/guide.jpg"}
                 alt="Nicolas Draperi"
                 fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
               />
             </div>
 
             <div className="space-y-8 text-lg text-foreground/70 leading-relaxed">
-              <h2 className="text-4xl font-bold text-foreground">Une passion née dans les Hautes-Alpes</h2>
-              <p>
-                Installé à Champcella, au pied du massif des Écrins et aux portes du Queyras, je vis ma passion pour la montagne au quotidien. En tant que Guide de Haute Montagne UIAGM, mon métier est avant tout une histoire de partage et de transmission.
-              </p>
-              <p>
-                Ma philosophie repose sur une approche authentique et humaine de la montagne. Chaque cordée est unique, et ma priorité est de m'adapter à votre rythme, à vos envies et à vos capacités, tout en garantissant une sécurité absolue.
-              </p>
-              <p>
-                Qu'il s'agisse de gravir une face nord technique, de tracer les premières courbes dans une combe sauvage ou de découvrir la magie cristalline d'une cascade de glace, je serai à vos côtés pour transformer vos rêves en souvenirs inoubliables.
-              </p>
+              <h2 className="text-4xl font-bold text-foreground">{guide.bioTitle}</h2>
+              <div className="prose prose-invert prose-lg max-w-none text-foreground/70">
+                {guide.bio ? (
+                  <PortableText value={guide.bio} />
+                ) : (
+                  <>
+                    <p>
+                      Installé à Champcella, au pied du massif des Écrins et aux portes du Queyras, je vis ma passion pour la montagne au quotidien. En tant que Guide de Haute Montagne UIAGM, mon métier est avant tout une histoire de partage et de transmission.
+                    </p>
+                    <p>
+                      Ma philosophie repose sur une approche authentique et humaine de la montagne. Chaque cordée est unique, et ma priorité est de m'adapter à votre rythme, à vos envies et à vos capacités, tout en garantissant une sécurité absolue.
+                    </p>
+                  </>
+                )}
+              </div>
 
               <div className="pt-8 grid grid-cols-2 gap-8">
                 <div className="glass p-6 rounded-3xl">
-                  <p className="text-3xl font-bold text-highlight">UIAGM</p>
-                  <p className="text-xs uppercase tracking-widest font-bold opacity-50">Certification Internationale</p>
+                  <p className="text-3xl font-bold text-highlight">{guide.certification}</p>
+                  <p className="text-xs uppercase tracking-widest font-bold opacity-50">{guide.certificationSub}</p>
                 </div>
                 <div className="glass p-6 rounded-3xl">
-                  <p className="text-3xl font-bold text-highlight">15+</p>
-                  <p className="text-xs uppercase tracking-widest font-bold opacity-50">Années d'expérience</p>
+                  <p className="text-3xl font-bold text-highlight">{guide.experience}</p>
+                  <p className="text-xs uppercase tracking-widest font-bold opacity-50">{guide.experienceSub}</p>
                 </div>
               </div>
             </div>
@@ -71,14 +101,10 @@ export default function GuidePage() {
             <div className="w-20 h-1.5 bg-accent mx-auto rounded-full" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { title: "Sécurité", desc: "La base de toute aventure. Une analyse constante des conditions pour un plaisir serein." },
-              { title: "Adaptabilité", desc: "La montagne impose son rythme, je m'adapte pour que votre expérience soit optimale." },
-              { title: "Pédagogie", desc: "Plus qu'un guide, je suis là pour vous apprendre à devenir autonome en montagne." }
-            ].map((v) => (
-              <div key={v.title} className="glass p-10 rounded-[40px] hover:border-accent transition-colors">
+            {(guide.values || []).map((v: any, index: number) => (
+              <div key={index} className="glass p-10 rounded-[40px] hover:border-accent transition-colors">
                 <h3 className="text-2xl font-bold mb-4 text-accent">{v.title}</h3>
-                <p className="text-foreground/60">{v.desc}</p>
+                <p className="text-foreground/60">{v.description}</p>
               </div>
             ))}
           </div>

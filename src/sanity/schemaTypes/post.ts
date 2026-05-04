@@ -20,6 +20,13 @@ export const postType = defineType({
       },
     }),
     defineField({
+      name: 'excerpt',
+      title: 'Extrait',
+      type: 'text',
+      description: 'Un court résumé de l\'article pour la liste des blogs.',
+      validation: (Rule) => Rule.max(200),
+    }),
+    defineField({
       name: 'mainImage',
       title: 'Image principale',
       type: 'image',

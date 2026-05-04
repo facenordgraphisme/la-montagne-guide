@@ -46,17 +46,30 @@ const activities = [
 ]
 
 
-const ActivitySection = () => {
+interface ActivitySectionProps {
+  title?: string
+  titleAccent?: string
+  description?: string
+  data?: any[]
+}
+
+const ActivitySection = ({
+  title = "VOS PROCHAINES",
+  titleAccent = "AVENTURES",
+  description = "Que vous soyez débutant ou expert, chaque sortie est conçue pour vous offrir une expérience unique, sécurisée et inoubliable.",
+  data = []
+}: ActivitySectionProps) => {
+  const safeData = data?.length > 0 ? data : activities;
   return (
     <section id="activites" className="py-24 px-6 bg-[#0a0a0a]">
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
           <div className="max-w-2xl">
-            <h2 className="text-4xl md:text-6xl font-bold tracking-tighter mb-6">
-              VOS PROCHAINES <br /> <span className="text-accent italic">AVENTURES</span>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 uppercase">
+              {title} <br /> <span className="text-accent italic">{titleAccent}</span>
             </h2>
             <p className="text-white/60 text-lg">
-              Que vous soyez débutant ou expert, chaque sortie est conçue pour vous offrir une expérience unique, sécurisée et inoubliable.
+              {description}
             </p>
           </div>
           <button className="text-sm font-bold tracking-widest uppercase border-b border-accent pb-1 hover:text-accent transition-colors">
@@ -65,7 +78,7 @@ const ActivitySection = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {activities.map((activity, index) => (
+          {safeData.map((activity, index) => (
             <Link 
               key={activity.title} 
               href={`/prestations/${activity.slug}`}
@@ -78,9 +91,12 @@ const ActivitySection = () => {
                 transition={{ delay: index * 0.2 }}
                 className="group relative h-[500px] rounded-3xl overflow-hidden cursor-pointer"
               >
-                <div 
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                  style={{ backgroundImage: `url('${activity.image}')` }}
+                <Image 
+                  src={activity.image || "/images/alpinisme.jpg"}
+                  alt={activity.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
                 

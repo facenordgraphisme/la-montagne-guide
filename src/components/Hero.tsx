@@ -4,22 +4,34 @@ import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 
-const backgrounds = [
-  '/images/hero.jpg',
-  '/photos/DSC_6701.jpg',
-  '/photos/DSC_6612.jpg',
-  '/photos/DSC_6683.jpg',
-]
+interface HeroProps {
+  title?: string
+  subtitle?: string
+  description?: string
+  images?: string[]
+}
 
-const Hero = () => {
+const Hero = ({ 
+  title = "L'AVENTURE EN CORDÉE", 
+  subtitle = "Nicolas Draperi — Guide de Haute Montagne",
+  description = "Alpinisme, Ski, Escalade & Voyages. Explorez les plus beaux massifs des Alpes et d'ailleurs avec un guide passionné.",
+  images = [
+    '/images/hero.jpg',
+    '/photos/DSC_6701.jpg',
+    '/photos/DSC_6612.jpg',
+    '/photos/DSC_6683.jpg',
+  ]
+}: HeroProps) => {
   const [currentBg, setCurrentBg] = React.useState(0)
+  const backgrounds = (images && images.length > 0) ? images : ['/images/hero.jpg']
 
   React.useEffect(() => {
+    if (backgrounds.length <= 1) return
     const timer = setInterval(() => {
       setCurrentBg((prev) => (prev + 1) % backgrounds.length)
     }, 6000)
     return () => clearInterval(timer)
-  }, [])
+  }, [backgrounds.length])
 
   return (
     <section className="relative h-screen w-full overflow-hidden flex items-center justify-center">
@@ -39,22 +51,21 @@ const Hero = () => {
         <div className="absolute inset-0 bg-black/40 bg-gradient-to-b from-black/60 via-transparent to-black" />
       </div>
 
-      <div className="container relative z-10 px-6 text-center">
+      <div className="container relative z-10 px-6 text-center pt-20">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="text-[#ffffff]"
         >
-          <span className="text-[#f97316] font-bold tracking-widest uppercase text-sm mb-4 block">
-            Nicolas Draperi — Guide de Haute Montagne
+          <span className="text-[#f97316] font-black tracking-widest uppercase text-sm mb-4 block">
+            {subtitle}
           </span>
-          <h1 className="text-5xl md:text-8xl font-bold tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">
-            L'AVENTURE <br /> EN CORDÉE
+          <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 uppercase whitespace-pre-line">
+            {title}
           </h1>
-          <p className="max-w-2xl mx-auto text-lg text-white/80 mb-10 leading-relaxed">
-            Alpinisme, Ski, Escalade & Voyages. <br />
-            Explorez les plus beaux massifs des Alpes et d'ailleurs avec un guide passionné.
+          <p className="max-w-2xl mx-auto text-lg text-white/80 mb-10 leading-relaxed whitespace-pre-line">
+            {description}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/prestations" className="btn-primary !text-white">Découvrir les prestations</Link>

@@ -20,8 +20,19 @@ export const activityType = defineType({
       },
     }),
     defineField({
+      name: 'subtitle',
+      title: 'Sous-titre',
+      type: 'string',
+    }),
+    defineField({
+      name: 'intro',
+      title: 'Texte d\'introduction (Hero)',
+      type: 'text',
+      rows: 3,
+    }),
+    defineField({
       name: 'description',
-      title: 'Description',
+      title: 'Description courte',
       type: 'text',
     }),
     defineField({
@@ -33,22 +44,94 @@ export const activityType = defineType({
       },
     }),
     defineField({
+      name: 'keyPoints',
+      title: 'Points clés (Section du haut)',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            { name: 'title', type: 'string', title: 'Titre' },
+            { name: 'description', type: 'text', title: 'Description' },
+          ],
+        },
+      ],
+    }),
+    defineField({
+      name: 'details',
+      title: 'Détails techniques (Checklist)',
+      type: 'array',
+      of: [{ type: 'string' }],
+    }),
+    defineField({
+      name: 'universBadge',
+      title: 'Badge Section Univers',
+      type: 'string',
+      initialValue: 'NOS UNIVERS',
+    }),
+    defineField({
+      name: 'universTitle',
+      title: 'Titre Section Univers (H2)',
+      type: 'string',
+      initialValue: 'Une progression adaptée à vos envies',
+    }),
+    defineField({
+      name: 'universDescription',
+      title: 'Description Section Univers',
+      type: 'text',
+      rows: 3,
+    }),
+    defineField({
+      name: 'univers',
+      title: 'Univers / Variantes',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            { name: 'title', type: 'string', title: 'Titre' },
+            { name: 'description', type: 'text', title: 'Description' },
+          ],
+        },
+      ],
+    }),
+    defineField({
+      name: 'price',
+      title: 'Prix / Tarif',
+      type: 'string',
+    }),
+    defineField({
+      name: 'period',
+      title: 'Période',
+      type: 'string',
+      initialValue: 'Saisonnière',
+    }),
+    defineField({
+      name: 'location',
+      title: 'Lieu',
+      type: 'string',
+      initialValue: 'Alpes & International',
+    }),
+    defineField({
+      name: 'showUpcomingSorties',
+      title: 'Afficher les prochaines sorties ?',
+      type: 'boolean',
+      initialValue: true,
+    }),
+    defineField({
       name: 'type',
-      title: 'Type d\'activité',
+      title: 'Type d\'activité (pour le filtrage)',
       type: 'string',
       options: {
         list: [
           { title: 'Alpinisme', value: 'alpinisme' },
           { title: 'Ski de randonnée', value: 'ski' },
           { title: 'Escalade', value: 'escalade' },
-          { title: 'Randonnée', value: 'randonnee' },
+          { title: 'Cascade de Glace', value: 'cascade-de-glace' },
+          { title: 'Paralpinisme', value: 'paralpinisme' },
+          { title: 'Voyages', value: 'voyage' },
         ],
       },
-    }),
-    defineField({
-      name: 'price',
-      title: 'Prix',
-      type: 'string',
     }),
   ],
 })
