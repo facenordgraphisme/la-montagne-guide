@@ -13,24 +13,24 @@ import { urlFor } from "@/sanity/lib/image";
 // Portable Text components for styling
 const components = {
   block: {
-    h1: ({ children }: any) => <h1 className="text-4xl md:text-5xl font-bold mb-8 mt-12 text-white">{children}</h1>,
-    h2: ({ children }: any) => <h2 className="text-3xl md:text-4xl font-bold mb-6 mt-10 text-white">{children}</h2>,
-    h3: ({ children }: any) => <h3 className="text-2xl md:text-3xl font-bold mb-4 mt-8 text-white">{children}</h3>,
-    normal: ({ children }: any) => <p className="text-lg md:text-xl text-white/70 leading-relaxed mb-6">{children}</p>,
+    h1: ({ children }: any) => <h1 className="text-4xl md:text-5xl font-bold mb-8 mt-12 text-foreground">{children}</h1>,
+    h2: ({ children }: any) => <h2 className="text-3xl md:text-4xl font-bold mb-6 mt-10 text-foreground">{children}</h2>,
+    h3: ({ children }: any) => <h3 className="text-2xl md:text-3xl font-bold mb-4 mt-8 text-foreground">{children}</h3>,
+    normal: ({ children }: any) => <p className="text-lg md:text-xl text-foreground/70 leading-relaxed mb-6">{children}</p>,
     blockquote: ({ children }: any) => (
-      <blockquote className="border-l-4 border-accent pl-6 py-2 my-8 italic text-2xl text-white/90 bg-white/5 rounded-r-2xl">
+      <blockquote className="border-l-4 border-accent pl-6 py-4 my-10 italic text-2xl text-foreground/90 bg-accent/5 rounded-r-2xl">
         {children}
       </blockquote>
     ),
   },
   list: {
-    bullet: ({ children }: any) => <ul className="list-disc list-inside mb-6 space-y-2 text-white/70">{children}</ul>,
-    number: ({ children }: any) => <ol className="list-decimal list-inside mb-6 space-y-2 text-white/70">{children}</ol>,
+    bullet: ({ children }: any) => <ul className="list-disc list-inside mb-6 space-y-2 text-foreground/70">{children}</ul>,
+    number: ({ children }: any) => <ol className="list-decimal list-inside mb-6 space-y-2 text-foreground/70">{children}</ol>,
   },
   types: {
     image: ({ value }: any) => {
       return (
-        <div className="relative w-full h-[400px] md:h-[600px] my-12 rounded-[2rem] overflow-hidden border border-white/10">
+        <div className="relative w-full h-[400px] md:h-[600px] my-12 rounded-[2rem] overflow-hidden border border-border">
           <Image
             src={urlFor(value).url()}
             alt={value.alt || 'Image article'}
@@ -38,7 +38,7 @@ const components = {
             className="object-cover"
           />
           {value.caption && (
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-black/60 backdrop-blur-sm text-sm text-white/60">
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm text-sm text-foreground/60">
               {value.caption}
             </div>
           )}
@@ -68,7 +68,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
   });
 
   return (
-    <main className="relative min-h-screen bg-black text-white">
+    <main className="relative min-h-screen bg-background text-foreground transition-colors duration-300">
       <Navbar />
 
       {/* Hero Header */}
@@ -83,7 +83,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
               className="object-cover"
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         </div>
 
         <div className="container relative z-10 px-6 pt-32 max-w-5xl">
@@ -95,7 +95,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
             RETOUR AU BLOG
           </Link>
           
-          <div className="flex items-center gap-3 text-white/60 mb-6">
+          <div className="flex items-center gap-3 text-foreground/60 mb-6">
             <Calendar size={18} className="text-accent" />
             <span className="font-medium">{formattedDate}</span>
           </div>
@@ -111,7 +111,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
         <div className="container mx-auto px-6">
           <div className="max-w-3xl mx-auto">
             {post.excerpt && (
-              <p className="text-2xl md:text-3xl font-medium text-white/90 mb-12 leading-tight border-l-2 border-accent pl-8">
+              <p className="text-2xl md:text-3xl font-medium text-foreground/90 mb-12 leading-tight border-l-2 border-accent pl-8">
                 {post.excerpt}
               </p>
             )}
