@@ -50,6 +50,22 @@ export const sortieType = defineType({
       },
     }),
     defineField({
+      name: 'location',
+      title: 'Lieu',
+      type: 'string',
+    }),
+    defineField({
+      name: 'duration',
+      title: 'Durée',
+      type: 'string',
+      description: 'Ex: 8 jours, 1 semaine',
+    }),
+    defineField({
+      name: 'description',
+      title: 'Description courte',
+      type: 'text',
+    }),
+    defineField({
       name: 'isFull',
       title: 'Complet ?',
       type: 'boolean',

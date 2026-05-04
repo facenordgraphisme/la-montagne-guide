@@ -54,6 +54,22 @@ export const sortiesQuery = groq`*[_type == "sortie"] | order(date asc) {
   title,
   "slug": slug.current,
   date,
+  location,
+  duration,
+  description,
+  price,
+  "image": image.asset->url,
+  activityType,
+  isFull
+}`
+
+export const sortieBySlugQuery = groq`*[_type == "sortie" && slug.current == $slug][0] {
+  title,
+  "slug": slug.current,
+  date,
+  location,
+  duration,
+  description,
   price,
   "image": image.asset->url,
   activityType,
