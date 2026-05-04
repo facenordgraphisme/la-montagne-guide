@@ -1,22 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --accent: #22d3ee; /* Turquoise */
-  --secondary: #3b82f6; /* Glacial Blue */
+  --background: #f4f7fa; /* Bleu-gris très clair */
+  --foreground: #0b1121; /* Bleu très foncé (logo) */
+  --accent: #0ea5e9; /* Bleu azur */
+  --secondary: #22d3ee; /* Turquoise glacial */
   --highlight: #f97316; /* Orange */
   --card: 255, 255, 255;
-  --border: #e2e8f0;
+  --border: #d1dce5;
 }
 
 [data-theme='dark'] {
-  --background: #020617;
-  --foreground: #f8fafc;
-  --accent: #06b6d4;
-  --secondary: #60a5fa;
+  --background: #0b1121; /* Bleu très foncé (logo) */
+  --foreground: #f1f5f9; /* Blanc bleuté */
+  --accent: #38bdf8;
+  --secondary: #06b6d4;
   --highlight: #fb923c;
-  --card: 15, 23, 42;
+  --card: 17, 25, 40; /* Navy riche pour les cartes */
   --border: #1e293b;
 }
 
