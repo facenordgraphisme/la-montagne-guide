@@ -13,6 +13,7 @@ interface AboutProps {
   description?: any
   image?: string
   experience?: number
+  className?: string
 }
 
 const AboutSection = ({
@@ -21,10 +22,11 @@ const AboutSection = ({
   titleAccent = "DRAPERI",
   description,
   image = "/images/guide.jpg",
-  experience = 15
+  experience = 15,
+  className = "bg-background"
 }: AboutProps) => {
   return (
-    <section id="a-propos" className="py-24 px-6 overflow-hidden">
+    <section id="a-propos" className={`py-24 px-6 overflow-hidden transition-colors duration-300 ${className}`}>
       <div className="container mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div

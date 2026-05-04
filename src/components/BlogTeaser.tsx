@@ -15,13 +15,15 @@ interface BlogTeaserProps {
   badge?: string
   title?: string
   titleAccent?: string
+  className?: string
 }
 
 const BlogTeaser = ({ 
   data = [],
   badge = "Carnet de voyage",
   title = "DERNIERS",
-  titleAccent = "RÉCITS"
+  titleAccent = "RÉCITS",
+  className = "bg-background"
 }: BlogTeaserProps) => {
   const formatDate = (dateStr: string) => {
     if (!dateStr) return ''
@@ -57,7 +59,7 @@ const BlogTeaser = ({
     }
   ]
   return (
-    <section className="py-24 px-6">
+    <section className={`py-24 px-6 transition-colors duration-300 ${className}`}>
       <div className="container mx-auto">
         <div className="flex justify-between items-end mb-16">
           <div>

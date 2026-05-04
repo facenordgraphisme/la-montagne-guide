@@ -8,6 +8,7 @@
   --highlight: #f97316; /* Orange */
   --card: 255, 255, 255;
   --border: #d1dce5;
+  --surface: #edf2f7; /* Gris-bleu un peu plus prononcé pour l'alternance */
 }
 
 [data-theme='dark'] {
@@ -18,6 +19,7 @@
   --highlight: #fb923c;
   --card: 17, 25, 40; /* Navy riche pour les cartes */
   --border: #1e293b;
+  --surface: #0f172a; /* Navy un peu plus clair pour l'alternance */
 }
 
 @theme inline {
@@ -26,6 +28,7 @@
   --color-accent: var(--accent);
   --color-secondary: var(--secondary);
   --color-highlight: var(--highlight);
+  --color-surface: var(--surface);
   --color-card: rgb(var(--card));
   --color-border: var(--border);
   --font-sans: var(--font-outfit);

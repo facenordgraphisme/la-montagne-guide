@@ -15,8 +15,9 @@ interface AdventureProps {
   title?: string
   titleAccent?: string
   description?: string
-  features?: string[]
   image?: string
+  features?: string[]
+  className?: string
 }
 
 const AdventureStart = ({
@@ -32,10 +33,11 @@ const AdventureStart = ({
     "Groupes réduits pour une expérience personnalisée",
     "Partage de la culture et de l’environnement montagnard"
   ],
-  image = "/photos/DSC_6758.jpg"
+  image = "/photos/DSC_6758.jpg",
+  className = "bg-surface"
 }: AdventureProps) => {
   return (
-    <section className="py-24 px-6 bg-foreground text-background overflow-hidden transition-colors duration-300">
+    <section className={`py-24 px-6 overflow-hidden transition-colors duration-300 ${className}`}>
       <div className="container mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           <div className="order-2 lg:order-1">
@@ -45,7 +47,7 @@ const AdventureStart = ({
             <h2 className="text-4xl md:text-6xl font-bold tracking-tighter mb-8 leading-tight uppercase whitespace-pre-line">
               {title} <br /> <span className="text-accent italic">{titleAccent}</span>
             </h2>
-            <p className="text-lg text-background/60 mb-12 max-w-xl leading-relaxed">
+            <p className="text-lg text-foreground/60 mb-12 max-w-xl leading-relaxed">
               {description}
             </p>
             
@@ -57,7 +59,7 @@ const AdventureStart = ({
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
                   </div>
-                  <p className="text-sm font-medium text-background/80">{f}</p>
+                  <p className="text-sm font-medium text-foreground/80">{f}</p>
                 </div>
               ))}
             </div>
@@ -72,7 +74,7 @@ const AdventureStart = ({
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
             </div>
             {/* Abstract decorative elements */}
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-accent rounded-full blur-[100px] opacity-20" />

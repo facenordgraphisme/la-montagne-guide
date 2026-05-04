@@ -16,13 +16,15 @@ interface TestimonialsProps {
   badge?: string
   title?: string
   titleAccent?: string
+  className?: string
 }
 
 const Testimonials = ({ 
   data = [],
   badge = "Avis Clients",
   title = "ILS NOUS ONT FAIT",
-  titleAccent = "CONFIANCE"
+  titleAccent = "CONFIANCE",
+  className = "bg-accent/5"
 }: TestimonialsProps) => {
   const safeData = data || []
   const list = safeData.length > 0 ? safeData : [
@@ -46,7 +48,7 @@ const Testimonials = ({
     }
   ]
   return (
-    <section className="py-24 px-6 bg-accent/5">
+    <section className={`py-24 px-6 transition-colors duration-300 ${className}`}>
       <div className="container mx-auto">
         <div className="text-center mb-16">
           <span className="text-accent font-bold tracking-widest uppercase text-sm mb-4 block">{badge}</span>

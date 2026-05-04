@@ -51,17 +51,19 @@ interface ActivitySectionProps {
   titleAccent?: string
   description?: string
   data?: any[]
+  className?: string
 }
 
 const ActivitySection = ({
   title = "VOS PROCHAINES",
   titleAccent = "AVENTURES",
   description = "Que vous soyez débutant ou expert, chaque sortie est conçue pour vous offrir une expérience unique, sécurisée et inoubliable.",
-  data = []
+  data = [],
+  className = "bg-background"
 }: ActivitySectionProps) => {
   const safeData = data?.length > 0 ? data : activities;
   return (
-    <section id="activites" className="py-24 px-6 bg-background transition-colors duration-300">
+    <section id="activites" className={`py-24 px-6 transition-colors duration-300 ${className}`}>
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
           <div className="max-w-2xl">

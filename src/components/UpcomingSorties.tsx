@@ -43,6 +43,7 @@ interface UpcomingSortiesProps {
   badge?: string
   title?: string
   titleAccent?: string
+  className?: string
 }
 
 const UpcomingSorties = ({ 
@@ -51,7 +52,8 @@ const UpcomingSorties = ({
   data = [],
   badge = "Prochaines sorties",
   title = "REJOIGNEZ",
-  titleAccent = "L'AVENTURE"
+  titleAccent = "L'AVENTURE",
+  className = "bg-background"
 }: UpcomingSortiesProps) => {
   const [filter, setFilter] = useState(initialFilter)
 
@@ -80,7 +82,7 @@ const UpcomingSorties = ({
     : list.filter(s => s.category === filter)
 
   return (
-    <section className="py-24 px-6 bg-background">
+    <section className={`py-24 px-6 transition-colors duration-300 ${className}`}>
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
           <div>

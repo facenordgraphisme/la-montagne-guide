@@ -36,18 +36,21 @@ export default async function Home() {
           description={homeData?.aboutDescription}
           image={homeData?.aboutImage}
           experience={homeData?.experienceYears}
+          className="bg-background"
         />
         <ActivitySection 
           title={homeData?.activitiesTitle}
           titleAccent={homeData?.activitiesTitleAccent}
           description={homeData?.activitiesDescription}
           data={activitiesData}
+          className="bg-surface"
         />
         <UpcomingSorties 
           data={sortiesData} 
           badge={homeData?.sortiesBadge}
           title={homeData?.sortiesTitle}
           titleAccent={homeData?.sortiesTitleAccent}
+          className="bg-background"
         />
         <AdventureStart 
           badge={homeData?.adventureBadge}
@@ -56,6 +59,7 @@ export default async function Home() {
           description={homeData?.adventureDescription}
           features={homeData?.adventureFeatures}
           image={homeData?.adventureImage}
+          className="bg-surface"
         />
         <ContactHome 
           badge={homeData?.contactBadge}
@@ -68,12 +72,14 @@ export default async function Home() {
           badge={homeData?.testimonialsBadge}
           title={homeData?.testimonialsTitle}
           titleAccent={homeData?.testimonialsTitleAccent}
+          className="bg-surface"
         />
         <BlogTeaser 
           data={blogTeaserData} 
           badge={homeData?.blogBadge}
           title={homeData?.blogTitle}
           titleAccent={homeData?.blogTitleAccent}
+          className="bg-background"
         />
       </div>
       <Footer />
