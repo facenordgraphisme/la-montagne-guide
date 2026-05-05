@@ -8,6 +8,7 @@ import { activityBySlugQuery, activitiesQuery } from "@/sanity/lib/queries";
 import { notFound } from 'next/navigation';
 
 import UpcomingSorties from "@/components/UpcomingSorties";
+import { PortableText } from '@portabletext/react';
 
 export async function generateStaticParams() {
   const activities = await client.fetch(activitiesQuery);
@@ -195,7 +196,9 @@ export default async function PrestationDetail({ params }: { params: Promise<{ s
               {data.univers.map((univ: any, i: number) => (
                 <div key={i} className="group p-8 rounded-[40px] border border-border hover:border-accent transition-all hover:bg-accent/5">
                   <h3 className="text-2xl font-bold mb-4 group-hover:text-accent transition-colors">{univ.title}</h3>
-                  <p className="text-foreground/60 leading-relaxed">{univ.description}</p>
+                  <div className="text-foreground/60 leading-relaxed prose-p:mb-0">
+                    <PortableText value={univ.description} />
+                  </div>
                 </div>
               ))}
             </div>
