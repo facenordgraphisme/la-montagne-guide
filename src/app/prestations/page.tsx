@@ -59,7 +59,7 @@ export default async function PrestationsPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {activities.map((p: any) => (
-            <Link href={`/prestations/${p.slug}`} key={p.slug} className="group glass rounded-[40px] overflow-hidden flex flex-col h-full hover:border-accent transition-all duration-500">
+            <Link href={`/${p.slug}`} key={p.slug} className="group glass rounded-[40px] overflow-hidden flex flex-col h-full hover:border-accent transition-all duration-500">
               <div className="h-64 overflow-hidden relative">
                 <Image 
                   src={p.image || "/images/alpinisme.jpg"}

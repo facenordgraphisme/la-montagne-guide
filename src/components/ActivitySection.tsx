@@ -83,7 +83,7 @@ const ActivitySection = ({
           {safeData.map((activity, index) => (
             <Link 
               key={activity.title} 
-              href={`/prestations/${activity.slug}`}
+              href={`/${activity.slug}`}
               className="block"
             >
               <motion.div

@@ -50,17 +50,63 @@ export const testimonialsQuery = groq`*[_type == "testimonial"] | order(_created
   "avatar": avatar.asset->url
 }`
 
-export const sortiesQuery = groq`*[_type == "sortie"] | order(date asc) {
+export const sortiesQuery = groq`*[_type == "sortie"] | order(startDate asc) {
+  date,
+  availableSpots,
+  isFull,
+  titleOverride,
+  "sejour": sejour-> {
+    title,
+    "slug": slug.current,
+    activityType,
+    "subCategory": subCategory->slug.current,
+    massif,
+    level,
+    season,
+    duration,
+    basePrice,
+    "image": image.asset->url
+  }
+}`
+
+export const sejoursQuery = groq`*[_type == "sejour"] | order(title asc) {
   title,
   "slug": slug.current,
-  date,
-  location,
-  duration,
-  description,
-  price,
-  "image": image.asset->url,
   activityType,
-  isFull
+  "subCategory": subCategory->slug.current,
+  massif,
+  level,
+  season,
+  duration,
+  basePrice,
+  "image": image.asset->url,
+  description
+}`
+
+export const sejoursByActivityQuery = groq`*[_type == "sejour" && activityType == $activity] | order(title asc) {
+  title,
+  "slug": slug.current,
+  activityType,
+  "subCategory": subCategory->slug.current,
+  massif,
+  level,
+  season,
+  duration,
+  basePrice,
+  "image": image.asset->url,
+  description
+}`
+
+export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $slug][0] {
+  ...,
+  "slug": slug.current,
+  "subCategory": subCategory->slug.current,
+  "image": image.asset->url,
+  "upcomingSorties": *[_type == "sortie" && sejour._ref == ^._id && startDate >= now()] | order(startDate asc) {
+    date,
+    availableSpots,
+    isFull
+  }
 }`
 
 export const sortieBySlugQuery = groq`*[_type == "sortie" && slug.current == $slug][0] {
@@ -88,7 +134,12 @@ export const activitiesQuery = groq`*[_type == "activity"] | order(title asc) {
   universBadge,
   universTitle,
   universDescription,
-  univers,
+  "univers": *[_type == "univers" && activity._ref == ^._id] {
+    title,
+    "slug": slug.current,
+    description,
+    "image": image.asset->url
+  },
   price,
   period,
   location,
@@ -108,7 +159,12 @@ export const activityBySlugQuery = groq`*[_type == "activity" && slug.current ==
   universBadge,
   universTitle,
   universDescription,
-  univers,
+  "univers": *[_type == "univers" && activity._ref == ^._id] {
+    title,
+    "slug": slug.current,
+    description,
+    "image": image.asset->url
+  },
   price,
   period,
   location,

@@ -60,7 +60,7 @@ const Navbar = () => {
                   {activities.map((item) => (
                     <Link
                       key={item.slug}
-                      href={`/prestations/${item.slug}`}
+                      href={`/${item.slug}`}
                       className="relative aspect-[16/9] rounded-2xl overflow-hidden group/item shadow-lg"
                     >
                       <Image
@@ -138,7 +138,7 @@ const Navbar = () => {
                       {activities.map((item) => (
                         <Link
                           key={item.slug}
-                          href={`/prestations/${item.slug}`}
+                          href={`/${item.slug}`}
                           onClick={() => setIsOpen(false)}
                           className="relative h-24 rounded-xl overflow-hidden group"
                         >
