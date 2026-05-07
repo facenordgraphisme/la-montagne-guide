@@ -86,7 +86,6 @@ export const sanityTranslations: Record<string, string> = {
   "image bientôt disponible": "Image coming soon",
   "années d'expérience": "Years of experience",
   "les univers": "THE WORLDS",
-  "retour à l'univers": "BACK TO WORLD",
   "description à venir pour cet univers.": "Description coming soon for this world.",
   "découvrez nos aventures dans cet univers": "Discover our adventures in this world",
   "nous préparons de nouveaux séjours d'exception pour cet univers.": "We are preparing new exceptional trips for this world.",
