@@ -1,11 +1,10 @@
 import React from 'react'
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import Image from 'next/image';
 import Link from 'next/link';
 import { client } from "@/sanity/lib/client";
 import { activityBySlugQuery, activitiesQuery } from "@/sanity/lib/queries";
 import { notFound } from 'next/navigation';
+import { getServerTranslations } from '@/i18n/server';
 
 import UpcomingSorties from "@/components/UpcomingSorties";
 import { PortableText } from '@portabletext/react';

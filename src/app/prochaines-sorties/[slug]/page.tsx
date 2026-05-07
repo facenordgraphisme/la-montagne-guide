@@ -6,6 +6,7 @@ import { client } from "@/sanity/lib/client";
 import { sortieBySlugQuery } from "@/sanity/lib/queries";
 import { Calendar, MapPin, Clock, Euro, Users, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { getServerTranslations } from '@/i18n/server';
 
 interface SortiePageProps {
   params: Promise<{ slug: string }>
@@ -30,6 +31,7 @@ export async function generateMetadata({ params }: SortiePageProps): Promise<Met
 export default async function SortieDetailPage({ params }: SortiePageProps) {
   const { slug } = await params
   const sortie = await client.fetch(sortieBySlugQuery, { slug })
+  const { at, t } = await getServerTranslations();
 
   if (!sortie) {
     notFound()
@@ -42,7 +44,7 @@ export default async function SortieDetailPage({ params }: SortiePageProps) {
       <section className="relative h-[70vh] w-full overflow-hidden">
         <Image
           src={sortie.image}
-          alt={sortie.title}
+          alt={at(sortie.title)}
           fill
           sizes="100vw"
           priority
@@ -56,15 +58,15 @@ export default async function SortieDetailPage({ params }: SortiePageProps) {
             className="flex items-center gap-2 text-white/60 hover:text-white transition-colors mb-8 group w-fit"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-sm font-bold uppercase tracking-widest">Retour aux sorties</span>
+            <span className="text-sm font-bold uppercase tracking-widest">{at('Retour aux sorties')}</span>
           </Link>
           
           <div className="max-w-4xl">
             <span className="px-4 py-1.5 bg-accent text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg mb-6 inline-block">
-              {sortie.activityType}
+              {at(sortie.activityType)}
             </span>
             <h1 className="text-5xl md:text-8xl font-bold tracking-tighter text-white uppercase leading-[0.9]">
-              {sortie.title}
+              {at(sortie.title)}
             </h1>
           </div>
         </div>
@@ -77,22 +79,22 @@ export default async function SortieDetailPage({ params }: SortiePageProps) {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-12">
             <div className="glass p-8 md:p-12 rounded-[40px] space-y-8">
-              <h2 className="text-3xl font-bold">Présentation de l'aventure</h2>
+              <h2 className="text-3xl font-bold">{at("Présentation de l'aventure")}</h2>
               <p className="text-foreground/70 text-xl leading-relaxed whitespace-pre-line">
-                {sortie.description || "Aucune description disponible pour le moment."}
+                {at(sortie.description) || at("Aucune description disponible pour le moment.")}
               </p>
             </div>
             
             <div className="glass p-8 md:p-12 rounded-[40px] space-y-8 bg-accent/5 border-accent/10">
-              <h2 className="text-3xl font-bold">Informations Pratiques</h2>
+              <h2 className="text-3xl font-bold">{at("Informations Pratiques")}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="flex gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-accent/20 flex items-center justify-center shrink-0">
                     <Calendar className="w-6 h-6 text-accent" />
                   </div>
                   <div>
-                    <p className="text-sm text-foreground/40 font-bold uppercase tracking-widest">Date / Période</p>
-                    <p className="text-lg font-bold">{sortie.date}</p>
+                    <p className="text-sm text-foreground/40 font-bold uppercase tracking-widest">{at('Date / Période')}</p>
+                    <p className="text-lg font-bold">{at(sortie.date)}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
@@ -100,8 +102,8 @@ export default async function SortieDetailPage({ params }: SortiePageProps) {
                     <MapPin className="w-6 h-6 text-accent" />
                   </div>
                   <div>
-                    <p className="text-sm text-foreground/40 font-bold uppercase tracking-widest">Lieu</p>
-                    <p className="text-lg font-bold">{sortie.location || "À définir"}</p>
+                    <p className="text-sm text-foreground/40 font-bold uppercase tracking-widest">{at('Lieu')}</p>
+                    <p className="text-lg font-bold">{at(sortie.location) || at("À définir")}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
@@ -109,8 +111,8 @@ export default async function SortieDetailPage({ params }: SortiePageProps) {
                     <Clock className="w-6 h-6 text-accent" />
                   </div>
                   <div>
-                    <p className="text-sm text-foreground/40 font-bold uppercase tracking-widest">Durée</p>
-                    <p className="text-lg font-bold">{sortie.duration || "Non spécifiée"}</p>
+                    <p className="text-sm text-foreground/40 font-bold uppercase tracking-widest">{at('Durée')}</p>
+                    <p className="text-lg font-bold">{at(sortie.duration) || at("Non spécifiée")}</p>
                   </div>
                 </div>
                 <div className="flex gap-4">
@@ -118,8 +120,8 @@ export default async function SortieDetailPage({ params }: SortiePageProps) {
                     <Euro className="w-6 h-6 text-accent" />
                   </div>
                   <div>
-                    <p className="text-sm text-foreground/40 font-bold uppercase tracking-widest">Budget estimé</p>
-                    <p className="text-lg font-bold">{sortie.price || "Sur devis"}</p>
+                    <p className="text-sm text-foreground/40 font-bold uppercase tracking-widest">{at('Budget estimé')}</p>
+                    <p className="text-lg font-bold">{at(sortie.price) || at("Sur devis")}</p>
                   </div>
                 </div>
               </div>
@@ -130,24 +132,24 @@ export default async function SortieDetailPage({ params }: SortiePageProps) {
           <div className="lg:col-span-1">
             <div className="sticky top-32 glass p-8 md:p-10 rounded-[40px] space-y-8 border-2 border-accent/20">
               <div className="space-y-2">
-                <p className="text-sm text-foreground/40 font-bold uppercase tracking-widest">Statut</p>
+                <p className="text-sm text-foreground/40 font-bold uppercase tracking-widest">{at('Statut')}</p>
                 {sortie.isFull ? (
                   <span className="flex items-center gap-2 text-red-500 font-bold">
                     <Users className="w-5 h-5" />
-                    GROUPE COMPLET
+                    {at('GROUPE COMPLET')}
                   </span>
                 ) : (
                   <span className="flex items-center gap-2 text-green-500 font-bold">
                     <Users className="w-5 h-5" />
-                    PLACES DISPONIBLES
+                    {at('PLACES DISPONIBLES')}
                   </span>
                 )}
               </div>
               
               <div className="space-y-4">
-                <h3 className="text-2xl font-bold">Intéressé par cette sortie ?</h3>
+                <h3 className="text-2xl font-bold">{at('Intéressé par cette sortie ?')}</h3>
                 <p className="text-foreground/60">
-                  Contactez-moi pour obtenir le programme détaillé et valider votre participation.
+                  {at('Contactez-moi pour obtenir le programme détaillé et valider votre participation.')}
                 </p>
               </div>
 
@@ -155,11 +157,11 @@ export default async function SortieDetailPage({ params }: SortiePageProps) {
                 href="/contact" 
                 className={`btn-primary w-full text-center py-6 rounded-2xl font-bold uppercase tracking-widest transition-all ${sortie.isFull ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
               >
-                {sortie.isFull ? "S'inscrire en liste d'attente" : "Demander le programme"}
+                {sortie.isFull ? at("S'inscrire en liste d'attente") : at("Demander le programme")}
               </Link>
               
               <p className="text-[10px] text-center text-foreground/30 uppercase tracking-widest font-bold">
-                Engagement sans obligation d'achat
+                {at("Engagement sans obligation d'achat")}
               </p>
             </div>
           </div>

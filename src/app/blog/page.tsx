@@ -1,5 +1,3 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import BlogCard from "@/components/BlogCard";
 import { client } from "@/sanity/lib/client";
 import { postsQuery } from "@/sanity/lib/queries";
