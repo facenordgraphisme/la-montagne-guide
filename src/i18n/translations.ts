@@ -78,7 +78,6 @@ export const sanityTranslations: Record<string, string> = {
   "Grimpeur": "Climber",
 
   "Carnet de voyage": "Travel Log",
-  "DERNIERS": "LATEST",
   "RÉCITS": "STORIES",
   "Expédition au coeur du Queyras": "Expedition to the heart of the Queyras",
   "Retour sur une semaine de ski de randonnée entre crêtes sauvages et neige de cinéma...": "A look back at a week of ski touring between wild ridges and cinema-quality snow...",
