@@ -6,6 +6,8 @@ import Link from 'next/link'
 
 import { PortableText } from '@portabletext/react'
 
+import { useLanguage } from '@/context/LanguageContext'
+
 interface AboutProps {
   badge?: string
   title?: string
@@ -25,6 +27,7 @@ const AboutSection = ({
   experience = 15,
   className = "bg-background"
 }: AboutProps) => {
+  const { at, t, translatePortableText } = useLanguage()
   return (
     <section id="a-propos" className={`py-24 px-6 overflow-hidden transition-colors duration-300 ${className}`}>
       <div className="container mx-auto">
@@ -47,8 +50,8 @@ const AboutSection = ({
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center font-bold">{experience}+</div>
                 <div>
-                  <p className="text-xs text-foreground/60 uppercase tracking-wider font-bold">Années d'expérience</p>
-                  <p className="font-medium">Guide de Haute Montagne</p>
+                  <p className="text-xs text-foreground/60 uppercase tracking-wider font-bold">{t('about.yearsExperience')}</p>
+                  <p className="font-medium">{t('about.role')}</p>
                 </div>
               </div>
             </div>
@@ -60,28 +63,28 @@ const AboutSection = ({
             viewport={{ once: true }}
           >
             <span className="text-accent font-black tracking-widest uppercase text-sm mb-4 block">
-              {badge}
+              {at(badge)}
             </span>
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-8 leading-tight uppercase">
-              {title} <br /> <span className="text-accent italic">{titleAccent}</span>
+              {at(title)} <br /> <span className="text-accent italic">{at(titleAccent)}</span>
             </h2>
             <div className="space-y-6 text-foreground/70 text-lg leading-relaxed mb-10">
               {description ? (
-                <PortableText value={description} />
+                <PortableText value={translatePortableText(description)} />
               ) : (
                 <>
                   <p>
-                    Installé à Champcella dans les Hautes-Alpes, je suis Guide de Haute Montagne spécialisé dans les massifs des Écrins et du Queyras.
+                    {at('Installé à Champcella dans les Hautes-Alpes, je suis Guide de Haute Montagne spécialisé dans les massifs des Écrins et du Queyras.')}
                   </p>
                   <p>
-                    Ma philosophie repose sur une approche authentique et humaine de la montagne. "Laissez le rêve être votre guide" n'est pas qu'une devise, c'est une promesse de partage et de découverte.
+                    {at('Ma philosophie repose sur une approche authentique et humaine de la montagne. "Laissez le rêve être votre guide" n\'est pas qu\'une devise, c\'est une promesse de partage et de découverte.')}
                   </p>
                 </>
               )}
             </div>
             
             <Link href="/le-guide" className="btn-primary inline-block">
-              En savoir plus sur moi
+              {t('about.learnMore')}
             </Link>
 
           </motion.div>

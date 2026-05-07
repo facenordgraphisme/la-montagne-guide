@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
 
+import { useLanguage } from '@/context/LanguageContext'
+
 interface HeroProps {
   title?: string
   subtitle?: string
@@ -23,6 +25,7 @@ const Hero = ({
     '/photos/DSC_6683.jpg',
   ]
 }: HeroProps) => {
+  const { at, t } = useLanguage()
   const [currentBg, setCurrentBg] = React.useState(0)
   const backgrounds = (images && images.length > 0) ? images : ['/images/hero.jpg']
 
@@ -68,18 +71,18 @@ const Hero = ({
           className="text-[#ffffff]"
         >
           <span className="text-[#f97316] font-black tracking-widest uppercase text-sm mb-4 block">
-            {subtitle}
+            {at(subtitle)}
           </span>
           <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 uppercase whitespace-pre-line">
-            {title}
+            {at(title)}
           </h1>
           <p className="max-w-2xl mx-auto text-lg text-white/80 mb-10 leading-relaxed whitespace-pre-line">
-            {description}
+            {at(description)}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/prestations" className="btn-primary !text-white">Découvrir les prestations</Link>
+            <Link href="/prestations" className="btn-primary !text-white">{t('hero.discover')}</Link>
             <Link href="/prochaines-sorties" className="px-8 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full font-medium transition-all text-white">
-              Prochains départs
+              {t('hero.departures')}
             </Link>
           </div>
         </motion.div>

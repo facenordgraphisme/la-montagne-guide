@@ -1,14 +1,8 @@
+'use client'
+
 import React from 'react'
 import Image from 'next/image'
-
-const features = [
-  "Guide de haute montagne diplômé UIAGM",
-  "Connaissance approfondie des Alpes",
-  "Activités adaptées à tous les niveaux",
-  "Encadrement en toute sécurité",
-  "Groupes réduits pour une expérience personnalisée",
-  "Partage de la culture et de l’environnement montagnard"
-]
+import { useLanguage } from '@/context/LanguageContext'
 
 interface AdventureProps {
   badge?: string
@@ -36,19 +30,20 @@ const AdventureStart = ({
   image = "/photos/DSC_6758.jpg",
   className = "bg-surface"
 }: AdventureProps) => {
+  const { at } = useLanguage()
   return (
     <section className={`py-24 px-6 overflow-hidden transition-colors duration-300 ${className}`}>
       <div className="container mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           <div className="order-2 lg:order-1">
             <span className="inline-block px-4 py-1.5 bg-highlight text-white text-[10px] font-black uppercase tracking-widest rounded-full mb-8">
-              {badge}
+              {at(badge)}
             </span>
             <h2 className="text-4xl md:text-6xl font-bold tracking-tighter mb-8 leading-tight uppercase whitespace-pre-line">
-              {title} <br /> <span className="text-accent italic">{titleAccent}</span>
+              {at(title)} <br /> <span className="text-accent italic">{at(titleAccent)}</span>
             </h2>
             <p className="text-lg text-foreground/60 mb-12 max-w-xl leading-relaxed">
-              {description}
+              {at(description)}
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -59,7 +54,7 @@ const AdventureStart = ({
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
                   </div>
-                  <p className="text-sm font-medium text-foreground/80">{f}</p>
+                  <p className="text-sm font-medium text-foreground/80">{at(f)}</p>
                 </div>
               ))}
             </div>

@@ -1,6 +1,4 @@
 import React from 'react'
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import Image from 'next/image';
 import Link from 'next/link';
 import { client } from "@/sanity/lib/client";
@@ -11,10 +9,13 @@ import { ArrowRight } from 'lucide-react';
 import { urlFor } from "@/sanity/lib/image";
 import { PortableText } from '@portabletext/react';
 
+import { getServerTranslations } from '@/i18n/server';
+
 const VALID_ACTIVITIES = ['alpinisme', 'ski', 'escalade', 'cascade-de-glace', 'paralpinisme', 'voyages'];
 
 export default async function ActivityLandingPage({ params }: { params: Promise<{ activitySlug: string }> }) {
   const { activitySlug } = await params;
+  const { at, t, translatePortableText } = await getServerTranslations();
 
   if (!VALID_ACTIVITIES.includes(activitySlug)) {
     notFound();
@@ -29,7 +30,6 @@ export default async function ActivityLandingPage({ params }: { params: Promise<
 
   return (
     <main className="relative min-h-screen bg-background text-foreground transition-colors duration-300">
-      <Navbar />
       
       {/* Hero Section */}
       <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">
@@ -37,7 +37,7 @@ export default async function ActivityLandingPage({ params }: { params: Promise<
           {activity.image && (
             <Image 
               src={activity.image}
-              alt={activity.title}
+              alt={at(activity.title)}
               fill
               sizes="100vw"
               className="object-cover"
@@ -47,10 +47,10 @@ export default async function ActivityLandingPage({ params }: { params: Promise<
           <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-background via-transparent to-black/20" />
         </div>
         <div className="container relative z-10 px-6 text-center pt-20">
-          <span className="text-accent font-black tracking-[0.4em] uppercase text-xs mb-6 block">{activity.subtitle || "AVENTURE"}</span>
-          <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-white uppercase mb-8 leading-[0.8]">{activity.title}</h1>
+          <span className="text-accent font-black tracking-[0.4em] uppercase text-xs mb-6 block">{at(activity.subtitle || "AVENTURE")}</span>
+          <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-white uppercase mb-8 leading-[0.8]">{at(activity.title)}</h1>
           <p className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed font-medium">
-            {activity.intro || activity.description?.substring(0, 200)}
+            {at(activity.intro || activity.description?.substring(0, 200))}
           </p>
         </div>
       </section>
@@ -65,8 +65,8 @@ export default async function ActivityLandingPage({ params }: { params: Promise<
                   <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center text-accent mx-auto mb-6">
                     <span className="font-black text-xl">{i + 1}</span>
                   </div>
-                  <h3 className="text-xl font-black mb-4 text-accent uppercase tracking-widest leading-tight">{point.title}</h3>
-                  <p className="text-foreground/60 leading-relaxed font-medium">{point.description}</p>
+                  <h3 className="text-xl font-black mb-4 text-accent uppercase tracking-widest leading-tight">{at(point.title)}</h3>
+                  <p className="text-foreground/60 leading-relaxed font-medium">{at(point.description)}</p>
                 </div>
               ))}
             </div>
@@ -78,10 +78,10 @@ export default async function ActivityLandingPage({ params }: { params: Promise<
       <section className="py-24">
         <div className="container mx-auto px-6">
           <div className="text-center mb-20">
-            <span className="text-accent font-black tracking-widest uppercase text-xs mb-4 block">{activity.universBadge || "NOS UNIVERS"}</span>
-            <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-6">{activity.universTitle || "Choisissez votre univers"}</h2>
+            <span className="text-accent font-black tracking-widest uppercase text-xs mb-4 block">{at(activity.universBadge || "NOS UNIVERS")}</span>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-6">{at(activity.universTitle || "Choisissez votre univers")}</h2>
             <p className="text-lg text-foreground/60 max-w-2xl mx-auto font-medium">
-              {activity.universDescription || "Découvrez nos différentes approches de la montagne, adaptées à vos envies et à votre niveau."}
+              {at(activity.universDescription || "Découvrez nos différentes approches de la montagne, adaptées à vos envies et à votre niveau.")}
             </p>
           </div>
 
@@ -99,8 +99,9 @@ export default async function ActivityLandingPage({ params }: { params: Promise<
                   {univ.image && (
                     <Image 
                       src={urlFor(univ.image).url()}
-                      alt={univ.title}
+                      alt={at(univ.title)}
                       fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
                       className="object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                   )}
@@ -108,17 +109,17 @@ export default async function ActivityLandingPage({ params }: { params: Promise<
                   
                   <div className="absolute inset-0 p-12 flex flex-col justify-end">
                     <h3 className="text-3xl md:text-5xl font-black text-foreground uppercase tracking-tighter mb-4 group-hover:text-accent transition-colors">
-                      {univ.title}
+                      {at(univ.title)}
                     </h3>
                     <div className="text-foreground/60 text-lg mb-8 max-w-md line-clamp-2 font-medium opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
                       {univ.description && (
                         <div className="prose-custom prose-sm">
-                          <PortableText value={univ.description} />
+                          <PortableText value={translatePortableText(univ.description)} />
                         </div>
                       )}
                     </div>
                     <div className="flex items-center gap-3 text-accent font-black uppercase tracking-widest text-xs">
-                      Découvrir le catalogue
+                      {at('Découvrir le catalogue')}
                       <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform" />
                     </div>
                   </div>
@@ -129,13 +130,12 @@ export default async function ActivityLandingPage({ params }: { params: Promise<
 
           {univers.length === 0 && (
             <div className="text-center py-20 glass rounded-[40px] border border-dashed border-border">
-              <p className="text-xl text-foreground/40 font-medium">Les univers de cette activité seront bientôt disponibles.</p>
+              <p className="text-xl text-foreground/40 font-medium">{at('Les univers de cette activité seront bientôt disponibles.')}</p>
             </div>
           )}
         </div>
       </section>
 
-      <Footer />
     </main>
   );
 }

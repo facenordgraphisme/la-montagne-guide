@@ -19,6 +19,8 @@ interface TestimonialsProps {
   className?: string
 }
 
+import { useLanguage } from '@/context/LanguageContext'
+
 const Testimonials = ({ 
   data = [],
   badge = "Avis Clients",
@@ -26,24 +28,25 @@ const Testimonials = ({
   titleAccent = "CONFIANCE",
   className = "bg-accent/5"
 }: TestimonialsProps) => {
+  const { at } = useLanguage()
   const safeData = data || []
   const list = safeData.length > 0 ? safeData : [
     {
       author: "Thomas Bernard",
-      role: "Alpiniste amateur",
-      quote: "Une expérience inoubliable au sommet de la Barre des Écrins. Nicolas est un guide d'une sérénité absolue, ce qui est très rassurant quand on débute en haute montagne.",
+      role: at("Alpiniste amateur"),
+      quote: at("Une expérience inoubliable au sommet de la Barre des Écrins. Nicolas est un guide d'une sérénité absolue, ce qui est très rassurant quand on débute en haute montagne."),
       rating: 5
     },
     {
       author: "Sophie Morel",
-      role: "Passionnée de Ski",
-      quote: "Nicolas nous a fait découvrir des vallons secrets du Queyras loin de la foule. Sa connaissance du terrain et de la sécurité est impressionnante. Je recommande les yeux fermés !",
+      role: at("Passionnée de Ski"),
+      quote: at("Nicolas nous a fait découvrir des vallons secrets du Queyras loin de la foule. Sa connaissance du terrain et de la sécurité est impressionnante. Je recommande les yeux fermés !"),
       rating: 5
     },
     {
       author: "Marc Lefebvre",
-      role: "Grimpeur",
-      quote: "Superbe journée en grande voie à Ailefroide. Nicolas a su me mettre en confiance sur des passages techniques. Un vrai partage de passion et de technique.",
+      role: at("Grimpeur"),
+      quote: at("Superbe journée en grande voie à Ailefroide. Nicolas a su me mettre en confiance sur des passages techniques. Un vrai partage de passion et de technique."),
       rating: 5
     }
   ]
@@ -51,9 +54,9 @@ const Testimonials = ({
     <section className={`py-24 px-6 transition-colors duration-300 ${className}`}>
       <div className="container mx-auto">
         <div className="text-center mb-16">
-          <span className="text-accent font-bold tracking-widest uppercase text-sm mb-4 block">{badge}</span>
+          <span className="text-accent font-bold tracking-widest uppercase text-sm mb-4 block">{at(badge)}</span>
           <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase">
-            {title} <br /> <span className="text-accent italic">{titleAccent}</span>
+            {at(title)} <br /> <span className="text-accent italic">{at(titleAccent)}</span>
           </h2>
         </div>
 
@@ -76,12 +79,12 @@ const Testimonials = ({
                   ))}
                 </div>
                 <p className="text-lg text-foreground/80 leading-relaxed italic mb-8">
-                  "{t.quote}"
+                  "{at(t.quote)}"
                 </p>
               </div>
               <div>
-                <p className="font-bold text-xl">{t.author}</p>
-                <p className="text-sm text-accent font-medium">{t.role}</p>
+                <p className="font-bold text-xl">{at(t.author)}</p>
+                <p className="text-sm text-accent font-medium">{at(t.role)}</p>
               </div>
             </motion.div>
           ))}

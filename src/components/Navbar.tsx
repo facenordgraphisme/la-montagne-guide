@@ -12,7 +12,7 @@ import { usePathname } from 'next/navigation'
 const Navbar = () => {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
-  const { language, setLanguage } = useLanguage()
+  const { language, setLanguage, t, at } = useLanguage()
 
   // Masquer la Navbar dans le Studio Sanity
   if (pathname?.startsWith('/studio')) return null
@@ -57,7 +57,7 @@ const Navbar = () => {
             {/* Prestations with Submenu */}
             <div className="relative group/menu py-4">
               <Link href="/prestations" className="hover:text-accent transition-colors flex items-center gap-1">
-                Activités
+                {t('nav.activities')}
                 <ChevronDown className="w-3 h-3 group-hover/menu:rotate-180 transition-transform" />
               </Link>
 
@@ -72,15 +72,15 @@ const Navbar = () => {
                     >
                       <Image
                         src={item.image}
-                        alt={item.title}
+                        alt={at(item.title)}
                         fill
                         sizes="(max-width: 1024px) 100vw, 300px"
                         className="object-cover transition-transform duration-500 group-hover/item:scale-110"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                       <div className="absolute inset-0 p-4 flex flex-col justify-end">
-                        <p className="font-bold text-white text-lg tracking-tight">{item.title}</p>
-                        <p className="text-white/60 text-xs font-medium uppercase tracking-widest">En savoir plus</p>
+                        <p className="font-bold text-white text-lg tracking-tight">{at(item.title)}</p>
+                        <p className="text-white/60 text-xs font-medium uppercase tracking-widest">{t('nav.learnMore')}</p>
                       </div>
                     </Link>
                   ))}
@@ -88,9 +88,9 @@ const Navbar = () => {
               </div>
             </div>
 
-            <Link href="/prochaines-sorties" className="hover:text-accent transition-colors">Prochaines sorties</Link>
-            <Link href="/le-guide" className="hover:text-accent transition-colors">Le Guide</Link>
-            <Link href="/blog" className="hover:text-accent transition-colors">Blog</Link>
+            <Link href="/prochaines-sorties" className="hover:text-accent transition-colors">{t('nav.sorties')}</Link>
+            <Link href="/le-guide" className="hover:text-accent transition-colors">{t('nav.guide')}</Link>
+            <Link href="/blog" className="hover:text-accent transition-colors">{t('nav.blog')}</Link>
           </div>
         </div>
 
@@ -122,7 +122,7 @@ const Navbar = () => {
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
           )}
-          <Link href="/contact" className="hidden sm:block btn-primary py-2 px-5 text-sm !text-white">Contact</Link>
+          <Link href="/contact" className="hidden sm:block btn-primary py-2 px-5 text-sm !text-white">{t('nav.contact')}</Link>
           
           {/* Mobile Menu Button */}
           <button 
@@ -150,7 +150,7 @@ const Navbar = () => {
                   onClick={() => setIsActivitiesOpen(!isActivitiesOpen)}
                   className="w-full flex items-center justify-between py-4 text-xl font-semibold border-b border-foreground/10"
                 >
-                  Activités
+                  {t('nav.activities')}
                   <ChevronDown className={`w-5 h-5 transition-transform ${isActivitiesOpen ? 'rotate-180' : ''}`} />
                 </button>
                 <AnimatePresence>
@@ -170,13 +170,13 @@ const Navbar = () => {
                         >
                           <Image
                             src={item.image}
-                            alt={item.title}
+                            alt={at(item.title)}
                             fill
                             sizes="(max-width: 768px) 100vw, 300px"
                             className="object-cover"
                           />
                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                            <span className="text-white font-bold">{item.title}</span>
+                            <span className="text-white font-bold">{at(item.title)}</span>
                           </div>
                         </Link>
                       ))}
@@ -186,10 +186,10 @@ const Navbar = () => {
               </div>
 
               {[
-                { name: "Prochaines sorties", href: "/prochaines-sorties" },
-                { name: "Le Guide", href: "/le-guide" },
-                { name: "Blog", href: "/blog" },
-                { name: "Contact", href: "/contact" },
+                { name: t('nav.sorties'), href: "/prochaines-sorties" },
+                { name: t('nav.guide'), href: "/le-guide" },
+                { name: t('nav.blog'), href: "/blog" },
+                { name: t('nav.contact'), href: "/contact" },
               ].map((link) => (
                 <Link
                   key={link.href}

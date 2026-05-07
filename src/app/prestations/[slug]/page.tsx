@@ -85,19 +85,19 @@ export default async function PrestationDetail({ params }: { params: Promise<{ s
   const { slug } = await params;
   const sanityData = await client.fetch(activityBySlugQuery, { slug });
   const data = sanityData || prestationsFallback[slug];
+  const { at, t } = await getServerTranslations();
 
   if (!data) notFound();
 
   return (
     <main className="relative min-h-screen">
-      <Navbar />
       
       {/* Hero Section */}
       <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image 
             src={data.image || "/images/alpinisme.jpg"}
-            alt={data.title}
+            alt={at(data.title)}
             fill
             sizes="100vw"
             className="object-cover"
@@ -105,11 +105,11 @@ export default async function PrestationDetail({ params }: { params: Promise<{ s
           <div className="absolute inset-0 bg-black/50 bg-gradient-to-t from-background via-transparent to-black/20" />
         </div>
         <div className="container relative z-10 px-6 text-center pt-20">
-          <span className="text-accent font-black tracking-[0.4em] uppercase text-xs mb-6 block">{data.subtitle}</span>
-          <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-white uppercase mb-8">{data.title}</h1>
+          <span className="text-accent font-black tracking-[0.4em] uppercase text-xs mb-6 block">{at(data.subtitle)}</span>
+          <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-white uppercase mb-8">{at(data.title)}</h1>
           {data.intro && (
             <p className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed font-medium whitespace-pre-line">
-              {data.intro}
+              {at(data.intro)}
             </p>
           )}
         </div>

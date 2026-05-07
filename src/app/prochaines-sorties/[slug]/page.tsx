@@ -2,8 +2,6 @@ import React from 'react'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { client } from "@/sanity/lib/client";
 import { sortieBySlugQuery } from "@/sanity/lib/queries";
 import { Calendar, MapPin, Clock, Euro, Users, ArrowLeft } from 'lucide-react'
@@ -39,7 +37,6 @@ export default async function SortieDetailPage({ params }: SortiePageProps) {
 
   return (
     <main className="relative min-h-screen pb-20">
-      <Navbar />
       
       {/* Hero Section */}
       <section className="relative h-[70vh] w-full overflow-hidden">
@@ -47,6 +44,7 @@ export default async function SortieDetailPage({ params }: SortiePageProps) {
           src={sortie.image}
           alt={sortie.title}
           fill
+          sizes="100vw"
           priority
           className="object-cover"
         />
@@ -169,7 +167,6 @@ export default async function SortieDetailPage({ params }: SortiePageProps) {
         </div>
       </section>
 
-      <Footer />
     </main>
   )
 }

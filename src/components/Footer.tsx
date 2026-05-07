@@ -10,7 +10,10 @@ interface FooterProps {
   contactData?: any
 }
 
+import { useLanguage } from '@/context/LanguageContext'
+
 const Footer = ({ contactData }: FooterProps) => {
+  const { at, t } = useLanguage()
   const pathname = usePathname()
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -37,7 +40,7 @@ const Footer = ({ contactData }: FooterProps) => {
               )}
             </Link>
             <p className="text-foreground/60 max-w-sm text-lg leading-relaxed mb-8">
-              Vivez l'exceptionnel en altitude avec un guide passionné. Sécurité, aventure et respect de la nature.
+              {at("Vivez l'exceptionnel en altitude avec un guide passionné. Sécurité, aventure et respect de la nature.")}
             </p>
             <div className="flex gap-4">
               {['Instagram', 'Facebook'].map((social) => (
@@ -50,31 +53,31 @@ const Footer = ({ contactData }: FooterProps) => {
           </div>
           
           <div>
-            <h4 className="font-bold mb-6 uppercase tracking-widest text-xs text-foreground/40">Navigation</h4>
+            <h4 className="font-bold mb-6 uppercase tracking-widest text-xs text-foreground/40">{t('footer.navigation') || t('nav.navigation')}</h4>
             <ul className="space-y-4 text-foreground/70 font-medium">
-              <li><Link href="/prestations" className="hover:text-accent transition-colors">Prestations</Link></li>
-              <li><Link href="/prochaines-sorties" className="hover:text-accent transition-colors">Prochains départs</Link></li>
-              <li><Link href="/le-guide" className="hover:text-accent transition-colors">Le Guide</Link></li>
-              <li><Link href="/blog" className="hover:text-accent transition-colors">Blog</Link></li>
-              <li><Link href="/contact" className="hover:text-accent transition-colors">Contact</Link></li>
+              <li><Link href="/prestations" className="hover:text-accent transition-colors">{t('nav.activities')}</Link></li>
+              <li><Link href="/prochaines-sorties" className="hover:text-accent transition-colors">{t('nav.sorties')}</Link></li>
+              <li><Link href="/le-guide" className="hover:text-accent transition-colors">{t('nav.guide')}</Link></li>
+              <li><Link href="/blog" className="hover:text-accent transition-colors">{t('nav.blog')}</Link></li>
+              <li><Link href="/contact" className="hover:text-accent transition-colors">{t('nav.contact')}</Link></li>
             </ul>
           </div>
           
           <div>
-            <h4 className="font-bold mb-6 uppercase tracking-widest text-xs text-foreground/40">Contact</h4>
+            <h4 className="font-bold mb-6 uppercase tracking-widest text-xs text-foreground/40">{t('nav.contact')}</h4>
             <ul className="space-y-4 text-foreground/70 font-medium">
               <li>{contactData?.email || 'draperinicolas@hotmail.com'}</li>
               <li>{contactData?.phone || '06 75 07 97 08'}</li>
-              <li>{contactData?.address || 'Champcella, Hautes-Alpes'}</li>
+              <li>{at(contactData?.address || 'Champcella, Hautes-Alpes')}</li>
             </ul>
           </div>
         </div>
         
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between gap-4 text-sm text-foreground/30 font-medium">
-          <p>© {new Date().getFullYear()} La Montagne Guide. Tous droits réservés.</p>
+          <p>© {new Date().getFullYear()} La Montagne Guide. {at('Tous droits réservés.')}</p>
           <div className="flex gap-8">
-            <Link href="/mentions-legales" className="hover:text-accent transition-colors">Mentions Légales</Link>
-            <Link href="/confidentialite" className="hover:text-accent transition-colors">Confidentialité</Link>
+            <Link href="/mentions-legales" className="hover:text-accent transition-colors">{at('Mentions Légales')}</Link>
+            <Link href="/confidentialite" className="hover:text-accent transition-colors">{at('Confidentialité')}</Link>
           </div>
         </div>
       </div>

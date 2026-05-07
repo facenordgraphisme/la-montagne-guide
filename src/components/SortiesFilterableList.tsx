@@ -70,13 +70,54 @@ const getLevelLabel = (level?: string) => {
   return level ? map[level] || level : ''
 }
 
+import { useLanguage } from '@/context/LanguageContext'
+
 export default function SortiesFilterableList({ initialSorties }: SortiesFilterableListProps) {
-  const [filter, setFilter] = useState('Tout voir')
+  const { at, t, language } = useLanguage()
+  const [filter, setFilter] = useState(at('Tout voir'))
   const [currentMonth, setCurrentMonth] = useState(new Date())
+
+  const categories = [at('Tout voir'), at('Alpinisme'), at('Escalade'), at('Ski'), at('Voyage'), at('Cascade de glace'), at('Paralpinisme')]
+
+  const getActivityColor = (type: string) => {
+    const map: Record<string, string> = {
+      'alpinisme': 'bg-accent',
+      'ski': 'bg-secondary',
+      'escalade': 'bg-highlight',
+      'voyage': 'bg-foreground/20',
+      'paralpinisme': 'bg-purple-500',
+      'cascade-de-glace': 'bg-blue-300',
+      'cascade de glace': 'bg-blue-300'
+    }
+    return map[type.toLowerCase()] || 'bg-foreground/20'
+  }
+
+  const getCategoryLabel = (type: string) => {
+    const map: Record<string, string> = {
+      'alpinisme': at('Alpinisme'),
+      'ski': at('Ski'),
+      'escalade': at('Escalade'),
+      'voyage': at('Voyage'),
+      'paralpinisme': at('Paralpinisme'),
+      'cascade-de-glace': at('Cascade de glace'),
+      'cascade de glace': at('Cascade de glace')
+    }
+    return map[type.toLowerCase()] || type
+  }
+
+  const getLevelLabel = (level?: string) => {
+    const map: Record<string, string> = {
+      'debutant': at('Débutant'),
+      'intermediaire': at('Intermédiaire'),
+      'confirme': at('Confirmé'),
+      'expert': at('Expert')
+    }
+    return level ? map[level] || level : ''
+  }
 
   const filteredSorties = initialSorties.filter(s => {
     if (!s.sejour) return false;
-    return filter === 'Tout voir' || getCategoryLabel(s.sejour.activityType) === filter;
+    return filter === at('Tout voir') || getCategoryLabel(s.sejour.activityType) === filter;
   });
 
   // Calendar Logic
@@ -88,7 +129,8 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
     const month = currentMonth.getMonth();
     const totalDays = daysInMonth(year, month);
     const startDay = (firstDayOfMonth(year, month) + 6) % 7; // Adjust for Monday start
-    const monthName = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(currentMonth);
+    const locale = language === 'fr' ? 'fr-FR' : 'en-US';
+    const monthName = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(currentMonth);
 
     const days = [];
     // Padding
@@ -98,14 +140,16 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
     // Days
     for (let d = 1; d <= totalDays; d++) {
       const dateStr = `${d < 10 ? '0' + d : d}`;
-      // Check for sorties on this day
-      // Note: This is simplified parsing, assumes date format "DD Month YYYY"
+      
       const dailySorties = filteredSorties.filter(s => {
         const parts = s.date.split(' ');
         const day = parts[0];
         const sMonth = parts[1]?.toLowerCase();
-        const currentMonthName = new Intl.DateTimeFormat('fr-FR', { month: 'long' }).format(currentMonth).toLowerCase();
-        return day === dateStr && sMonth === currentMonthName;
+        // Month parsing logic: we assume sanity dates are in French or we need to map them
+        // For now let's use a mapping for months if sMonth is French
+        const monthsFr = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+        const currentMonthIdx = currentMonth.getMonth();
+        return day === dateStr && sMonth === monthsFr[currentMonthIdx];
       });
 
       days.push(
@@ -142,8 +186,8 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
             </div>
             
             <div className="grid grid-cols-7 gap-y-2 text-center mb-2">
-              {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, idx) => (
-                <span key={`${d}-${idx}`} className="text-[9px] font-black text-foreground/20">{d}</span>
+              {[at('Lundi'), at('Mardi'), at('Mercredi'), at('Jeudi'), at('Vendredi'), at('Samedi'), at('Dimanche')].map((d, idx) => (
+                <span key={idx} className="text-[9px] font-black text-foreground/20">{d.charAt(0).toUpperCase()}</span>
               ))}
             </div>
             <div className="grid grid-cols-7 gap-y-1">
@@ -152,15 +196,15 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
           </div>
 
           <div className="space-y-6 px-4">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-foreground/30">Activités</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-foreground/30">{at('Activités')}</h4>
             <div className="grid grid-cols-1 gap-4">
               {[
-                { name: 'Alpinisme', color: 'bg-accent' },
-                { name: 'Ski de Rando', color: 'bg-secondary' },
-                { name: 'Escalade', color: 'bg-highlight' },
-                { name: 'Voyage', color: 'bg-foreground/20' },
-                { name: 'Cascade de Glace', color: 'bg-blue-300' },
-                { name: 'Paralpinisme', color: 'bg-purple-500' }
+                { name: at('Alpinisme'), color: 'bg-accent' },
+                { name: at('Ski de Rando'), color: 'bg-secondary' },
+                { name: at('Escalade'), color: 'bg-highlight' },
+                { name: at('Voyage'), color: 'bg-foreground/20' },
+                { name: at('Cascade de Glace'), color: 'bg-blue-300' },
+                { name: at('Paralpinisme'), color: 'bg-purple-500' }
               ].map(cat => (
                 <div key={cat.name} className="flex items-center gap-3">
                   <div className={`w-2.5 h-2.5 rounded-full ${cat.color} shadow-lg`} />
@@ -210,8 +254,9 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                     {s.sejour?.image && (
                       <Image
                         src={s.sejour.image}
-                        alt={s.titleOverride || s.sejour.title}
+                        alt={at(s.titleOverride || s.sejour.title)}
                         fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                     )}
@@ -223,7 +268,7 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                       </span>
                       {s.isFull && (
                         <span className="px-3 py-1 bg-red-500 text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-lg">
-                          Complet
+                          {at('Complet')}
                         </span>
                       )}
                     </div>
@@ -231,10 +276,10 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                     <div className="absolute bottom-4 left-4 right-4">
                       <div className="flex items-center gap-2 text-accent font-black mb-1">
                         <CalendarIcon size={14} />
-                        <span className="text-xs uppercase tracking-[0.2em]">{s.date}</span>
+                        <span className="text-xs uppercase tracking-[0.2em]">{at(s.date)}</span>
                       </div>
                       <h3 className="text-2xl font-black text-white uppercase tracking-tighter leading-none line-clamp-1">
-                        {s.titleOverride || s.sejour?.title}
+                        {at(s.titleOverride || s.sejour?.title)}
                       </h3>
                     </div>
                   </div>
@@ -245,11 +290,11 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                       <div className="flex flex-wrap gap-5 text-[11px] font-bold uppercase tracking-widest text-foreground/50">
                         <div className="flex items-center gap-1.5">
                           <MapPin size={14} className="text-accent" />
-                          {s.sejour?.massif}
+                          {at(s.sejour?.massif)}
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Users size={14} className="text-accent" />
-                          {s.availableSpots}
+                          {at(s.availableSpots)}
                         </div>
                         <div className="flex items-center gap-1.5 text-highlight">
                           <BarChart3 size={14} />
@@ -257,14 +302,14 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                         </div>
                       </div>
                       <p className="text-sm leading-relaxed text-foreground/70 line-clamp-2 font-medium">
-                        {s.sejour?.description || "Une expérience d'exception encadrée par votre guide."}
+                        {at(s.sejour?.description || "Une expérience d'exception encadrée par votre guide.")}
                       </p>
                     </div>
 
                     <div className="flex items-center justify-between pt-4 border-t border-white/5">
                       <div className="flex flex-col">
-                        <span className="text-[8px] font-black text-foreground/30 uppercase tracking-widest">À partir de</span>
-                        <span className="text-xl font-black text-foreground">{s.sejour?.basePrice}</span>
+                        <span className="text-[8px] font-black text-foreground/30 uppercase tracking-widest">{at('À partir de')}</span>
+                        <span className="text-xl font-black text-foreground">{at(s.sejour?.basePrice)}</span>
                       </div>
                       {(() => {
                         const universSlug = s.sejour?.subCategory?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
@@ -283,7 +328,7 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
               ))
             ) : (
               <div className="col-span-full text-center py-32 glass rounded-[60px] border border-dashed border-white/10">
-                <p className="text-xl font-black uppercase tracking-tighter text-foreground/20">Aucune sortie disponible</p>
+                <p className="text-xl font-black uppercase tracking-tighter text-foreground/20">{at('Aucune sortie disponible')}</p>
               </div>
             )}
           </AnimatePresence>

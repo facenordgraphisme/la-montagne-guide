@@ -37,6 +37,8 @@ interface UpcomingSortiesProps {
   className?: string
 }
 
+import { useLanguage } from '@/context/LanguageContext'
+
 const UpcomingSorties = ({ 
   initialFilter = 'Tous les séjours', 
   showFilters = true, 
@@ -46,6 +48,7 @@ const UpcomingSorties = ({
   titleAccent = "L'AVENTURE",
   className = "bg-background"
 }: UpcomingSortiesProps) => {
+  const { at, t } = useLanguage()
   const [filter, setFilter] = useState(initialFilter)
   const [seasonFilter, setSeasonFilter] = useState('Toutes saisons')
 
@@ -55,12 +58,12 @@ const UpcomingSorties = ({
   // Mapping activities to display names
   const getCategoryDisplay = (type: string) => {
     const map: Record<string, string> = {
-      'alpinisme': 'Alpinisme',
-      'ski': 'Ski',
-      'escalade': 'Escalade',
-      'voyage': 'Voyage'
+      'alpinisme': at('Alpinisme'),
+      'ski': at('Ski'),
+      'escalade': at('Escalade'),
+      'voyage': at('Voyages')
     }
-    return map[type] || type
+    return map[type] || at(type)
   }
 
   const safeData = data || []
@@ -68,13 +71,20 @@ const UpcomingSorties = ({
   const filteredSorties = safeData.filter(s => {
     if (!s.sejour) return false;
     
-    const matchesCategory = filter === 'Tous les séjours' || getCategoryDisplay(s.sejour.activityType) === filter;
+    const matchesCategory = filter === 'Tous les séjours' || getCategoryDisplay(s.sejour.activityType) === getCategoryDisplay(filter.toLowerCase());
+    // Special case for filters
+    const matchesCategoryFixed = filter === 'Tous les séjours' || s.sejour.activityType.toLowerCase().includes(filter.toLowerCase().replace('Tous les séjours', ''));
+    
+    // Simplification for the filter logic to be language independent
+    const currentCat = filter === 'Tous les séjours' ? 'all' : filter;
+    const matchesCat = currentCat === 'all' || s.sejour.activityType.toLowerCase().includes(filter.toLowerCase());
+
     const matchesSeason = seasonFilter === 'Toutes saisons' || 
                          (seasonFilter === 'Été' && s.sejour.season === 'ete') ||
                          (seasonFilter === 'Hiver' && s.sejour.season === 'hiver') ||
                          s.sejour.season === 'toutes';
 
-    return matchesCategory && matchesSeason;
+    return matchesCat && matchesSeason;
   });
 
   return (
@@ -82,9 +92,9 @@ const UpcomingSorties = ({
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
           <div>
-            <span className="text-accent font-bold tracking-widest uppercase text-sm mb-4 block">{badge}</span>
+            <span className="text-accent font-bold tracking-widest uppercase text-sm mb-4 block">{at(badge)}</span>
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase">
-              {title} <br /> <span className="text-accent italic">{titleAccent}</span>
+              {at(title)} <br /> <span className="text-accent italic">{at(titleAccent)}</span>
             </h2>
           </div>
 
@@ -101,7 +111,7 @@ const UpcomingSorties = ({
                         : 'bg-foreground/5 text-foreground/40 hover:bg-foreground/10'
                       }`}
                   >
-                    {cat}
+                    {at(cat)}
                   </button>
                 ))}
               </div>
@@ -116,7 +126,7 @@ const UpcomingSorties = ({
                         : 'bg-foreground/5 text-foreground/40 hover:bg-foreground/10'
                       }`}
                   >
-                    {s}
+                    {at(s)}
                   </button>
                 ))}
               </div>
@@ -139,7 +149,7 @@ const UpcomingSorties = ({
                 {s.sejour?.image && (
                   <Image
                     src={s.sejour.image}
-                    alt={s.titleOverride || s.sejour.title}
+                    alt={at(s.titleOverride || s.sejour.title)}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -154,7 +164,7 @@ const UpcomingSorties = ({
                   </span>
                   {s.isFull && (
                     <span className="px-4 py-1.5 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
-                      Complet
+                      {at('Complet')}
                     </span>
                   )}
                 </div>
@@ -163,23 +173,23 @@ const UpcomingSorties = ({
                   <div className="space-y-4 mb-6">
                     <div className="flex items-center gap-3 text-accent font-bold uppercase tracking-[0.2em] text-xs">
                       <Calendar size={14} />
-                      {s.date}
+                      {at(s.date)}
                     </div>
                     <h3 className="text-3xl font-black text-foreground uppercase tracking-tighter leading-none">
-                      {s.titleOverride || s.sejour?.title}
+                      {at(s.titleOverride || s.sejour?.title)}
                     </h3>
                     <div className="flex flex-wrap gap-4 text-[10px] font-bold uppercase tracking-widest text-foreground/60">
                       <div className="flex items-center gap-1">
                         <MapPin size={12} className="text-accent" />
-                        {s.sejour?.massif}
+                        {at(s.sejour?.massif)}
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock size={12} className="text-accent" />
-                        {s.sejour?.duration}
+                        {at(s.sejour?.duration)}
                       </div>
                       <div className="flex items-center gap-1">
                         <Users size={12} className="text-accent" />
-                        {s.availableSpots}
+                        {at(s.availableSpots)}
                       </div>
                     </div>
                   </div>
@@ -191,7 +201,7 @@ const UpcomingSorties = ({
                         href={`/${s.sejour?.activityType}/${universSlug}/${s.sejour?.slug}`}
                         className="w-full py-4 bg-foreground text-background hover:bg-accent hover:text-white transition-all rounded-2xl text-center text-xs font-black uppercase tracking-widest"
                       >
-                        Découvrir la sortie
+                        {at('Découvrir la sortie')}
                       </Link>
                     );
                   })()}
@@ -203,7 +213,7 @@ const UpcomingSorties = ({
 
         {filteredSorties.length === 0 && (
           <div className="text-center py-24 glass rounded-[40px]">
-            <p className="text-xl text-foreground/40 font-medium">Aucune sortie programmée pour ces critères actuellement.</p>
+            <p className="text-xl text-foreground/40 font-medium">{at('Aucune sortie programmée pour ces critères actuellement.')}</p>
           </div>
         )}
       </div>

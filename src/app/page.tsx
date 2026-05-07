@@ -21,7 +21,6 @@ export default async function Home() {
 
   return (
     <main className="relative">
-      <Navbar />
       <Hero 
         title={homeData?.heroTitle}
         subtitle={homeData?.heroSubtitle}
@@ -82,9 +81,6 @@ export default async function Home() {
           className="bg-background"
         />
       </div>
-      <Footer />
     </main>
   );
 }
-
-

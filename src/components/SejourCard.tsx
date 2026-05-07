@@ -1,7 +1,10 @@
+'use client'
+
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { MapPin, BarChart3, Clock } from 'lucide-react'
+import { useLanguage } from '@/context/LanguageContext'
 
 interface SejourCardProps {
   sejour: {
@@ -19,24 +22,26 @@ interface SejourCardProps {
 }
 
 const SejourCard = ({ sejour, activitySlug }: SejourCardProps) => {
+  const { at, t } = useLanguage()
+
   const getLevelLabel = (level?: string) => {
     const map: Record<string, string> = {
-      'debutant': 'Débutant',
-      'intermediaire': 'Intermédiaire',
-      'confirme': 'Confirmé',
-      'expert': 'Expert'
+      'debutant': at('Débutant'),
+      'intermediaire': at('Intermédiaire'),
+      'confirme': at('Confirmé'),
+      'expert': at('Expert')
     }
-    return level ? map[level] || level : ''
+    return level ? map[level] || at(level) : ''
   }
 
   const getActivityLabel = (type: string) => {
     const map: Record<string, string> = {
-      'alpinisme': 'Alpinisme',
-      'ski': 'Ski de Randonnée',
-      'escalade': 'Escalade',
-      'voyage': 'Voyage'
+      'alpinisme': at('Alpinisme'),
+      'ski': at('Ski de randonnée'),
+      'escalade': at('Escalade'),
+      'voyage': at('Voyages')
     }
-    return map[type] || type
+    return map[type] || at(type)
   }
 
   const universSlug = sejour.subCategory?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
@@ -53,7 +58,7 @@ const SejourCard = ({ sejour, activitySlug }: SejourCardProps) => {
             {sejour.massif && (
               <span className="px-3 py-1 bg-background/80 text-foreground text-[10px] font-bold uppercase tracking-wider rounded-full backdrop-blur-md border border-white/10 flex items-center gap-1">
                 <MapPin size={10} className="text-accent" />
-                {sejour.massif}
+                {at(sejour.massif)}
               </span>
             )}
             {sejour.level && (
@@ -70,7 +75,7 @@ const SejourCard = ({ sejour, activitySlug }: SejourCardProps) => {
           {sejour.image ? (
             <Image
               src={sejour.image}
-              alt={sejour.title}
+              alt={at(sejour.title)}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -84,20 +89,20 @@ const SejourCard = ({ sejour, activitySlug }: SejourCardProps) => {
             {sejour.duration && (
               <div className="flex items-center gap-1 text-foreground/60 text-[10px] font-bold uppercase tracking-widest mb-2">
                 <Clock size={12} className="text-accent" />
-                {sejour.duration}
+                {at(sejour.duration)}
               </div>
             )}
             <h3 className="text-2xl font-black text-foreground uppercase tracking-tighter leading-none mb-6">
-              {sejour.title}
+              {at(sejour.title)}
             </h3>
             
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest leading-none mb-1">À partir de</span>
-                <span className="text-xl font-black text-highlight leading-none">{sejour.basePrice || "Sur devis"}</span>
+                <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest leading-none mb-1">{at('À partir de')}</span>
+                <span className="text-xl font-black text-highlight leading-none">{at(sejour.basePrice || "Sur devis")}</span>
               </div>
               <div className="bg-foreground text-background text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full transition-colors group-hover:bg-accent group-hover:text-white">
-                Voir le séjour
+                {at('Voir le séjour')}
               </div>
             </div>
           </div>

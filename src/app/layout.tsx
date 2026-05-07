@@ -30,7 +30,7 @@ export default async function RootLayout({
   const phoneNumber = contactData?.phone;
 
   return (
-    <html lang="fr" suppressHydrationWarning className={`${outfit.variable} antialiased scroll-smooth`}>
+    <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth" className={`${outfit.variable} antialiased scroll-smooth`}>
       <body className="bg-background text-foreground transition-colors duration-300">
         <ThemeProvider
           attribute="data-theme"

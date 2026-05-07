@@ -1,6 +1,4 @@
 import React from 'react';
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import Image from 'next/image';
 import { client } from "@/sanity/lib/client";
 import { postBySlugQuery, postsQuery } from "@/sanity/lib/queries";
@@ -35,6 +33,7 @@ const components = {
             src={urlFor(value).url()}
             alt={value.alt || 'Image article'}
             fill
+            sizes="(max-width: 1024px) 100vw, 800px"
             className="object-cover"
           />
           {value.caption && (
@@ -55,13 +54,16 @@ export async function generateStaticParams() {
   }));
 }
 
+import { getServerTranslations } from '@/i18n/server';
+
 export default async function PostDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await client.fetch(postBySlugQuery, { slug });
+  const { at, t, lang, translatePortableText } = await getServerTranslations();
 
   if (!post) notFound();
 
-  const formattedDate = new Date(post.date).toLocaleDateString('fr-FR', {
+  const formattedDate = new Date(post.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -69,7 +71,6 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
 
   return (
     <main className="relative min-h-screen bg-background text-foreground transition-colors duration-300">
-      <Navbar />
 
       {/* Hero Header */}
       <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden">
@@ -77,8 +78,9 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
           {post.image && (
             <Image
               src={post.image}
-              alt={post.title}
+              alt={at(post.title)}
               fill
+              sizes="100vw"
               priority
               className="object-cover"
             />
@@ -92,7 +94,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
             className="inline-flex items-center gap-2 text-accent font-bold mb-8 hover:gap-4 transition-all duration-300"
           >
             <ArrowLeft size={20} />
-            RETOUR AU BLOG
+            {at('RETOUR AU BLOG')}
           </Link>
           
           <div className="flex items-center gap-3 text-foreground/60 mb-6">
@@ -101,7 +103,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
           </div>
 
           <h1 className="text-4xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase leading-[0.9]">
-            {post.title}
+            {at(post.title)}
           </h1>
         </div>
       </section>
@@ -112,18 +114,17 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
           <div className="max-w-3xl mx-auto">
             {post.excerpt && (
               <p className="text-2xl md:text-3xl font-medium text-foreground/90 mb-12 leading-tight border-l-2 border-accent pl-8">
-                {post.excerpt}
+                {at(post.excerpt)}
               </p>
             )}
             
             <div className="prose-custom">
-              <PortableText value={post.body} components={components} />
+              <PortableText value={translatePortableText(post.body)} components={components} />
             </div>
           </div>
         </div>
       </section>
 
-      <Footer />
     </main>
   );
 }

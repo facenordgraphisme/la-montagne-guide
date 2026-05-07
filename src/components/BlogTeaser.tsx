@@ -1,6 +1,9 @@
+'use client'
+
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useLanguage } from '@/context/LanguageContext'
 
 interface Post {
   title: string
@@ -25,10 +28,12 @@ const BlogTeaser = ({
   titleAccent = "RÉCITS",
   className = "bg-background"
 }: BlogTeaserProps) => {
+  const { at, t, language } = useLanguage()
+  
   const formatDate = (dateStr: string) => {
     if (!dateStr) return ''
     const date = new Date(dateStr)
-    return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+    return date.toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', { month: 'long', year: 'numeric' })
   }
 
   const safeData = data || []
@@ -37,23 +42,23 @@ const BlogTeaser = ({
     date: formatDate(p.date)
   })) : [
     {
-      title: "Expédition au coeur du Queyras",
-      excerpt: "Retour sur une semaine de ski de randonnée entre crêtes sauvages et neige de cinéma...",
-      date: "Mars 2026",
+      title: at("Expédition au coeur du Queyras"),
+      excerpt: at("Retour sur une semaine de ski de randonnée entre crêtes sauvages et neige de cinéma..."),
+      date: at("Mars 2026"),
       image: "/photos/DSC_6614.jpg",
       slug: "expedition-queyras"
     },
     {
-      title: "Les plus belles cascades de glace",
-      excerpt: "Sélection des itinéraires incontournables pour s'initier ou se perfectionner cet hiver...",
-      date: "Janvier 2026",
+      title: at("Les plus belles cascades de glace"),
+      excerpt: at("Sélection des itinéraires incontournables pour s'initier ou se perfectionner cet hiver..."),
+      date: at("Janvier 2026"),
       image: "/photos/DSC_6753.jpg",
       slug: "cascades-glace-top"
     },
     {
-      title: "Préparer sa saison d'alpinisme",
-      excerpt: "Conseils d'expert pour l'entraînement physique et le choix du matériel avant l'été...",
-      date: "Avril 2026",
+      title: at("Préparer sa saison d'alpinisme"),
+      excerpt: at("Conseils d'expert pour l'entraînement physique et le choix du matériel avant l'été..."),
+      date: at("Avril 2026"),
       image: "/images/alpinisme.jpg",
       slug: "prepa-alpinisme"
     }
@@ -63,13 +68,13 @@ const BlogTeaser = ({
       <div className="container mx-auto">
         <div className="flex justify-between items-end mb-16">
           <div>
-            <span className="text-accent font-bold tracking-widest uppercase text-sm mb-4 block">{badge}</span>
+            <span className="text-accent font-bold tracking-widest uppercase text-sm mb-4 block">{at(badge)}</span>
             <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase">
-              {title} <br /> <span className="text-accent italic">{titleAccent}</span>
+              {at(title)} <br /> <span className="text-accent italic">{at(titleAccent)}</span>
             </h2>
           </div>
           <Link href="/blog" className="hidden md:block px-8 py-3 rounded-full border border-border hover:bg-foreground hover:text-background transition-all font-bold text-sm uppercase tracking-widest">
-            Tout lire
+            {t('blog.viewAll')}
           </Link>
         </div>
 
@@ -80,19 +85,19 @@ const BlogTeaser = ({
                 {post.image && (
                   <Image
                     src={post.image}
-                    alt={post.title}
+                    alt={at(post.title)}
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 )}
               </div>
-              <p className="text-accent font-bold text-xs uppercase tracking-widest mb-3">{post.date}</p>
+              <p className="text-accent font-bold text-xs uppercase tracking-widest mb-3">{at(post.date)}</p>
               <h3 className="text-2xl font-bold mb-4 group-hover:text-accent transition-colors leading-tight">
-                {post.title}
+                {at(post.title)}
               </h3>
               <p className="text-foreground/60 leading-relaxed line-clamp-2">
-                {post.excerpt}
+                {at(post.excerpt)}
               </p>
             </Link>
           ))}

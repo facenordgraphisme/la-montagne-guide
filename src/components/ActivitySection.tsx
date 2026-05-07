@@ -54,6 +54,8 @@ interface ActivitySectionProps {
   className?: string
 }
 
+import { useLanguage } from '@/context/LanguageContext'
+
 const ActivitySection = ({
   title = "VOS PROCHAINES",
   titleAccent = "AVENTURES",
@@ -61,6 +63,48 @@ const ActivitySection = ({
   data = [],
   className = "bg-background"
 }: ActivitySectionProps) => {
+  const { at, t } = useLanguage()
+  
+  const activities = [
+    {
+      title: at('Alpinisme'),
+      slug: 'alpinisme',
+      description: at('Sommets mythiques, arêtes effilées et glaciers majestueux. Découvrez la haute montagne.'),
+      image: '/images/alpinisme.jpg',
+    },
+    {
+      title: at('Ski'),
+      slug: 'ski',
+      description: at('Ski de randonnée, freeride ou hors-piste. Tracez votre propre voie dans la poudreuse.'),
+      image: '/images/ski.jpg',
+    },
+
+    {
+      title: at('Escalade'),
+      slug: 'escalade',
+      description: at('Verticalité et sensations. Des falaises ensoleillées aux grandes voies calcaires.'),
+      image: '/images/escalade.jpg',
+    },
+    {
+      title: at('Cascade de Glace'),
+      slug: 'cascade-de-glace',
+      description: at('La magie cristalline des éphémères. Grimpez sur des structures de glace uniques.'),
+      image: '/photos/DSC_6753.jpg',
+    },
+    {
+      title: at('Paralpinisme'),
+      slug: 'paralpinisme',
+      description: at('Entre ciel et terre. Gravissez les sommets pour vous envoler en parapente.'),
+      image: '/photos/DSC_6701.jpg',
+    },
+    {
+      title: at('Voyages'),
+      slug: 'voyages',
+      description: at('L\'aventure au-delà des frontières. Expéditions sur mesure dans les plus beaux massifs du monde.'),
+      image: '/photos/2017-06-15 12.01.27.jpg',
+    }
+  ]
+
   const safeData = data?.length > 0 ? data : activities;
   return (
     <section id="activites" className={`py-24 px-6 transition-colors duration-300 ${className}`}>
@@ -68,14 +112,14 @@ const ActivitySection = ({
         <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
           <div className="max-w-2xl">
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 uppercase">
-              {title} <br /> <span className="text-accent italic">{titleAccent}</span>
+              {at(title)} <br /> <span className="text-accent italic">{at(titleAccent)}</span>
             </h2>
             <p className="text-foreground/60 text-lg">
-              {description}
+              {at(description)}
             </p>
           </div>
           <button className="text-sm font-bold tracking-widest uppercase border-b border-accent pb-1 text-foreground/60 hover:text-accent transition-colors">
-            Voir tout
+            {t('common.viewAll')}
           </button>
         </div>
 
@@ -95,7 +139,7 @@ const ActivitySection = ({
               >
                 <Image 
                   src={activity.image || "/images/alpinisme.jpg"}
-                  alt={activity.title}
+                  alt={at(activity.title)}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -104,10 +148,10 @@ const ActivitySection = ({
                 
                 <div className="absolute inset-0 p-8 flex flex-col justify-end text-white">
                   <h3 className="text-2xl font-bold mb-2 group-hover:text-accent transition-colors">
-                    {activity.title}
+                    {at(activity.title)}
                   </h3>
                   <p className="text-sm text-white/80 line-clamp-2 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    {activity.description}
+                    {at(activity.description)}
                   </p>
                   <div className="mt-6 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-accent transition-colors text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
