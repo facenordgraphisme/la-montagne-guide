@@ -213,7 +213,6 @@ export default async function PrestationDetail({ params }: { params: Promise<{ s
         />
       )}
 
-      <Footer />
     </main>
   );
 }
