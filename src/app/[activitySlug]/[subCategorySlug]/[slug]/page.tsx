@@ -155,6 +155,18 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                       <p className="text-xs font-bold text-foreground/40 uppercase tracking-widest">Dates sur demande</p>
                     </div>
                   )}
+
+                  {/* Information block for groups and on-demand */}
+                  <div className="mt-8 space-y-4 p-6 rounded-3xl bg-accent/5 border border-accent/10">
+                    <p className="text-[11px] leading-relaxed text-foreground/70 font-medium">
+                      <span className="text-accent font-bold block mb-1">PARTAGE DE SORTIE</span>
+                      Ces dates sont destinées aux personnes souhaitant s'inscrire individuellement et partager les frais d'une sortie.
+                    </p>
+                    <p className="text-[11px] leading-relaxed text-foreground/70 font-medium">
+                      <span className="text-accent font-bold block mb-1">GROUPES & SUR MESURE</span>
+                      Si vous êtes un groupe déjà constitué ou si vous souhaitez <span className="text-accent font-bold">ouvrir de nouvelles dates</span> à la demande, contactez-moi directement pour un engagement privé.
+                    </p>
+                  </div>
                 </div>
 
                 <Link href="/contact" className="btn-primary w-full block text-center !text-white py-4 text-sm font-black uppercase tracking-widest">

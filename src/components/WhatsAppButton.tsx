@@ -3,13 +3,16 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { MessageCircle } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 
 interface WhatsAppButtonProps {
   phoneNumber: string
 }
 
 const WhatsAppButton = ({ phoneNumber }: WhatsAppButtonProps) => {
-  if (!phoneNumber) return null
+  const pathname = usePathname()
+  
+  if (!phoneNumber || pathname?.startsWith('/studio')) return null
 
   // Remove any non-digit characters for the link
   const cleanNumber = phoneNumber.replace(/\D/g, '')

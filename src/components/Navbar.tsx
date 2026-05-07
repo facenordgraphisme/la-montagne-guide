@@ -6,9 +6,16 @@ import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from 'next-themes'
 import { Moon, Sun, Menu, X, ChevronDown } from 'lucide-react'
+import { useLanguage } from '@/context/LanguageContext'
+import { usePathname } from 'next/navigation'
 
 const Navbar = () => {
+  const pathname = usePathname()
   const { theme, setTheme } = useTheme()
+  const { language, setLanguage } = useLanguage()
+
+  // Masquer la Navbar dans le Studio Sanity
+  if (pathname?.startsWith('/studio')) return null
   const [mounted, setMounted] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isActivitiesOpen, setIsActivitiesOpen] = useState(false)
@@ -81,13 +88,32 @@ const Navbar = () => {
               </div>
             </div>
 
-            <Link href="/prochaines-sorties" className="hover:text-accent transition-colors">Sorties</Link>
+            <Link href="/prochaines-sorties" className="hover:text-accent transition-colors">Prochaines sorties</Link>
             <Link href="/le-guide" className="hover:text-accent transition-colors">Le Guide</Link>
             <Link href="/blog" className="hover:text-accent transition-colors">Blog</Link>
           </div>
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">
+          {/* Language Switcher */}
+          <div className="flex items-center gap-2 mr-4 px-3 py-1 bg-foreground/5 rounded-full border border-border">
+            <button 
+              onClick={() => setLanguage('fr')}
+              className={`w-6 h-6 rounded-full overflow-hidden transition-all duration-300 ${language === 'fr' ? 'ring-2 ring-accent scale-110' : 'opacity-40 hover:opacity-100'}`}
+              title="Français"
+            >
+              <img src="https://flagcdn.com/w40/fr.png" alt="FR" className="w-full h-full object-cover" />
+            </button>
+            <button 
+              onClick={() => setLanguage('en')}
+              className={`w-6 h-6 rounded-full overflow-hidden transition-all duration-300 ${language === 'en' ? 'ring-2 ring-accent scale-110' : 'opacity-40 hover:opacity-100'}`}
+              title="English"
+            >
+              <img src="https://flagcdn.com/w40/gb.png" alt="EN" className="w-full h-full object-cover" />
+            </button>
+          </div>
+
+          {/* Theme Toggle */}
           {mounted && (
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -160,7 +186,7 @@ const Navbar = () => {
               </div>
 
               {[
-                { name: "Sorties", href: "/prochaines-sorties" },
+                { name: "Prochaines sorties", href: "/prochaines-sorties" },
                 { name: "Le Guide", href: "/le-guide" },
                 { name: "Blog", href: "/blog" },
                 { name: "Contact", href: "/contact" },
@@ -174,6 +200,23 @@ const Navbar = () => {
                   {link.name}
                 </Link>
               ))}
+              {/* Mobile Language Switcher */}
+              <div className="flex items-center justify-center gap-6 mt-8 py-4 border-t border-white/10">
+                <button 
+                  onClick={() => setLanguage('fr')}
+                  className={`flex flex-col items-center gap-2 transition-all ${language === 'fr' ? 'scale-110' : 'opacity-40'}`}
+                >
+                  <img src="https://flagcdn.com/w80/fr.png" alt="FR" className="w-10 h-10 rounded-full object-cover ring-2 ring-accent/50" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-white">Français</span>
+                </button>
+                <button 
+                  onClick={() => setLanguage('en')}
+                  className={`flex flex-col items-center gap-2 transition-all ${language === 'en' ? 'scale-110' : 'opacity-40'}`}
+                >
+                  <img src="https://flagcdn.com/w80/gb.png" alt="EN" className="w-10 h-10 rounded-full object-cover ring-2 ring-accent/50" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-white">English</span>
+                </button>
+              </div>
             </div>
           </motion.div>
         )}

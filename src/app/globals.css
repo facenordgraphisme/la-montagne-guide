@@ -74,6 +74,23 @@ body {
 }
 
 /* Custom scrollbar */
+/* Google Translate Cleanup */
+.goog-te-banner-frame, 
+.goog-te-banner,
+.skiptranslate > iframe {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+body {
+  top: 0 !important;
+}
+
+.goog-tooltip,
+.goog-tooltip:hover {
+  display: none !important;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
 }

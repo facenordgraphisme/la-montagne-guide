@@ -17,6 +17,10 @@ export const metadata: Metadata = {
   description: "Guide de Haute Montagne Nicolas Draperi. Alpinisme, ski de randonnée, escalade et voyages.",
 };
 
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { LanguageProvider } from "@/context/LanguageContext";
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -27,19 +31,21 @@ export default async function RootLayout({
 
   return (
     <html lang="fr" suppressHydrationWarning className={`${outfit.variable} antialiased scroll-smooth`}>
-      <body className="min-h-screen">
+      <body className="bg-background text-foreground transition-colors duration-300">
         <ThemeProvider
           attribute="data-theme"
-          defaultTheme="light"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <WhatsAppButton phoneNumber={phoneNumber} />
+          <LanguageProvider>
+            <Navbar />
+            {children}
+            <Footer contactData={contactData} />
+            <WhatsAppButton phoneNumber={phoneNumber} />
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>
   );
 }
-
-

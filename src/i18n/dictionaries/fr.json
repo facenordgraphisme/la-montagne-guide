@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "activities": "Activités",
+    "sorties": "Sorties",
+    "guide": "Le Guide",
+    "blog": "Blog",
+    "contact": "Contact",
+    "learnMore": "En savoir plus"
+  },
+  "activities": {
+    "alpinisme": { "title": "Alpinisme" },
+    "ski": { "title": "Ski" },
+    "escalade": { "title": "Escalade" },
+    "cascade": { "title": "Cascade de Glace" },
+    "paralpinisme": { "title": "Paralpinisme" },
+    "voyages": { "title": "Voyages" }
+  },
+  "hero": {
+    "cta": "Réserver une sortie",
+    "discover": "Découvrir les prestations",
+    "departures": "Prochains départs"
+  },
+  "about": {
+    "yearsExperience": "Années d'expérience",
+    "role": "Guide de Haute Montagne",
+    "learnMore": "En savoir plus sur moi"
+  },
+  "contact": {
+    "button": "Contactez-moi",
+    "directPhone": "Directement par téléphone"
+  },
+  "blog": {
+    "viewAll": "Tout lire"
+  },
+  "prestation": {
+    "presentation": "Présentation",
+    "informations": "Informations",
+    "price": "Tarif",
+    "period": "Période",
+    "location": "Lieu",
+    "book": "Réserver mon aventure",
+    "seasonal": "Saisonnière",
+    "defaultLocation": "Alpes & International",
+    "universBadge": "NOS UNIVERS",
+    "universTitle": "Une progression adaptée à vos envies"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "viewAll": "Voir tout"
+  }
+}

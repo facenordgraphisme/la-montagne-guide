@@ -4,10 +4,15 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
+import { usePathname } from 'next/navigation'
 
 const Footer = () => {
+  const pathname = usePathname()
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
+
+  // Masquer le Footer dans le Studio Sanity
+  if (pathname?.startsWith('/studio')) return null
 
   useEffect(() => setMounted(true), [])
 

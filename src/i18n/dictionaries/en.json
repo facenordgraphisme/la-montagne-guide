@@ -1,0 +1,52 @@
+{
+  "nav": {
+    "activities": "Activities",
+    "sorties": "Trips",
+    "guide": "The Guide",
+    "blog": "Blog",
+    "contact": "Contact",
+    "learnMore": "Learn more"
+  },
+  "activities": {
+    "alpinisme": { "title": "Mountaineering" },
+    "ski": { "title": "Skiing" },
+    "escalade": { "title": "Climbing" },
+    "cascade": { "title": "Ice Climbing" },
+    "paralpinisme": { "title": "Paralpinism" },
+    "voyages": { "title": "Trips" }
+  },
+  "hero": {
+    "cta": "Book a trip",
+    "discover": "Discover activities",
+    "departures": "Upcoming departures"
+  },
+  "about": {
+    "yearsExperience": "Years of experience",
+    "role": "Mountain Guide",
+    "learnMore": "Learn more about me"
+  },
+  "contact": {
+    "button": "Contact me",
+    "directPhone": "Directly by phone"
+  },
+  "blog": {
+    "viewAll": "Read all"
+  },
+  "prestation": {
+    "presentation": "Presentation",
+    "informations": "Information",
+    "price": "Price",
+    "period": "Period",
+    "location": "Location",
+    "book": "Book my adventure",
+    "seasonal": "Seasonal",
+    "defaultLocation": "Alps & International",
+    "universBadge": "OUR WORLDS",
+    "universTitle": "A progression adapted to your desires"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "viewAll": "View all"
+  }
+}

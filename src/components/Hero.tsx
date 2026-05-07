@@ -3,6 +3,7 @@
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface HeroProps {
   title?: string
@@ -44,9 +45,17 @@ const Hero = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 2, ease: "easeInOut" }}
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: `url('${backgrounds[currentBg]}')` }}
-          />
+            className="absolute inset-0"
+          >
+            <Image
+              src={backgrounds[currentBg]}
+              alt="Hero Background"
+              fill
+              priority={currentBg === 0}
+              className="object-cover"
+              sizes="100vw"
+            />
+          </motion.div>
         </AnimatePresence>
         <div className="absolute inset-0 bg-black/40 bg-gradient-to-b from-black/60 via-transparent to-black" />
       </div>
