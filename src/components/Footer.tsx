@@ -6,7 +6,11 @@ import Image from 'next/image'
 import { useTheme } from 'next-themes'
 import { usePathname } from 'next/navigation'
 
-const Footer = () => {
+interface FooterProps {
+  contactData?: any
+}
+
+const Footer = ({ contactData }: FooterProps) => {
   const pathname = usePathname()
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -59,9 +63,9 @@ const Footer = () => {
           <div>
             <h4 className="font-bold mb-6 uppercase tracking-widest text-xs text-foreground/40">Contact</h4>
             <ul className="space-y-4 text-foreground/70 font-medium">
-              <li>draperinicolas@hotmail.com</li>
-              <li>06 75 07 97 08</li>
-              <li>Champcella, Hautes-Alpes</li>
+              <li>{contactData?.email || 'draperinicolas@hotmail.com'}</li>
+              <li>{contactData?.phone || '06 75 07 97 08'}</li>
+              <li>{contactData?.address || 'Champcella, Hautes-Alpes'}</li>
             </ul>
           </div>
         </div>
