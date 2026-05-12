@@ -48,5 +48,9 @@
     "loading": "Loading...",
     "error": "An error occurred",
     "viewAll": "View all"
+  },
+  "customTrip": {
+    "text": "Any desires, ideas, or dates to suggest? Contact me to create a tailor-made stay",
+    "cta": "Contact me"
   }
 }

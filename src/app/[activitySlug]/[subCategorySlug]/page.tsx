@@ -84,8 +84,8 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
       {/* Description Section - Centered & Wide */}
       <section className="relative -mt-32 z-20 pb-24">
         <div className="container mx-auto px-6">
-          <div className="glass p-12 md:p-24 rounded-[60px] border border-white/10 shadow-2xl bg-background/80 backdrop-blur-3xl max-w-5xl mx-auto text-center">
-            <div className="prose-custom prose-xl mx-auto">
+          <div className="glass p-12 md:p-24 rounded-[60px] border border-white/10 shadow-2xl bg-background/80 backdrop-blur-3xl max-w-5xl mx-auto text-center relative">
+            <div className="prose-custom prose-xl mx-auto mb-16">
               {currentUnivers.description ? (
                 <PortableText value={translatePortableText(currentUnivers.description)} />
               ) : (
@@ -93,7 +93,25 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
               )}
             </div>
             
-            <div className="w-24 h-1 bg-accent mx-auto mt-16" />
+            <div className="w-24 h-1 bg-accent mx-auto" />
+
+            {/* CTA Encart - Sur mesure */}
+            <div className="md:absolute -bottom-16 right-0 md:right-12 glass p-8 md:p-10 rounded-[40px] border-accent/20 shadow-2xl max-w-xl text-left backdrop-blur-3xl mt-12 md:mt-0 group hover:border-accent/40 transition-all duration-500 overflow-hidden">
+              <div className="absolute -right-4 -top-4 w-24 h-24 bg-accent/5 rounded-full blur-2xl group-hover:bg-accent/10 transition-colors" />
+              <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                <div className="flex-1">
+                  <p className="text-xl font-black leading-[1.1] tracking-tighter text-foreground uppercase">
+                    {at(activity.customTripText) || t("customTrip.text")}
+                  </p>
+                </div>
+                <Link 
+                  href="/contact" 
+                  className="btn-primary whitespace-nowrap px-8 py-4 text-sm uppercase tracking-widest shadow-xl shadow-accent/20 hover:shadow-accent/40"
+                >
+                  {at(activity.customTripCTA) || t("customTrip.cta")}
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>

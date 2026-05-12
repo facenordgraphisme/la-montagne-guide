@@ -48,5 +48,9 @@
     "loading": "Chargement...",
     "error": "Une erreur est survenue",
     "viewAll": "Voir tout"
+  },
+  "customTrip": {
+    "text": "Des envies, des idées, des dates à me soumettre ? Contactez-moi pour monter un séjour sur mesure",
+    "cta": "Contactez-moi"
   }
 }

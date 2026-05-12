@@ -9,7 +9,7 @@ import { Moon, Sun, Menu, X, ChevronDown } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 import { usePathname } from 'next/navigation'
 
-const Navbar = () => {
+const Navbar = ({ sanityActivities }: { sanityActivities?: any[] }) => {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
   const { language, setLanguage, t, at } = useLanguage()
@@ -22,7 +22,7 @@ const Navbar = () => {
 
   useEffect(() => setMounted(true), [])
 
-  const activities = [
+  const defaultActivities = [
     { title: "Alpinisme", slug: "alpinisme", image: "/images/alpinisme.jpg" },
     { title: "Ski", slug: "ski", image: "/images/ski.jpg" },
     { title: "Escalade", slug: "escalade", image: "/images/escalade.jpg" },
@@ -30,6 +30,10 @@ const Navbar = () => {
     { title: "Paralpinisme", slug: "paralpinisme", image: "/photos/DSC_6701.jpg" },
     { title: "Voyages", slug: "voyages", image: "/photos/2017-06-15 12.01.27.jpg" },
   ]
+
+  const activities = sanityActivities && sanityActivities.length > 0 
+    ? sanityActivities 
+    : defaultActivities;
 
   return (
     <>

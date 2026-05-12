@@ -144,7 +144,9 @@ export const activitiesQuery = groq`*[_type == "activity"] | order(title asc) {
   period,
   location,
   showUpcomingSorties,
-  type
+  type,
+  customTripText,
+  customTripCTA
 }`
 
 export const activityBySlugQuery = groq`*[_type == "activity" && slug.current == $slug][0] {

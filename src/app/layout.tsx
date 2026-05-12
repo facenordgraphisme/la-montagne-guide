@@ -4,7 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 import { client } from "@/sanity/lib/client";
-import { contactQuery } from "@/sanity/lib/queries";
+import { contactQuery, activitiesQuery } from "@/sanity/lib/queries";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
 const outfit = Outfit({
@@ -26,7 +26,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const contactData = await client.fetch(contactQuery);
+  const [contactData, activitiesData] = await Promise.all([
+    client.fetch(contactQuery),
+    client.fetch(activitiesQuery)
+  ]);
   const phoneNumber = contactData?.phone;
 
   return (
@@ -39,7 +42,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <LanguageProvider>
-            <Navbar />
+            <Navbar sanityActivities={activitiesData} />
             {children}
             <Footer contactData={contactData} />
             <WhatsAppButton phoneNumber={phoneNumber} />

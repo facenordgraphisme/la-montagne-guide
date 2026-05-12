@@ -133,5 +133,17 @@ export const activityType = defineType({
         ],
       },
     }),
+    defineField({
+      name: 'customTripText',
+      title: 'Texte Encart Sur Mesure',
+      type: 'string',
+      description: 'Texte affiché dans l\'encart en bas des pages d\'univers.',
+    }),
+    defineField({
+      name: 'customTripCTA',
+      title: 'Texte Bouton Sur Mesure',
+      type: 'string',
+      description: 'Texte du bouton dans l\'encart en bas des pages d\'univers.',
+    }),
   ],
 })
