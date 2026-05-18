@@ -44,4 +44,30 @@ export const sortieType = defineType({
       description: 'Laissez vide pour utiliser le titre du séjour de base.',
     }),
   ],
+  preview: {
+    select: {
+      sejourTitle: 'sejour.title',
+      date: 'date',
+      titleOverride: 'titleOverride',
+      availableSpots: 'availableSpots',
+      media: 'sejour.image',
+    },
+    prepare(selection) {
+      const { sejourTitle, date, titleOverride, availableSpots, media } = selection
+      const mainTitle = titleOverride || sejourTitle || 'Sans titre'
+      const dateStr = date ? ` - ${date}` : ''
+      
+      let subtitle = availableSpots
+      if (availableSpots && /^\d+$/.test(availableSpots.trim())) {
+        const spots = parseInt(availableSpots.trim(), 10)
+        subtitle = spots > 1 ? `${spots} places disponibles` : `${spots} place disponible`
+      }
+      
+      return {
+        title: `${mainTitle}${dateStr}`,
+        subtitle,
+        media,
+      }
+    },
+  },
 })
