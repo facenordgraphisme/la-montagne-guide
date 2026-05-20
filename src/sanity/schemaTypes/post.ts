@@ -1,9 +1,11 @@
 import { defineField, defineType } from 'sanity'
+import { FileText } from 'lucide-react'
 
 export const postType = defineType({
   name: 'post',
   title: 'Blog',
   type: 'document',
+  icon: FileText,
   fields: [
     defineField({
       name: 'title',

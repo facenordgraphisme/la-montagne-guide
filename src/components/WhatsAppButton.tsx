@@ -6,26 +6,32 @@ import { MessageCircle } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 
 interface WhatsAppButtonProps {
-  phoneNumber: string
+  phoneNumber?: string
+  whatsappNumber?: string
+  whatsappText?: string
 }
 
 import { useLanguage } from '@/context/LanguageContext'
 
-const WhatsAppButton = ({ phoneNumber }: WhatsAppButtonProps) => {
+const WhatsAppButton = ({ phoneNumber, whatsappNumber, whatsappText }: WhatsAppButtonProps) => {
   const { at } = useLanguage()
   const pathname = usePathname()
   
-  if (!phoneNumber || pathname?.startsWith('/studio')) return null
+  const finalPhone = whatsappNumber || phoneNumber
+  if (!finalPhone || pathname?.startsWith('/studio')) return null
 
   // Remove any non-digit characters for the link
-  const cleanNumber = phoneNumber.replace(/\D/g, '')
+  const cleanNumber = finalPhone.replace(/\D/g, '')
   
   // Ensure the number starts with a country code if needed (assuming French +33 if it starts with 0)
   const formattedNumber = cleanNumber.startsWith('0') 
     ? `33${cleanNumber.slice(1)}` 
     : cleanNumber
 
-  const whatsappUrl = `https://wa.me/${formattedNumber}`
+  let whatsappUrl = `https://wa.me/${formattedNumber}`
+  if (whatsappText) {
+    whatsappUrl += `?text=${encodeURIComponent(whatsappText)}`
+  }
 
   return (
     <motion.a

@@ -40,7 +40,8 @@ const Navbar = ({ sanityActivities }: { sanityActivities?: any[] }) => {
       <motion.nav
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="fixed top-6 left-1/2 -translate-x-1/2 z-[60] w-[95%] max-w-6xl glass rounded-full px-4 md:px-8 py-3 md:py-4 flex items-center justify-between shadow-2xl"
+        style={{ top: 'calc(var(--banner-height, 0px) + 24px)' }}
+        className="fixed left-1/2 -translate-x-1/2 z-[60] w-[95%] max-w-6xl glass rounded-full px-4 md:px-8 py-3 md:py-4 flex items-center justify-between shadow-2xl transition-[top] duration-300 ease-out"
       >
         <Link href="/" className="flex items-center" onClick={() => setIsOpen(false)}>
           {mounted && (
@@ -146,7 +147,8 @@ const Navbar = ({ sanityActivities }: { sanityActivities?: any[] }) => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-x-0 top-0 pt-28 pb-12 z-[50] glass lg:hidden max-h-screen overflow-y-auto"
+            style={{ paddingTop: 'calc(var(--banner-height, 0px) + 112px)' }}
+            className="fixed inset-x-0 top-0 pb-12 z-[50] glass lg:hidden max-h-screen overflow-y-auto transition-[padding-top] duration-300 ease-out"
           >
             <div className="flex flex-col items-center gap-6 px-6">
               <div className="w-full flex flex-col items-center">

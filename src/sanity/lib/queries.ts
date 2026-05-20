@@ -39,7 +39,10 @@ export const homeQuery = groq`*[_type == "home"][0]{
 
   blogBadge,
   blogTitle,
-  blogTitleAccent
+  blogTitleAccent,
+  hideTestimonials,
+  hideBlog,
+  featuredPostsLimit
 }`
 
 export const testimonialsQuery = groq`*[_type == "testimonial"] | order(_createdAt desc) {
@@ -174,7 +177,7 @@ export const activityBySlugQuery = groq`*[_type == "activity" && slug.current ==
   type
 }`
 
-export const blogTeaserQuery = groq`*[_type == "post"] | order(publishedAt desc)[0...3] {
+export const blogTeaserQuery = groq`*[_type == "post"] | order(publishedAt desc)[0...$limit] {
   title,
   "slug": slug.current,
   "date": publishedAt,
@@ -221,5 +224,48 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
   "image": mainImage.asset->url,
   excerpt,
   body
+}`
+
+export const settingsQuery = groq`*[_type == "settings"][0]{
+  siteName,
+  "logoLight": logoLight.asset->url,
+  "logoDark": logoDark.asset->url,
+  instagram,
+  facebook,
+  youtube,
+  whatsappNumber,
+  whatsappText,
+  whatsappTextEn,
+  email,
+  phone,
+  address,
+  footerDescription,
+  footerDescriptionEn,
+  copyright,
+  seoTitle,
+  seoTitleEn,
+  seoDescription,
+  seoDescriptionEn,
+  "seoImage": seoImage.asset->url,
+  showBanner,
+  bannerText,
+  bannerTextEn,
+  bannerColor,
+  bannerLink,
+  hidePartners,
+  "partners": partners[]{
+    name,
+    "logo": logo.asset->url,
+    link
+  }
+}`
+
+export const faqsQuery = groq`*[_type == "faq"] | order(order asc, _createdAt desc) {
+  _id,
+  question,
+  questionEn,
+  answer,
+  answerEn,
+  category
 }`
 

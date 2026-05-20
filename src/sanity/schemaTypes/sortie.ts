@@ -1,9 +1,11 @@
 import { defineField, defineType } from 'sanity'
+import { CalendarRange } from 'lucide-react'
 
 export const sortieType = defineType({
   name: 'sortie',
   title: 'Prochaines Sorties',
   type: 'document',
+  icon: CalendarRange,
   fields: [
     defineField({
       name: 'sejour',
@@ -50,21 +52,45 @@ export const sortieType = defineType({
       date: 'date',
       titleOverride: 'titleOverride',
       availableSpots: 'availableSpots',
+      isFull: 'isFull',
       media: 'sejour.image',
     },
     prepare(selection) {
-      const { sejourTitle, date, titleOverride, availableSpots, media } = selection
+      const { sejourTitle, date, titleOverride, availableSpots, isFull, media } = selection
       const mainTitle = titleOverride || sejourTitle || 'Sans titre'
       const dateStr = date ? ` - ${date}` : ''
       
-      let subtitle = availableSpots
-      if (availableSpots && /^\d+$/.test(availableSpots.trim())) {
-        const spots = parseInt(availableSpots.trim(), 10)
-        subtitle = spots > 1 ? `${spots} places disponibles` : `${spots} place disponible`
+      let statusPrefix = ''
+      let subtitle = ''
+
+      if (isFull === true) {
+        statusPrefix = '🔴 [COMPLET] '
+        subtitle = '⚠️ COMPLET - Plus de place'
+      } else {
+        let spotsCount = -1
+        if (availableSpots) {
+          const match = availableSpots.trim().match(/^(\d+)/)
+          if (match) {
+            spotsCount = parseInt(match[1], 10)
+          } else if (/^\d+$/.test(availableSpots.trim())) {
+            spotsCount = parseInt(availableSpots.trim(), 10)
+          }
+        }
+
+        if (spotsCount === 0) {
+          statusPrefix = '🔴 [COMPLET] '
+          subtitle = '⚠️ COMPLET - Plus de place'
+        } else if (spotsCount > 0 && spotsCount <= 2) {
+          statusPrefix = '⚠️ [DERNIÈRES PLACES] '
+          subtitle = `🔥 ${availableSpots} !`
+        } else {
+          statusPrefix = '🟢 [PLACES DISPO] '
+          subtitle = availableSpots ? `✔ ${availableSpots}` : '✔ Places disponibles'
+        }
       }
-      
+
       return {
-        title: `${mainTitle}${dateStr}`,
+        title: `${statusPrefix}${mainTitle}${dateStr}`,
         subtitle,
         media,
       }

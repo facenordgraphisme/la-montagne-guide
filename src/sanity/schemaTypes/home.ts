@@ -1,10 +1,13 @@
 import { defineField, defineType } from 'sanity'
+import { Home } from 'lucide-react'
 
 export const homeType = defineType({
   name: 'home',
   title: 'Page d\'accueil',
   type: 'document',
+  icon: Home,
   groups: [
+    { name: 'layout', title: 'Mise en Page ⚙️' },
     { name: 'hero', title: 'Hero' },
     { name: 'about', title: 'À Propos' },
     { name: 'activities', title: 'Activités' },
@@ -236,6 +239,33 @@ export const homeType = defineType({
       title: 'Titre Blog (Turquoise)',
       type: 'string',
       group: 'blog',
+    }),
+
+    // LAYOUT CONTROLS
+    defineField({
+      name: 'hideTestimonials',
+      title: 'Masquer la section Témoignages',
+      type: 'boolean',
+      initialValue: false,
+      group: 'layout',
+      description: "Masque le bloc d'avis clients sur la page d'accueil.",
+    }),
+    defineField({
+      name: 'hideBlog',
+      title: 'Masquer la section Blog',
+      type: 'boolean',
+      initialValue: false,
+      group: 'layout',
+      description: "Masque le bloc de carnet de voyage sur la page d'accueil.",
+    }),
+    defineField({
+      name: 'featuredPostsLimit',
+      title: "Limite d'articles de blog",
+      type: 'number',
+      initialValue: 3,
+      group: 'layout',
+      description: "Le nombre maximum d'articles à afficher dans la grille du blog.",
+      validation: (Rule) => Rule.min(1).max(9),
     }),
   ],
 })

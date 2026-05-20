@@ -1,9 +1,11 @@
 import { defineField, defineType } from 'sanity'
+import { MessageSquareQuote } from 'lucide-react'
 
 export const testimonialType = defineType({
   name: 'testimonial',
   title: 'Témoignages',
   type: 'document',
+  icon: MessageSquareQuote,
   fields: [
     defineField({
       name: 'author',

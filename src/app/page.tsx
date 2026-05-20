@@ -8,16 +8,21 @@ import ContactHome from "@/components/ContactHome";
 import Testimonials from "@/components/Testimonials";
 import BlogTeaser from "@/components/BlogTeaser";
 import Footer from "@/components/Footer";
+import PartnersSlider from "@/components/PartnersSlider";
 
 import { client } from "@/sanity/lib/client";
-import { homeQuery, sortiesQuery, testimonialsQuery, blogTeaserQuery, activitiesQuery } from "@/sanity/lib/queries";
+import { homeQuery, sortiesQuery, testimonialsQuery, blogTeaserQuery, activitiesQuery, settingsQuery } from "@/sanity/lib/queries";
 
 export default async function Home() {
   const homeData = await client.fetch(homeQuery);
-  const sortiesData = await client.fetch(sortiesQuery);
-  const testimonialsData = await client.fetch(testimonialsQuery);
-  const blogTeaserData = await client.fetch(blogTeaserQuery);
-  const activitiesData = await client.fetch(activitiesQuery);
+  const limit = homeData?.featuredPostsLimit || 3;
+  const [sortiesData, testimonialsData, blogTeaserData, activitiesData, settingsData] = await Promise.all([
+    client.fetch(sortiesQuery),
+    client.fetch(testimonialsQuery),
+    client.fetch(blogTeaserQuery, { limit }),
+    client.fetch(activitiesQuery),
+    client.fetch(settingsQuery)
+  ]);
 
   return (
     <main className="relative">
@@ -66,20 +71,27 @@ export default async function Home() {
           titleAccent={homeData?.contactTitleAccent}
           description={homeData?.contactDescription}
         />
-        <Testimonials 
-          data={testimonialsData} 
-          badge={homeData?.testimonialsBadge}
-          title={homeData?.testimonialsTitle}
-          titleAccent={homeData?.testimonialsTitleAccent}
-          className="bg-surface"
-        />
-        <BlogTeaser 
-          data={blogTeaserData} 
-          badge={homeData?.blogBadge}
-          title={homeData?.blogTitle}
-          titleAccent={homeData?.blogTitleAccent}
-          className="bg-background"
-        />
+        {!homeData?.hideTestimonials && (
+          <Testimonials 
+            data={testimonialsData} 
+            badge={homeData?.testimonialsBadge}
+            title={homeData?.testimonialsTitle}
+            titleAccent={homeData?.testimonialsTitleAccent}
+            className="bg-surface"
+          />
+        )}
+        {!homeData?.hideBlog && (
+          <BlogTeaser 
+            data={blogTeaserData} 
+            badge={homeData?.blogBadge}
+            title={homeData?.blogTitle}
+            titleAccent={homeData?.blogTitleAccent}
+            className="bg-background"
+          />
+        )}
+        {!settingsData?.hidePartners && (
+          <PartnersSlider partners={settingsData?.partners} />
+        )}
       </div>
     </main>
   );

@@ -1,9 +1,11 @@
 import { defineField, defineType } from 'sanity'
+import { UserRound } from 'lucide-react'
 
 export const guideType = defineType({
   name: 'guide',
   title: 'Le Guide',
   type: 'document',
+  icon: UserRound,
   fields: [
     defineField({
       name: 'badge',

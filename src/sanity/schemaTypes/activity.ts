@@ -1,9 +1,11 @@
 import { defineField, defineType } from 'sanity'
+import { Compass } from 'lucide-react'
 
 export const activityType = defineType({
   name: 'activity',
   title: 'Activités',
   type: 'document',
+  icon: Compass,
   fields: [
     defineField({
       name: 'title',

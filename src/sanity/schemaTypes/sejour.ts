@@ -1,9 +1,11 @@
 import { defineField, defineType } from 'sanity'
+import { Mountain } from 'lucide-react'
 
 export const sejourType = defineType({
   name: 'sejour',
   title: 'Catalogue des Séjours',
   type: 'document',
+  icon: Mountain,
   fields: [
     defineField({
       name: 'title',

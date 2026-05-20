@@ -1,9 +1,11 @@
 import { defineField, defineType } from 'sanity'
+import { Layers } from 'lucide-react'
 
 export const universType = defineType({
   name: 'univers',
   title: 'Les Univers',
   type: 'document',
+  icon: Layers,
   fields: [
     defineField({
       name: 'title',

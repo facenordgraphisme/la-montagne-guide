@@ -8,12 +8,13 @@ import { usePathname } from 'next/navigation'
 
 interface FooterProps {
   contactData?: any
+  settingsData?: any
 }
 
 import { useLanguage } from '@/context/LanguageContext'
 
-const Footer = ({ contactData }: FooterProps) => {
-  const { at, t } = useLanguage()
+const Footer = ({ contactData, settingsData }: FooterProps) => {
+  const { at, t, language } = useLanguage()
   const pathname = usePathname()
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -31,24 +32,51 @@ const Footer = ({ contactData }: FooterProps) => {
             <Link href="/" className="inline-block mb-8">
               {mounted && (
                 <Image 
-                  src={theme === 'dark' ? "/logo.webp" : "/logo-black.webp"} 
-                  alt="La Montagne Guide" 
+                  src={
+                    theme === 'dark' 
+                      ? (settingsData?.logoLight || "/logo.webp") 
+                      : (settingsData?.logoDark || "/logo-black.webp")
+                  } 
+                  alt={settingsData?.siteName || "La Montagne Guide"} 
                   width={240} 
                   height={80} 
-                  className="w-48 h-auto object-contain" 
+                  className="w-48 h-auto object-contain"
+                  unoptimized={settingsData?.logoLight || settingsData?.logoDark ? true : undefined}
                 />
               )}
             </Link>
             <p className="text-foreground/60 max-w-sm text-lg leading-relaxed mb-8">
-              {at("Vivez l'exceptionnel en altitude avec un guide passionné. Sécurité, aventure et respect de la nature.")}
+              {language === 'en' && settingsData?.footerDescriptionEn 
+                ? settingsData.footerDescriptionEn 
+                : (settingsData?.footerDescription || at("Vivez l'exceptionnel en altitude avec un guide passionné. Sécurité, aventure et respect de la nature."))}
             </p>
             <div className="flex gap-4">
-              {['Instagram', 'Facebook'].map((social) => (
-                <a key={social} href="#" className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-foreground/5 transition-colors">
-                  <span className="sr-only">{social}</span>
+              {settingsData?.instagram && (
+                <a href={settingsData.instagram} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-foreground/5 transition-colors">
+                  <span className="sr-only">Instagram</span>
                   <div className="w-1 h-1 bg-accent rounded-full" />
                 </a>
-              ))}
+              )}
+              {settingsData?.facebook && (
+                <a href={settingsData.facebook} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-foreground/5 transition-colors">
+                  <span className="sr-only">Facebook</span>
+                  <div className="w-1 h-1 bg-accent rounded-full" />
+                </a>
+              )}
+              {settingsData?.youtube && (
+                <a href={settingsData.youtube} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-foreground/5 transition-colors">
+                  <span className="sr-only">YouTube</span>
+                  <div className="w-1 h-1 bg-accent rounded-full" />
+                </a>
+              )}
+              {!settingsData?.instagram && !settingsData?.facebook && !settingsData?.youtube && (
+                ['Instagram', 'Facebook'].map((social) => (
+                  <a key={social} href="#" className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-foreground/5 transition-colors">
+                    <span className="sr-only">{social}</span>
+                    <div className="w-1 h-1 bg-accent rounded-full" />
+                  </a>
+                ))
+              )}
             </div>
           </div>
           
@@ -66,15 +94,15 @@ const Footer = ({ contactData }: FooterProps) => {
           <div>
             <h4 className="font-bold mb-6 uppercase tracking-widest text-xs text-foreground/40">{t('nav.contact')}</h4>
             <ul className="space-y-4 text-foreground/70 font-medium">
-              <li>{contactData?.email || 'draperinicolas@hotmail.com'}</li>
-              <li>{contactData?.phone || '06 75 07 97 08'}</li>
-              <li>{at(contactData?.address || 'Champcella, Hautes-Alpes')}</li>
+              <li>{settingsData?.email || contactData?.email || 'draperinicolas@hotmail.com'}</li>
+              <li>{settingsData?.phone || contactData?.phone || '06 75 07 97 08'}</li>
+              <li>{at(settingsData?.address || contactData?.address || 'Champcella, Hautes-Alpes')}</li>
             </ul>
           </div>
         </div>
         
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between gap-4 text-sm text-foreground/30 font-medium">
-          <p>© {new Date().getFullYear()} La Montagne Guide. {at('Tous droits réservés.')}</p>
+          <p>© {new Date().getFullYear()} {settingsData?.siteName || "La Montagne Guide"}. {language === 'en' && settingsData?.copyrightEn ? settingsData.copyrightEn : (settingsData?.copyright || at('Tous droits réservés.'))}</p>
           <div className="flex gap-8">
             <Link href="/mentions-legales" className="hover:text-accent transition-colors">{at('Mentions Légales')}</Link>
             <Link href="/confidentialite" className="hover:text-accent transition-colors">{at('Confidentialité')}</Link>

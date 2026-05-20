@@ -1,13 +1,17 @@
 import React from 'react'
 import Image from 'next/image';
 import { client } from "@/sanity/lib/client";
-import { guideQuery } from "@/sanity/lib/queries";
+import { guideQuery, settingsQuery } from "@/sanity/lib/queries";
 import { PortableText } from "@portabletext/react";
+import PartnersSlider from "@/components/PartnersSlider";
 
 import { getServerTranslations } from '@/i18n/server';
 
 export default async function GuidePage() {
-  const data = await client.fetch(guideQuery);
+  const [data, settingsData] = await Promise.all([
+    client.fetch(guideQuery),
+    client.fetch(settingsQuery)
+  ]);
   const { at, t, translatePortableText } = await getServerTranslations();
 
   const fallback = {
@@ -111,6 +115,9 @@ export default async function GuidePage() {
         </div>
       </section>
 
+      {!settingsData?.hidePartners && (
+        <PartnersSlider partners={settingsData?.partners} />
+      )}
     </main>
   );
 }

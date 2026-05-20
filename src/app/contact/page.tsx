@@ -1,13 +1,17 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { client } from "@/sanity/lib/client";
-import { contactQuery } from "@/sanity/lib/queries";
-import ContactForm from "@/components/ContactForm"; // I'll create this
+import { contactQuery, faqsQuery } from "@/sanity/lib/queries";
+import ContactForm from "@/components/ContactForm";
+import FAQAccordion from "@/components/FAQAccordion";
 
 import { getServerTranslations } from '@/i18n/server';
 
 export default async function ContactPage() {
-  const data = await client.fetch(contactQuery);
+  const [data, faqsData] = await Promise.all([
+    client.fetch(contactQuery),
+    client.fetch(faqsQuery)
+  ]);
   const { at, t } = await getServerTranslations();
 
   const contact = data || {
@@ -46,6 +50,10 @@ export default async function ContactPage() {
                 <p className="text-2xl font-bold text-white">{at(contact.location)}</p>
               </div>
             </div>
+          </div>
+          
+          <div className="mt-24 border-t border-white/5 pt-12">
+            <FAQAccordion faqs={faqsData} />
           </div>
         </div>
       </div>

@@ -8,7 +8,21 @@ import { testimonialType } from './testimonial'
 import { sejourType } from './sejour'
 import { universType } from './univers'
 import { sortieType } from './sortie'
+import { settingsType } from './settings'
+import { faqType } from './faq'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [activityType, postType, guideType, homeType, contactType, testimonialType, sejourType, universType, sortieType],
+  types: [
+    settingsType,
+    activityType,
+    postType,
+    guideType,
+    homeType,
+    contactType,
+    testimonialType,
+    sejourType,
+    universType,
+    sortieType,
+    faqType,
+  ],
 }
