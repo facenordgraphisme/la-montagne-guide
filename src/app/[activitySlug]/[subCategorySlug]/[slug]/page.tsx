@@ -2,12 +2,14 @@ import React from 'react'
 import Image from 'next/image';
 import Link from 'next/link';
 import { client } from "@/sanity/lib/client";
-import { sejourBySlugQuery } from "@/sanity/lib/queries";
+import { sejourBySlugQuery, postsBySejourQuery } from "@/sanity/lib/queries";
 import { notFound } from 'next/navigation';
 import { PortableText } from '@portabletext/react';
 import { MapPin, BarChart3, Clock, Euro, ArrowLeft } from 'lucide-react';
 
 import { getServerTranslations } from '@/i18n/server';
+import SejourTabs from '@/components/SejourTabs';
+import BlogCard from '@/components/BlogCard';
 
 export default async function SejourDetail({ params }: { params: Promise<{ activitySlug: string, subCategorySlug: string, slug: string }> }) {
   const { activitySlug, subCategorySlug, slug } = await params;
@@ -15,6 +17,10 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
   const { at, t, translatePortableText } = await getServerTranslations();
 
   if (!sejour) notFound();
+
+  const relatedPosts = sejour._id
+    ? await client.fetch(postsBySejourQuery, { sejourId: sejour._id })
+    : [];
 
   const getLevelLabel = (level?: string) => {
     const map: Record<string, string> = {
@@ -25,6 +31,15 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
     }
     return level ? map[level] || level : ''
   }
+
+  const hasTabs = sejour.programme || sejour.budget || sejour.infosPratiques || sejour.materiel || sejour.materielPdf
+
+  const tabs = [
+    { id: 'programme', label: at('Programme'), content: sejour.programme ? translatePortableText(sejour.programme) : null },
+    { id: 'budget', label: at('Budget'), content: sejour.budget ? translatePortableText(sejour.budget) : null },
+    { id: 'infos', label: at('Infos Pratiques'), content: sejour.infosPratiques ? translatePortableText(sejour.infosPratiques) : null },
+    { id: 'materiel', label: at('Matériel'), content: sejour.materiel ? translatePortableText(sejour.materiel) : null, pdf: sejour.materielPdf ?? null },
+  ]
 
   return (
     <main className="relative min-h-screen bg-background text-foreground transition-colors duration-300">
@@ -42,7 +57,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
               className="object-cover"
             />
           )}
-          <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-background via-transparent to-black/20" />
+          <div className="absolute inset-0 bg-black/40 bg-linear-to-t from-background via-transparent to-black/20" />
         </div>
 
         <div className="container relative z-10 px-6 pt-32 max-w-5xl">
@@ -76,18 +91,22 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
       <section className="py-24">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-20">
+
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-12">
-              <div className="prose-custom max-w-none">
-                {sejour.description && (
-                  <p className="text-2xl font-medium leading-relaxed mb-12 text-foreground/80">
-                    {at(sejour.description)}
-                  </p>
-                )}
-                {sejour.content && (
+              {sejour.description && (
+                <p className="text-2xl font-medium leading-relaxed text-foreground/80">
+                  {at(sejour.description)}
+                </p>
+              )}
+
+              {hasTabs ? (
+                <SejourTabs tabs={tabs} />
+              ) : sejour.content ? (
+                <div className="prose-custom max-w-none">
                   <PortableText value={translatePortableText(sejour.content)} />
-                )}
-              </div>
+                </div>
+              ) : null}
             </div>
 
             {/* Sidebar Stats */}
@@ -120,15 +139,30 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                     <span className="font-bold">{at(sejour.massif)}</span>
                   </div>
 
-                  <div className="flex justify-between items-center py-4 border-b border-border">
-                    <div className="flex items-center gap-3">
+                  {/* Dual pricing */}
+                  <div className="py-4 border-b border-border space-y-3">
+                    <div className="flex items-center gap-3 mb-2">
                       <Euro size={18} className="text-accent" />
-                      <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{at('Prix')}</span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{at('Tarifs')}</span>
                     </div>
-                    <div className="text-right">
-                      <span className="block text-[10px] font-bold text-foreground/30 uppercase leading-none mb-1">{at('À partir de')}</span>
-                      <span className="text-2xl font-black text-highlight leading-none">{at(sejour.basePrice)}</span>
-                    </div>
+                    {sejour.priceEncadrement ? (
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-[11px] font-bold text-foreground/50 uppercase tracking-wider">{at('Encadrement')}</span>
+                        <span className="font-black text-highlight">{at(sejour.priceEncadrement)}</span>
+                      </div>
+                    ) : null}
+                    {sejour.priceFraisSejour ? (
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-[11px] font-bold text-foreground/50 uppercase tracking-wider">{at('Frais de séjour')}</span>
+                        <span className="font-black text-foreground/80">{at(sejour.priceFraisSejour)}</span>
+                      </div>
+                    ) : null}
+                    {!sejour.priceEncadrement && !sejour.priceFraisSejour && sejour.basePrice ? (
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-[10px] font-bold text-foreground/30 uppercase">{at('À partir de')}</span>
+                        <span className="text-2xl font-black text-highlight leading-none">{at(sejour.basePrice)}</span>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 
@@ -157,7 +191,6 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                     </div>
                   )}
 
-                  {/* Information block for groups and on-demand */}
                   <div className="mt-8 space-y-4 p-6 rounded-3xl bg-accent/5 border border-accent/10">
                     <p className="text-[11px] leading-relaxed text-foreground/70 font-medium">
                       <span className="text-accent font-bold block mb-1 uppercase">{at('PARTAGE DE SORTIE')}</span>
@@ -170,9 +203,10 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                   </div>
                 </div>
 
-                <Link href="/contact" className="btn-primary w-full block text-center !text-white py-4 text-sm font-black uppercase tracking-widest">
+                <Link href="/contact" className="btn-primary w-full block text-center text-white! py-4 text-sm font-black uppercase tracking-widest">
                   {at('Réserver ce séjour')}
                 </Link>
+
                 <p className="text-[10px] text-center mt-6 text-foreground/40 font-bold uppercase tracking-widest">
                   {at('Conseils & Réservation par téléphone possible')}
                 </p>
@@ -181,6 +215,47 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
           </div>
         </div>
       </section>
+
+      {/* Photo Gallery */}
+      {sejour.gallery && sejour.gallery.length > 0 && (
+        <section className="pb-24">
+          <div className="container mx-auto px-6">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase mb-10">
+              {at('Galerie')} <span className="text-accent italic">{at('Photos')}</span>
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {sejour.gallery.map((photo: { url: string; alt?: string }, i: number) => (
+                <div key={i} className="relative aspect-square overflow-hidden rounded-2xl group">
+                  <Image
+                    src={photo.url}
+                    alt={photo.alt || at(sejour.title)}
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Related Blog Posts */}
+      {relatedPosts && relatedPosts.length > 0 && (
+        <section className="pb-24 bg-surface/40">
+          <div className="container mx-auto px-6 pt-16">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase mb-10">
+              {at('Dernières')} <span className="text-accent italic">{at('Sorties')}</span>
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {relatedPosts.map((post: any) => (
+                <BlogCard key={post.slug} post={post} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
     </main>
   );

@@ -105,11 +105,27 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
   "slug": slug.current,
   "subCategory": subCategory->slug.current,
   "image": image.asset->url,
+  priceEncadrement,
+  priceFraisSejour,
+  programme,
+  budget,
+  infosPratiques,
+  materiel,
+  "materielPdf": materielPdf.asset->url,
+  "gallery": gallery[]{alt, "url": asset->url},
   "upcomingSorties": *[_type == "sortie" && sejour._ref == ^._id && startDate >= now()] | order(startDate asc) {
     date,
     availableSpots,
     isFull
   }
+}`
+
+export const postsBySejourQuery = groq`*[_type == "post" && relatedSejour._ref == $sejourId] | order(publishedAt desc)[0...6] {
+  title,
+  "slug": slug.current,
+  "date": publishedAt,
+  "image": mainImage.asset->url,
+  excerpt
 }`
 
 export const sortieBySlugQuery = groq`*[_type == "sortie" && slug.current == $slug][0] {

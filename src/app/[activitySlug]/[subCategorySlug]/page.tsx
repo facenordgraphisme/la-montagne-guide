@@ -96,17 +96,17 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
             <div className="w-24 h-1 bg-accent mx-auto" />
 
             {/* CTA Encart - Sur mesure */}
-            <div className="md:absolute -bottom-16 right-0 md:right-12 glass p-8 md:p-10 rounded-[40px] border-accent/20 shadow-2xl max-w-xl text-left backdrop-blur-3xl mt-12 md:mt-0 group hover:border-accent/40 transition-all duration-500 overflow-hidden">
-              <div className="absolute -right-4 -top-4 w-24 h-24 bg-accent/5 rounded-full blur-2xl group-hover:bg-accent/10 transition-colors" />
+            <div className="md:absolute -bottom-16 right-0 md:right-12 p-8 md:p-10 rounded-[40px] shadow-2xl max-w-xl text-left mt-12 md:mt-0 group transition-all duration-500 overflow-hidden border border-highlight/30 hover:border-highlight/60 bg-linear-to-br from-highlight/10 via-highlight/5 to-orange-400/10 backdrop-blur-3xl">
+              <div className="absolute -right-4 -top-4 w-32 h-32 bg-highlight/10 rounded-full blur-3xl group-hover:bg-highlight/20 transition-colors" />
               <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
                 <div className="flex-1">
                   <p className="text-xl font-black leading-[1.1] tracking-tighter text-foreground uppercase">
                     {at(activity.customTripText) || t("customTrip.text")}
                   </p>
                 </div>
-                <Link 
-                  href="/contact" 
-                  className="btn-primary whitespace-nowrap px-8 py-4 text-sm uppercase tracking-widest shadow-xl shadow-accent/20 hover:shadow-accent/40"
+                <Link
+                  href="/contact"
+                  className="whitespace-nowrap px-8 py-4 text-sm uppercase tracking-widest font-black rounded-full bg-highlight text-white shadow-xl shadow-highlight/30 hover:shadow-highlight/50 hover:-translate-y-0.5 transition-all duration-300"
                 >
                   {at(activity.customTripCTA) || t("customTrip.cta")}
                 </Link>

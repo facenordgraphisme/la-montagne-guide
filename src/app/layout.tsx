@@ -49,6 +49,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { LanguageProvider } from "@/context/LanguageContext";
 import AnnouncementBanner from "@/components/AnnouncementBanner";
+import ScrollToTop from "@/components/ScrollToTop";
 
 export default async function RootLayout({
   children,
@@ -78,11 +79,12 @@ export default async function RootLayout({
             <Navbar sanityActivities={activitiesData} />
             {children}
             <Footer contactData={contactData} settingsData={settingsData} />
-            <WhatsAppButton 
-              phoneNumber={phoneNumber} 
-              whatsappNumber={whatsappNumber} 
-              whatsappText={whatsappText} 
+            <WhatsAppButton
+              phoneNumber={phoneNumber}
+              whatsappNumber={whatsappNumber}
+              whatsappText={whatsappText}
             />
+            <ScrollToTop />
           </LanguageProvider>
         </ThemeProvider>
       </body>

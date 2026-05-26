@@ -47,5 +47,12 @@ export const postType = defineType({
       type: 'array',
       of: [{ type: 'block' }, { type: 'image' }],
     }),
+    defineField({
+      name: 'relatedSejour',
+      title: 'Séjour lié',
+      type: 'reference',
+      to: [{ type: 'sejour' }],
+      description: 'Associer cet article à un séjour pour l\'afficher sur la page du séjour',
+    }),
   ],
 })

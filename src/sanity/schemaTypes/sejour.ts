@@ -93,6 +93,18 @@ export const sejourType = defineType({
       type: 'string',
     }),
     defineField({
+      name: 'priceEncadrement',
+      title: 'Tarif encadrement',
+      type: 'string',
+      description: 'Ex: 450€/personne',
+    }),
+    defineField({
+      name: 'priceFraisSejour',
+      title: 'Frais de séjour',
+      type: 'string',
+      description: 'Ex: 180€/personne (hébergement, repas)',
+    }),
+    defineField({
       name: 'image',
       title: 'Image principale',
       type: 'image',
@@ -108,6 +120,50 @@ export const sejourType = defineType({
       title: 'Contenu riche (Programme, etc.)',
       type: 'array',
       of: [{ type: 'block' }, { type: 'image' }],
+    }),
+    defineField({
+      name: 'programme',
+      title: 'Onglet — Programme',
+      type: 'array',
+      of: [{ type: 'block' }, { type: 'image' }],
+    }),
+    defineField({
+      name: 'budget',
+      title: 'Onglet — Budget',
+      type: 'array',
+      of: [{ type: 'block' }, { type: 'image' }],
+    }),
+    defineField({
+      name: 'infosPratiques',
+      title: 'Onglet — Infos Pratiques',
+      type: 'array',
+      of: [{ type: 'block' }, { type: 'image' }],
+    }),
+    defineField({
+      name: 'materiel',
+      title: 'Onglet — Matériel',
+      type: 'array',
+      of: [{ type: 'block' }, { type: 'image' }],
+    }),
+    defineField({
+      name: 'materielPdf',
+      title: 'Matériel — PDF téléchargeable',
+      type: 'file',
+      options: { accept: '.pdf' },
+    }),
+    defineField({
+      name: 'gallery',
+      title: 'Galerie photos',
+      type: 'array',
+      of: [
+        {
+          type: 'image',
+          options: { hotspot: true },
+          fields: [
+            defineField({ name: 'alt', type: 'string', title: 'Texte alternatif' }),
+          ],
+        },
+      ],
     }),
   ],
 })

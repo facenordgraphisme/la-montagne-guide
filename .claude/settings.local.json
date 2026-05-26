@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep -l \"scroll\\\\|Scroll\\\\|top\\\\|Top\")",
+      "Bash(xargs grep -l \"Tab\\\\|tab\\\\|Accordion\")",
+      "Bash(xargs grep -l \"prestations\")"
+    ]
+  }
+}
