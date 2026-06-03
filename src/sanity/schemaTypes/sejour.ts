@@ -125,25 +125,65 @@ export const sejourType = defineType({
       name: 'programme',
       title: 'Onglet — Programme',
       type: 'array',
-      of: [{ type: 'block' }, { type: 'image' }],
+      of: [{
+        type: 'block',
+        styles: [
+          { title: 'Normal', value: 'normal' },
+          { title: 'H2', value: 'h2' },
+          { title: 'H3', value: 'h3' },
+          { title: 'Centré', value: 'blockCenter' },
+          { title: 'Justifié', value: 'blockJustify' },
+          { title: 'Droite', value: 'blockRight' },
+        ],
+      }, { type: 'image' }],
     }),
     defineField({
       name: 'budget',
       title: 'Onglet — Budget',
       type: 'array',
-      of: [{ type: 'block' }, { type: 'image' }],
+      of: [{
+        type: 'block',
+        styles: [
+          { title: 'Normal', value: 'normal' },
+          { title: 'H2', value: 'h2' },
+          { title: 'H3', value: 'h3' },
+          { title: 'Centré', value: 'blockCenter' },
+          { title: 'Justifié', value: 'blockJustify' },
+          { title: 'Droite', value: 'blockRight' },
+        ],
+      }, { type: 'image' }],
     }),
     defineField({
       name: 'infosPratiques',
       title: 'Onglet — Infos Pratiques',
       type: 'array',
-      of: [{ type: 'block' }, { type: 'image' }],
+      of: [{
+        type: 'block',
+        styles: [
+          { title: 'Normal', value: 'normal' },
+          { title: 'H2', value: 'h2' },
+          { title: 'H3', value: 'h3' },
+          { title: 'Centré', value: 'blockCenter' },
+          { title: 'Justifié', value: 'blockJustify' },
+          { title: 'Droite', value: 'blockRight' },
+        ],
+      }, { type: 'image' }],
     }),
     defineField({
       name: 'materiel',
       title: 'Onglet — Matériel',
       type: 'array',
-      of: [{ type: 'block' }, { type: 'image' }],
+      of: [{
+        type: 'block',
+        styles: [
+          { title: 'Normal', value: 'normal' },
+          { title: 'H2', value: 'h2' },
+          { title: 'H3', value: 'h3' },
+          { title: 'Centré', value: 'blockCenter' },
+          { title: 'Justifié', value: 'blockJustify' },
+          { title: 'Droite', value: 'blockRight' },
+        ],
+      }, { type: 'image' }],
     }),
     defineField({
       name: 'materielPdf',
@@ -164,6 +204,13 @@ export const sejourType = defineType({
           ],
         },
       ],
+    }),
+    defineField({
+      name: 'hideUpcomingSorties',
+      title: 'Masquer le bloc "Prochains Départs"',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Cochez pour masquer les dates de sorties sur la page de ce séjour (ex: séjour uniquement sur demande privée).',
     }),
   ],
 })

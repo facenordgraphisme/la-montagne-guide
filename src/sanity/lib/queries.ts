@@ -107,10 +107,23 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
   "image": image.asset->url,
   priceEncadrement,
   priceFraisSejour,
-  programme,
-  budget,
-  infosPratiques,
-  materiel,
+  hideUpcomingSorties,
+  "programme": programme[]{
+    ...,
+    _type == "image" => { ..., "asset": asset-> }
+  },
+  "budget": budget[]{
+    ...,
+    _type == "image" => { ..., "asset": asset-> }
+  },
+  "infosPratiques": infosPratiques[]{
+    ...,
+    _type == "image" => { ..., "asset": asset-> }
+  },
+  "materiel": materiel[]{
+    ...,
+    _type == "image" => { ..., "asset": asset-> }
+  },
   "materielPdf": materielPdf.asset->url,
   "gallery": gallery[]{alt, "url": asset->url},
   "upcomingSorties": *[_type == "sortie" && sejour._ref == ^._id && startDate >= now()] | order(startDate asc) {
@@ -121,6 +134,14 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
 }`
 
 export const postsBySejourQuery = groq`*[_type == "post" && relatedSejour._ref == $sejourId] | order(publishedAt desc)[0...6] {
+  title,
+  "slug": slug.current,
+  "date": publishedAt,
+  "image": mainImage.asset->url,
+  excerpt
+}`
+
+export const postsByActivityQuery = groq`*[_type == "post" && activityType == $activityType && !(relatedSejour._ref in $excludedIds)] | order(publishedAt desc)[0...6] {
   title,
   "slug": slug.current,
   "date": publishedAt,

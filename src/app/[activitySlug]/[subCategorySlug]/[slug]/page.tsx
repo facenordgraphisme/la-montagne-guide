@@ -2,13 +2,13 @@ import React from 'react'
 import Image from 'next/image';
 import Link from 'next/link';
 import { client } from "@/sanity/lib/client";
-import { sejourBySlugQuery, postsBySejourQuery } from "@/sanity/lib/queries";
+import { sejourBySlugQuery, postsBySejourQuery, postsByActivityQuery } from "@/sanity/lib/queries";
 import { notFound } from 'next/navigation';
-import { PortableText } from '@portabletext/react';
-import { MapPin, BarChart3, Clock, Euro, ArrowLeft } from 'lucide-react';
+import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar } from 'lucide-react';
 
 import { getServerTranslations } from '@/i18n/server';
 import SejourTabs from '@/components/SejourTabs';
+import RichContent from '@/components/RichContent';
 import BlogCard from '@/components/BlogCard';
 
 export default async function SejourDetail({ params }: { params: Promise<{ activitySlug: string, subCategorySlug: string, slug: string }> }) {
@@ -18,9 +18,24 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
 
   if (!sejour) notFound();
 
-  const relatedPosts = sejour._id
+  // Articles directement liés au séjour
+  const directPosts = sejour._id
     ? await client.fetch(postsBySejourQuery, { sejourId: sejour._id })
     : [];
+
+  // Compléter avec des articles de la même activité si moins de 3 articles directs
+  const directIds = directPosts.map((p: any) => p.slug);
+  const activityPosts = (directPosts.length < 3 && sejour.activityType)
+    ? await client.fetch(postsByActivityQuery, {
+        activityType: sejour.activityType,
+        excludedIds: sejour._id ? [sejour._id] : []
+      })
+    : [];
+
+  // Fusionner sans doublons (déduplication par slug)
+  const seenSlugs = new Set(directIds);
+  const extraPosts = activityPosts.filter((p: any) => !seenSlugs.has(p.slug));
+  const relatedPosts = [...directPosts, ...extraPosts].slice(0, 6);
 
   const getLevelLabel = (level?: string) => {
     const map: Record<string, string> = {
@@ -103,18 +118,19 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
               {hasTabs ? (
                 <SejourTabs tabs={tabs} />
               ) : sejour.content ? (
-                <div className="prose-custom max-w-none">
-                  <PortableText value={translatePortableText(sejour.content)} />
-                </div>
+                <RichContent value={translatePortableText(sejour.content)} />
               ) : null}
             </div>
 
-            {/* Sidebar Stats */}
+            {/* Sidebar — 2 blocs distincts */}
             <div className="lg:col-span-1">
-              <div className="glass p-10 rounded-[40px] sticky top-32 border border-border shadow-2xl">
+              <div className="sticky top-32 space-y-6">
+
+              {/* Bloc 1 — Fiche Technique + Tarifs + CTA */}
+              <div className="glass p-10 rounded-[40px] border border-border shadow-2xl">
                 <h3 className="text-2xl font-black uppercase tracking-tight mb-8">{at('Fiche Technique')}</h3>
 
-                <div className="space-y-6 mb-12">
+                <div className="space-y-6 mb-10">
                   <div className="flex justify-between items-center py-4 border-b border-border">
                     <div className="flex items-center gap-3">
                       <Clock size={18} className="text-accent" />
@@ -139,7 +155,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                     <span className="font-bold">{at(sejour.massif)}</span>
                   </div>
 
-                  {/* Dual pricing */}
+                  {/* Tarifs */}
                   <div className="py-4 border-b border-border space-y-3">
                     <div className="flex items-center gap-3 mb-2">
                       <Euro size={18} className="text-accent" />
@@ -166,9 +182,22 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                   </div>
                 </div>
 
-                {/* Upcoming Dates Section */}
-                <div className="mb-12">
-                  <h4 className="text-xs font-black uppercase tracking-[0.2em] text-accent mb-6">{at('Prochains Départs')}</h4>
+                <Link href="/contact" className="btn-primary w-full block text-center text-white! py-4 text-sm font-black uppercase tracking-widest">
+                  {at('Réserver ce séjour')}
+                </Link>
+
+                <p className="text-[10px] text-center mt-6 text-foreground/40 font-bold uppercase tracking-widest">
+                  {at('Conseils & Réservation par téléphone possible')}
+                </p>
+              </div>
+
+              {/* Bloc 2 — Prochains Départs (conditionnel) */}
+              {!sejour.hideUpcomingSorties && (
+                <div className="glass p-8 rounded-[40px] border border-border shadow-xl">
+                  <h4 className="text-xs font-black uppercase tracking-[0.2em] text-accent mb-6 flex items-center gap-2">
+                    <Calendar size={14} />
+                    {at('Prochains Départs')}
+                  </h4>
                   {sejour.upcomingSorties && sejour.upcomingSorties.length > 0 ? (
                     <div className="space-y-3">
                       {sejour.upcomingSorties.map((s: any, i: number) => (
@@ -191,7 +220,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                     </div>
                   )}
 
-                  <div className="mt-8 space-y-4 p-6 rounded-3xl bg-accent/5 border border-accent/10">
+                  <div className="mt-6 space-y-4 p-5 rounded-3xl bg-accent/5 border border-accent/10">
                     <p className="text-[11px] leading-relaxed text-foreground/70 font-medium">
                       <span className="text-accent font-bold block mb-1 uppercase">{at('PARTAGE DE SORTIE')}</span>
                       {at("Ces dates sont destinées aux personnes souhaitant s'inscrire individuellement et partager les frais d'une sortie.")}
@@ -202,14 +231,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                     </p>
                   </div>
                 </div>
-
-                <Link href="/contact" className="btn-primary w-full block text-center text-white! py-4 text-sm font-black uppercase tracking-widest">
-                  {at('Réserver ce séjour')}
-                </Link>
-
-                <p className="text-[10px] text-center mt-6 text-foreground/40 font-bold uppercase tracking-widest">
-                  {at('Conseils & Réservation par téléphone possible')}
-                </p>
+              )}
               </div>
             </div>
           </div>

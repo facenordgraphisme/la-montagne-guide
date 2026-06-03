@@ -48,6 +48,20 @@ export const postType = defineType({
       of: [{ type: 'block' }, { type: 'image' }],
     }),
     defineField({
+      name: 'activityType',
+      title: 'Catégorie (Type d\'activité)',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Alpinisme', value: 'alpinisme' },
+          { title: 'Ski de randonnée', value: 'ski' },
+          { title: 'Escalade', value: 'escalade' },
+          { title: 'Voyage', value: 'voyage' },
+        ],
+      },
+      description: 'Catégorie principale de cet article — utilisée pour afficher les articles pertinents sur les pages séjour.',
+    }),
+    defineField({
       name: 'relatedSejour',
       title: 'Séjour lié',
       type: 'reference',

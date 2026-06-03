@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { PortableText } from '@portabletext/react'
+import type { PortableTextComponents } from '@portabletext/react'
 import { Download, FileText } from 'lucide-react'
 
 interface Tab {
@@ -13,6 +14,18 @@ interface Tab {
 
 interface SejourTabsProps {
   tabs: Tab[]
+}
+
+// Composants PortableText définis côté client (ne peuvent pas être passés en props depuis un Server Component)
+const portableTextComponents: PortableTextComponents = {
+  block: {
+    blockCenter: ({ children }) => <p style={{ textAlign: 'center' }}>{children}</p>,
+    blockRight: ({ children }) => <p style={{ textAlign: 'right' }}>{children}</p>,
+    blockJustify: ({ children }) => <p style={{ textAlign: 'justify' }}>{children}</p>,
+    normal: ({ children }) => <p>{children}</p>,
+    h2: ({ children }) => <h2>{children}</h2>,
+    h3: ({ children }) => <h3>{children}</h3>,
+  },
 }
 
 export default function SejourTabs({ tabs }: SejourTabsProps) {
@@ -27,9 +40,9 @@ export default function SejourTabs({ tabs }: SejourTabsProps) {
   const current = visibleTabs.find(t => t.id === activeTab)
 
   return (
-    <div>
+    <div className="glass rounded-[40px] border border-border shadow-xl overflow-hidden">
       {/* Tab buttons */}
-      <div className="flex flex-wrap gap-2 mb-8 border-b border-border pb-4">
+      <div className="flex flex-wrap gap-2 px-8 pt-8 pb-6 border-b border-border bg-foreground/[0.02]">
         {visibleTabs.map(tab => (
           <button
             key={tab.id}
@@ -47,9 +60,9 @@ export default function SejourTabs({ tabs }: SejourTabsProps) {
 
       {/* Tab content */}
       {current && (
-        <div className="prose-custom max-w-none animate-in fade-in duration-300">
+        <div className="px-8 py-8 prose-custom max-w-none animate-in fade-in duration-300">
           {current.content && current.content.length > 0 && (
-            <PortableText value={current.content} />
+            <PortableText value={current.content} components={portableTextComponents} />
           )}
 
           {current.pdf && (
