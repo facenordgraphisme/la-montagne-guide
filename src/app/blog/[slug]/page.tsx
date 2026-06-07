@@ -132,49 +132,35 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Hero Header */}
-      <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          {post.image && (
-            <Image
-              src={post.image}
-              alt={at(post.title)}
-              fill
-              sizes="100vw"
-              priority
-              className="object-cover"
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        </div>
-
-        <div className="container relative z-10 px-6 pt-32 max-w-5xl">
+      {/* Hero Header (Text only, more compact) */}
+      <section className="relative py-20 md:py-28 bg-muted/10 border-b border-border/50">
+        <div className="container relative z-10 px-6 max-w-3xl mx-auto">
           <Link 
             href="/blog" 
-            className="inline-flex items-center gap-2 text-accent font-bold mb-8 hover:gap-4 transition-all duration-300"
+            className="inline-flex items-center gap-2 text-accent font-bold mb-6 hover:gap-4 transition-all duration-300 text-sm"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={16} />
             {at('RETOUR AU BLOG')}
           </Link>
           
-          <div className="flex items-center gap-3 text-foreground/60 mb-6">
-            <Calendar size={18} className="text-accent" />
+          <div className="flex items-center gap-3 text-foreground/60 mb-6 text-sm">
+            <Calendar size={16} className="text-accent" />
             <span className="font-medium">{formattedDate}</span>
           </div>
 
-          <h1 className="text-4xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase leading-[0.9]">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tighter uppercase leading-[1.0] text-foreground">
             {at(post.title)}
           </h1>
         </div>
       </section>
 
       {/* Article Content */}
-      <section className="py-20">
+      <section className="py-16">
         <div className="container mx-auto px-6">
           <div className="max-w-3xl mx-auto">
             {/* Tags / Catégories */}
             {post.tags && post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2.5 mb-10">
+              <div className="flex flex-wrap gap-2.5 mb-8">
                 {post.tags.map((tag: string, idx: number) => (
                   <span 
                     key={idx} 
@@ -186,8 +172,22 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
               </div>
             )}
 
+            {/* Featured Image (Much smaller, in-flow after title/tags) */}
+            {post.image && (
+              <div className="relative w-full aspect-[16/10] md:aspect-[16/9] max-h-[450px] rounded-3xl overflow-hidden border border-border mb-10 shadow-lg">
+                <Image
+                  src={post.image}
+                  alt={at(post.title)}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 800px"
+                  className="object-cover"
+                />
+              </div>
+            )}
+
             {post.excerpt && (
-              <p className="text-2xl md:text-3xl font-medium text-foreground/90 mb-12 leading-tight border-l-2 border-accent pl-8">
+              <p className="text-xl md:text-2xl font-medium text-foreground/90 mb-10 leading-relaxed border-l-2 border-accent pl-6">
                 {at(post.excerpt)}
               </p>
             )}

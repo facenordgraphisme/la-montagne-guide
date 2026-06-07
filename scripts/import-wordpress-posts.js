@@ -41,49 +41,128 @@ function slugify(text) {
     .replace(/-+/g, '-');           // Remove duplicate -
 }
 
-// Helper: Strip WordPress resize dimensions to fetch the original high-resolution quality image
-function getOriginalWpUrl(url) {
-  if (!url) return '';
-  let clean = url.trim();
-  // Strip size suffixes like -300x225 or -e1302861442380-225x300 or .resized
-  clean = clean.replace(/(?:-e\d+)?-\d+x\d+(\.[a-zA-Z0-9]+)$/i, '$1');
-  // Strip .resized if present
-  clean = clean.replace(/\.resized(\.[a-zA-Z0-9]+)$/i, '$1');
-  return clean;
+// Helper: Get candidate URLs for WordPress uploads to find the original high-resolution version
+function getCandidates(url) {
+  const candidates = [];
+  let cleanUrl = url.trim();
+  
+  if (cleanUrl.startsWith(',')) cleanUrl = cleanUrl.substring(1).trim();
+  if (cleanUrl.endsWith(',')) cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1).trim();
+  if (cleanUrl.startsWith('//')) cleanUrl = 'https:' + cleanUrl;
+
+  try {
+    const urlObj = new URL(cleanUrl);
+    const pathname = urlObj.pathname;
+    const dir = urlObj.origin + path.dirname(pathname);
+    const ext = path.extname(pathname);
+    let name = path.basename(pathname, ext);
+
+    let dimensions = null;
+    const dimMatch = name.match(/-(\d+x\d+)$/);
+    if (dimMatch) {
+      dimensions = dimMatch[1];
+      name = name.slice(0, -dimMatch[0].length);
+    }
+
+    let eSuffix = null;
+    const eMatch = name.match(/-e(\d+)$/);
+    if (eMatch) {
+      eSuffix = eMatch[1];
+      name = name.slice(0, -eMatch[0].length);
+    }
+
+    const dimMatch2 = name.match(/-(\d+x\d+)$/);
+    if (dimMatch2) {
+      dimensions = dimMatch2[1];
+      name = name.slice(0, -dimMatch2[0].length);
+    }
+
+    let hasResized = false;
+    if (name.endsWith('.resized')) {
+      hasResized = true;
+      name = name.slice(0, -'.resized'.length);
+    }
+
+    const buildUrl = (n, resized, e, dim) => {
+      let baseName = n;
+      if (resized) baseName += '.resized';
+      if (e) baseName += `-e${e}`;
+      if (dim) baseName += `-${dim}`;
+      return `${dir}/${baseName}${ext}`;
+    };
+
+    // Candidates in order of preference
+    candidates.push(buildUrl(name, false, null, null));
+    if (hasResized) candidates.push(buildUrl(name, true, null, null));
+    if (eSuffix) candidates.push(buildUrl(name, false, eSuffix, null));
+    if (hasResized && eSuffix) candidates.push(buildUrl(name, true, eSuffix, null));
+    if (dimensions) candidates.push(buildUrl(name, false, null, dimensions));
+    if (hasResized && dimensions) candidates.push(buildUrl(name, true, null, dimensions));
+    if (eSuffix && dimensions) candidates.push(buildUrl(name, false, eSuffix, dimensions));
+    if (hasResized && eSuffix && dimensions) candidates.push(buildUrl(name, true, eSuffix, dimensions));
+  } catch (err) {
+    // Fail-safe
+  }
+
+  candidates.push(cleanUrl);
+  return Array.from(new Set(candidates));
 }
 
 // Helper: Downloader and Uploader for Images
 async function importImage(url) {
   if (!url) return null;
   
-  // Make sure we have a clean URL
-  let cleanUrl = url.trim();
+  const candidates = getCandidates(url);
+  let bestUrl = candidates[candidates.length - 1]; // default to original
+  let maxBytes = 0;
+
+  console.log(`\nRecherche de la meilleure qualité pour l'image : ${url}`);
   
-  // Strip leading commas or other characters sometimes prepended by WordPress plugins in exports
-  if (cleanUrl.startsWith(',')) {
-    cleanUrl = cleanUrl.substring(1).trim();
-  }
-  if (cleanUrl.endsWith(',')) {
-    cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1).trim();
-  }
-  if (cleanUrl.startsWith('//')) {
-    cleanUrl = 'https:' + cleanUrl;
-  }
+  // Check candidates in parallel
+  const checks = candidates.map(async (c) => {
+    try {
+      const response = await axios.head(c, { 
+        timeout: 4000,
+        headers: { 'User-Agent': 'Mozilla/5.0' }
+      });
+      if (response.status === 200) {
+        const size = parseInt(response.headers['content-length'] || '0', 10);
+        return { url: c, size, exists: true };
+      }
+    } catch (e) {
+      // Ignore
+    }
+    return { url: c, size: 0, exists: false };
+  });
+
+  const results = await Promise.all(checks);
   
-  // Convert thumbnail URLs to original high-quality URLs
-  cleanUrl = getOriginalWpUrl(cleanUrl);
-  
+  let chosen = null;
+  for (const res of results) {
+    if (res.exists && res.size > maxBytes) {
+      maxBytes = res.size;
+      chosen = res.url;
+    }
+  }
+
+  if (chosen) {
+    bestUrl = chosen;
+    console.log(`Meilleure version trouvée : ${bestUrl} (${(maxBytes / 1024).toFixed(1)} KB)`);
+  } else {
+    console.log(`Aucune alternative trouvée, utilisation de l'URL par défaut : ${bestUrl}`);
+  }
+
   try {
-    console.log(`Téléchargement de l'image : ${cleanUrl}`);
+    console.log(`Téléchargement de l'image : ${bestUrl}`);
     const response = await axios({
       method: 'get',
-      url: cleanUrl,
+      url: bestUrl,
       responseType: 'arraybuffer',
-      timeout: 25000, // higher timeout for large original files
+      timeout: 25000,
     });
     
     const buffer = Buffer.from(response.data);
-    const filename = path.basename(cleanUrl.split('?')[0]) || 'image.jpg';
+    const filename = path.basename(bestUrl.split('?')[0]) || 'image.jpg';
     
     console.log(`Upload de l'image sur Sanity...`);
     const asset = await client.assets.upload('image', buffer, {
@@ -100,7 +179,7 @@ async function importImage(url) {
       }
     };
   } catch (error) {
-    console.error(`❌ Échec du téléchargement/upload de l'image : ${cleanUrl}`, error.message);
+    console.error(`❌ Échec du téléchargement/upload de l'image : ${bestUrl}`, error.message);
     return null;
   }
 }
@@ -124,7 +203,7 @@ async function convertHtmlToPortableText(htmlContent, row) {
         urls = row['Image URL'].split(/[|,]/).map(u => u.trim()).filter(Boolean);
       }
       // Return a customized tag to easily parse in cheerio
-      const cleanUrls = urls.map(u => getOriginalWpUrl(u)).filter(Boolean);
+      const cleanUrls = urls.map(u => u.trim()).filter(Boolean);
       return `<wp-gallery-container urls="${cleanUrls.join(',')}"></wp-gallery-container>`;
     });
 
