@@ -31,18 +31,20 @@ const components = {
   types: {
     image: ({ value }: any) => {
       return (
-        <div className="relative w-full h-[400px] md:h-[600px] my-12 rounded-[2rem] overflow-hidden border border-border">
-          <Image
-            src={urlFor(value).url()}
-            alt={value.alt || 'Image article'}
-            fill
-            sizes="(max-width: 1024px) 100vw, 800px"
-            className="object-cover"
-          />
+        <div className="my-12">
+          <div className="relative w-full h-[400px] md:h-[600px] rounded-[2rem] overflow-hidden border border-border">
+            <Image
+              src={urlFor(value).url()}
+              alt={value.alt || 'Image article'}
+              fill
+              sizes="(max-width: 1024px) 100vw, 800px"
+              className="object-cover"
+            />
+          </div>
           {value.caption && (
-            <div className="absolute bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm text-sm text-foreground/60">
+            <p className="mt-3 text-center text-sm text-foreground/60 italic font-medium px-4">
               {value.caption}
-            </div>
+            </p>
           )}
         </div>
       );

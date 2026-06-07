@@ -162,7 +162,7 @@ async function importImage(url) {
     });
     
     const buffer = Buffer.from(response.data);
-    const filename = path.basename(bestUrl.split('?')[0]) || 'image.jpg';
+    const filename = decodeURIComponent(path.basename(bestUrl.split('?')[0])) || 'image.jpg';
     
     console.log(`Upload de l'image sur Sanity...`);
     const asset = await client.assets.upload('image', buffer, {
@@ -190,9 +190,7 @@ async function convertHtmlToPortableText(htmlContent, row) {
   if (!htmlContent) return blocks;
 
   // Pre-process shortcodes like [gallery] and [caption]
-  // Let's replace [caption ...] <a href="..."><img ... /></a> [/caption] with standard img tags
   let cleanedHtml = htmlContent
-    .replace(/\[caption[^\]]*\]([\s\S]*?)\[\/caption\]/g, '$1')
     // Clean other gallery shortcodes. Fallback to all images in row['Image URL'] if ids attribute is missing.
     .replace(/\[gallery[^\]]*\]/g, (match) => {
       const idsMatch = match.match(/ids="*([^"\]]*)"*/);
@@ -202,9 +200,24 @@ async function convertHtmlToPortableText(htmlContent, row) {
       } else if (row && row['Image URL']) {
         urls = row['Image URL'].split(/[|,]/).map(u => u.trim()).filter(Boolean);
       }
-      // Return a customized tag to easily parse in cheerio
       const cleanUrls = urls.map(u => u.trim()).filter(Boolean);
       return `<wp-gallery-container urls="${cleanUrls.join(',')}"></wp-gallery-container>`;
+    })
+    // Pre-process captions and turn them into wp-image-caption tags
+    .replace(/\[caption([^\]]*)\]([\s\S]*?)\[\/caption\]/g, (match, attrs, content) => {
+      const capMatch = attrs.match(/caption="([^"]*)"/);
+      let captionText = capMatch ? capMatch[1] : '';
+
+      const $ = cheerio.load(content);
+      const img = $('img');
+      const src = img.attr('src') || '';
+      const alt = img.attr('alt') || '';
+      
+      if (!captionText) {
+        captionText = $.text().replace(/\s+/g, ' ').trim();
+      }
+
+      return `<wp-image-caption src="${src}" caption="${captionText}" alt="${alt}"></wp-image-caption>`;
     });
 
   const $ = cheerio.load(cleanedHtml);
@@ -217,9 +230,25 @@ async function convertHtmlToPortableText(htmlContent, row) {
     const tagName = el.tagName.toLowerCase();
 
     if (tagName === 'p') {
-      const text = $(el).text().trim();
+      const text = $(el).clone().find('wp-image-caption, wp-gallery-container, img').remove().end().text().trim();
       const imgs = $(el).find('img');
       const galleryContainers = $(el).find('wp-gallery-container');
+      const imageCaptions = $(el).find('wp-image-caption');
+
+      // Process captions inside paragraph
+      if (imageCaptions.length > 0) {
+        for (let j = 0; j < imageCaptions.length; j++) {
+          const src = $(imageCaptions[j]).attr('src');
+          const caption = $(imageCaptions[j]).attr('caption');
+          const alt = $(imageCaptions[j]).attr('alt');
+          const imageAsset = await importImage(src);
+          if (imageAsset) {
+            imageAsset.caption = caption || undefined;
+            imageAsset.alt = alt || undefined;
+            blocks.push(imageAsset);
+          }
+        }
+      }
 
       // Process galleries inside paragraph
       if (galleryContainers.length > 0) {
@@ -245,10 +274,13 @@ async function convertHtmlToPortableText(htmlContent, row) {
       // Process individual images inside paragraph
       if (imgs.length > 0) {
         for (let j = 0; j < imgs.length; j++) {
-          const src = $(imgs[j]).attr('src');
-          const imageAsset = await importImage(src);
-          if (imageAsset) {
-            blocks.push(imageAsset);
+          const isInsideCaption = $(imgs[j]).closest('wp-image-caption').length > 0;
+          if (!isInsideCaption) {
+            const src = $(imgs[j]).attr('src');
+            const imageAsset = await importImage(src);
+            if (imageAsset) {
+              blocks.push(imageAsset);
+            }
           }
         }
       }
@@ -264,6 +296,46 @@ async function convertHtmlToPortableText(htmlContent, row) {
             }
           ]
         });
+      }
+    } else if (tagName === 'wp-image-caption') {
+      const src = $(el).attr('src');
+      const caption = $(el).attr('caption');
+      const alt = $(el).attr('alt');
+      const imageAsset = await importImage(src);
+      if (imageAsset) {
+        imageAsset.caption = caption || undefined;
+        imageAsset.alt = alt || undefined;
+        blocks.push(imageAsset);
+      }
+    } else if (tagName === 'a') {
+      const imgs = $(el).find('img');
+      const captions = $(el).find('wp-image-caption');
+      
+      if (captions.length > 0) {
+        for (let j = 0; j < captions.length; j++) {
+          const src = $(captions[j]).attr('src');
+          const caption = $(captions[j]).attr('caption');
+          const alt = $(captions[j]).attr('alt');
+          const imageAsset = await importImage(src);
+          if (imageAsset) {
+            imageAsset.caption = caption || undefined;
+            imageAsset.alt = alt || undefined;
+            blocks.push(imageAsset);
+          }
+        }
+      }
+      
+      if (imgs.length > 0) {
+        for (let j = 0; j < imgs.length; j++) {
+          const isInsideCaption = $(imgs[j]).closest('wp-image-caption').length > 0;
+          if (!isInsideCaption) {
+            const src = $(imgs[j]).attr('src');
+            const imageAsset = await importImage(src);
+            if (imageAsset) {
+              blocks.push(imageAsset);
+            }
+          }
+        }
       }
     } else if (tagName === 'wp-gallery-container') {
       const urlsAttr = $(el).attr('urls') || '';
@@ -483,11 +555,7 @@ async function run() {
       // 5. Generate clean Slug
       const cleanSlug = slugify(row.Title) || `article-${wpId}`;
 
-      // 6. Excerpt extraction (first 180 chars)
-      const plainTextContent = cheerio.load(row.Content).text().replace(/\s+/g, ' ').trim();
-      const excerpt = row.Excerpt || (plainTextContent.length > 180 ? plainTextContent.substring(0, 177) + '...' : plainTextContent);
-
-      // 7. Build document
+      // 6. Build document
       const doc = {
         _type: 'post',
         _id: `wp-post-${wpId}`, // Maintain unique reference
@@ -496,7 +564,6 @@ async function run() {
           _type: 'slug',
           current: cleanSlug,
         },
-        excerpt: excerpt,
         mainImage: mainImageRef || undefined,
         publishedAt: row.Date ? new Date(row.Date).toISOString() : new Date().toISOString(),
         body: bodyBlocks,
