@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import React from 'react'
 import Image from 'next/image';
 import { client } from "@/sanity/lib/client";
@@ -6,6 +7,22 @@ import { PortableText } from "@portabletext/react";
 import PartnersSlider from "@/components/PartnersSlider";
 
 import { getServerTranslations } from '@/i18n/server';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [data, settingsData] = await Promise.all([
+    client.fetch(guideQuery),
+    client.fetch(settingsQuery)
+  ]);
+  const { at } = await getServerTranslations();
+
+  const title = `${at(data?.titleNormal || 'Nicolas')} ${at(data?.titleAccent || 'Draperi')} - Guide UIAGM | La Montagne Guide`;
+  const description = data?.quote ? `"${at(data.quote)}" — Nicolas Draperi, guide de haute montagne.` : "Nicolas Draperi, guide de haute montagne certifié UIAGM. Découvrez mon parcours, ma philosophie et mes valeurs.";
+
+  return {
+    title,
+    description,
+  };
+}
 
 export default async function GuidePage() {
   const [data, settingsData] = await Promise.all([

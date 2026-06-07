@@ -45,7 +45,23 @@ export const postType = defineType({
       name: 'body',
       title: 'Corps',
       type: 'array',
-      of: [{ type: 'block' }, { type: 'image' }],
+      of: [
+        { type: 'block' },
+        { type: 'image', options: { hotspot: true } },
+        {
+          name: 'gallery',
+          type: 'object',
+          title: 'Galerie d\'images',
+          fields: [
+            {
+              name: 'images',
+              type: 'array',
+              title: 'Images',
+              of: [{ type: 'image', options: { hotspot: true } }]
+            }
+          ]
+        }
+      ],
     }),
     defineField({
       name: 'activityType',
@@ -67,6 +83,16 @@ export const postType = defineType({
       type: 'reference',
       to: [{ type: 'sejour' }],
       description: 'Associer cet article à un séjour pour l\'afficher sur la page du séjour',
+    }),
+    defineField({
+      name: 'tags',
+      title: 'Tags / Catégories',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: {
+        layout: 'tags'
+      },
+      description: 'Tags et catégories importés de WordPress'
     }),
   ],
 })

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import React from 'react'
 import Image from 'next/image';
 import { client } from "@/sanity/lib/client";
@@ -9,6 +10,49 @@ import { ArrowLeft } from 'lucide-react';
 import { PortableText } from '@portabletext/react';
 
 import { getServerTranslations } from '@/i18n/server';
+
+function blocksToText(blocks: any, lang: string): string {
+  if (!blocks) return '';
+  const blockArray = Array.isArray(blocks) ? blocks : blocks[lang] || blocks.fr || blocks.en || [];
+  if (!Array.isArray(blockArray)) return '';
+  return blockArray
+    .map(block => {
+      if (block._type !== 'block' || !block.children) return '';
+      return block.children.map((child: any) => child.text).join('');
+    })
+    .join(' ')
+    .trim();
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ activitySlug: string, subCategorySlug: string }> }): Promise<Metadata> {
+  const { activitySlug, subCategorySlug } = await params;
+  const activity = await client.fetch(activityBySlugQuery, { slug: activitySlug });
+  const { at, lang } = await getServerTranslations();
+
+  if (!activity) return {};
+
+  const currentUnivers = activity.univers?.find((u: any) => {
+    const uSlug = u.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+    return uSlug === subCategorySlug;
+  });
+
+  if (!currentUnivers) return {};
+
+  const title = `${at(currentUnivers.title)} - ${at(activity.title)} | La Montagne Guide`;
+  const plainTextDescription = blocksToText(currentUnivers.description, lang);
+  const description = plainTextDescription ? plainTextDescription.substring(0, 160) : '';
+  const ogImage = currentUnivers.image || activity.image || undefined;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: ogImage ? [{ url: ogImage }] : undefined,
+    },
+  };
+}
 
 export default async function UniversePage({ params }: { params: Promise<{ activitySlug: string, subCategorySlug: string }> }) {
   const { activitySlug, subCategorySlug } = await params;

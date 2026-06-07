@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import React from 'react'
 import Image from 'next/image';
 import Link from 'next/link';
@@ -10,6 +11,28 @@ import { getServerTranslations } from '@/i18n/server';
 import SejourTabs from '@/components/SejourTabs';
 import RichContent from '@/components/RichContent';
 import BlogCard from '@/components/BlogCard';
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const sejour = await client.fetch(sejourBySlugQuery, { slug });
+  const { at } = await getServerTranslations();
+
+  if (!sejour) return {};
+
+  const title = `${at(sejour.title)} | La Montagne Guide`;
+  const description = sejour.description ? at(sejour.description).substring(0, 160) : '';
+  const ogImage = sejour.image || undefined;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: ogImage ? [{ url: ogImage }] : undefined,
+    },
+  };
+}
 
 export default async function SejourDetail({ params }: { params: Promise<{ activitySlug: string, subCategorySlug: string, slug: string }> }) {
   const { activitySlug, subCategorySlug, slug } = await params;
@@ -56,8 +79,32 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
     { id: 'materiel', label: at('Matériel'), content: sejour.materiel ? translatePortableText(sejour.materiel) : null, pdf: sejour.materielPdf ?? null },
   ]
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TouristTrip",
+    "name": at(sejour.title),
+    "description": sejour.description ? at(sejour.description) : undefined,
+    "image": sejour.image || undefined,
+    "touristType": sejour.activityType ? at(sejour.activityType) : undefined,
+    "offers": sejour.basePrice ? {
+      "@type": "Offer",
+      "price": sejour.basePrice.replace(/[^0-9]/g, ''),
+      "priceCurrency": "EUR",
+      "description": at("Tarif de base")
+    } : undefined,
+    "provider": {
+      "@type": "Person",
+      "name": "Nicolas Draperi",
+      "jobTitle": "Guide de Haute Montagne"
+    }
+  };
+
   return (
     <main className="relative min-h-screen bg-background text-foreground transition-colors duration-300">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* Hero Header */}
       <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">

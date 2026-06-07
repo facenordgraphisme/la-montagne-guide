@@ -1,8 +1,17 @@
+import type { Metadata } from "next";
 import BlogCard from "@/components/BlogCard";
 import { client } from "@/sanity/lib/client";
 import { postsQuery } from "@/sanity/lib/queries";
 
 import { getServerTranslations } from '@/i18n/server';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { at } = await getServerTranslations();
+  return {
+    title: `${at('Blog')} | La Montagne Guide`,
+    description: at("Retrouvez mes derniers récits d'aventures, conseils techniques et actualités de la montagne."),
+  };
+}
 
 export default async function BlogPage() {
   const posts = await client.fetch(postsQuery);

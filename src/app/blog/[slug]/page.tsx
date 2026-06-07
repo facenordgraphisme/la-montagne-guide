@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import React from 'react';
 import Image from 'next/image';
 import { client } from "@/sanity/lib/client";
@@ -7,6 +8,8 @@ import { PortableText } from '@portabletext/react';
 import { Calendar, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { urlFor } from "@/sanity/lib/image";
+import { getServerTranslations } from '@/i18n/server';
+import ImageGallery from '@/components/ImageGallery';
 
 // Portable Text components for styling
 const components = {
@@ -44,6 +47,21 @@ const components = {
         </div>
       );
     },
+    gallery: ({ value }: any) => {
+      if (!value || !value.images || !Array.isArray(value.images)) return null;
+      const formattedImages = value.images
+        .map((img: any) => {
+          if (!img || !img.asset) return null;
+          return {
+            src: urlFor(img).url(),
+            alt: img.alt || ''
+          };
+        })
+        .filter(Boolean);
+
+      if (formattedImages.length === 0) return null;
+      return <ImageGallery images={formattedImages} />;
+    }
   },
 };
 
@@ -54,7 +72,28 @@ export async function generateStaticParams() {
   }));
 }
 
-import { getServerTranslations } from '@/i18n/server';
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await client.fetch(postBySlugQuery, { slug });
+  const { at } = await getServerTranslations();
+
+  if (!post) return {};
+
+  const title = `${at(post.title)} | La Montagne Guide`;
+  const description = post.excerpt ? at(post.excerpt) : '';
+  const ogImage = post.image || undefined;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'article',
+      images: ogImage ? [{ url: ogImage }] : undefined,
+    },
+  };
+}
 
 export default async function PostDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -62,6 +101,23 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
   const { at, t, lang, translatePortableText } = await getServerTranslations();
 
   if (!post) notFound();
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": at(post.title),
+    "description": post.excerpt ? at(post.excerpt) : undefined,
+    "image": post.image || undefined,
+    "datePublished": post.date || undefined,
+    "author": {
+      "@type": "Person",
+      "name": "Nicolas Draperi"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "La Montagne Guide"
+    }
+  };
 
   const formattedDate = new Date(post.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', {
     day: 'numeric',
@@ -71,6 +127,10 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
 
   return (
     <main className="relative min-h-screen bg-background text-foreground transition-colors duration-300">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* Hero Header */}
       <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden">
@@ -112,6 +172,20 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
       <section className="py-20">
         <div className="container mx-auto px-6">
           <div className="max-w-3xl mx-auto">
+            {/* Tags / Catégories */}
+            {post.tags && post.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2.5 mb-10">
+                {post.tags.map((tag: string, idx: number) => (
+                  <span 
+                    key={idx} 
+                    className="inline-flex items-center bg-accent/10 text-accent font-semibold px-3.5 py-1.5 rounded-full text-xs uppercase tracking-wider border border-accent/20 hover:bg-accent/20 transition-colors duration-300 select-none"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
             {post.excerpt && (
               <p className="text-2xl md:text-3xl font-medium text-foreground/90 mb-12 leading-tight border-l-2 border-accent pl-8">
                 {at(post.excerpt)}

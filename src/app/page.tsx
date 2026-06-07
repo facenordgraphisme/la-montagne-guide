@@ -24,8 +24,31 @@ export default async function Home() {
     client.fetch(settingsQuery)
   ]);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": settingsData?.siteName || "La Montagne Guide | Nicolas Draperi",
+    "image": settingsData?.seoImage || undefined,
+    "telephone": settingsData?.phone || undefined,
+    "email": settingsData?.email || undefined,
+    "address": settingsData?.address ? {
+      "@type": "PostalAddress",
+      "streetAddress": settingsData.address
+    } : undefined,
+    "priceRange": "$$",
+    "sameAs": [
+      settingsData?.instagram,
+      settingsData?.facebook,
+      settingsData?.youtube
+    ].filter(Boolean)
+  };
+
   return (
     <main className="relative">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Hero 
         title={homeData?.heroTitle}
         subtitle={homeData?.heroSubtitle}

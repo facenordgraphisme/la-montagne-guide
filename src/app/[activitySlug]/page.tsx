@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import React from 'react'
 import Image from 'next/image';
 import Link from 'next/link';
@@ -12,6 +13,31 @@ import { PortableText } from '@portabletext/react';
 import { getServerTranslations } from '@/i18n/server';
 
 const VALID_ACTIVITIES = ['alpinisme', 'ski', 'escalade', 'cascade-de-glace', 'paralpinisme', 'voyages'];
+
+export async function generateMetadata({ params }: { params: Promise<{ activitySlug: string }> }): Promise<Metadata> {
+  const { activitySlug } = await params;
+  if (!VALID_ACTIVITIES.includes(activitySlug)) {
+    return {};
+  }
+  const activity = await client.fetch(activityBySlugQuery, { slug: activitySlug });
+  const { at } = await getServerTranslations();
+
+  if (!activity) return {};
+
+  const title = `${at(activity.title)} | La Montagne Guide`;
+  const description = activity.intro ? at(activity.intro) : (activity.description ? at(activity.description).substring(0, 160) : '');
+  const ogImage = activity.image || undefined;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: ogImage ? [{ url: ogImage }] : undefined,
+    },
+  };
+}
 
 export default async function ActivityLandingPage({ params }: { params: Promise<{ activitySlug: string }> }) {
   const { activitySlug } = await params;

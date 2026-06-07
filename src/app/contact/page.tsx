@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { client } from "@/sanity/lib/client";
@@ -6,6 +7,21 @@ import ContactForm from "@/components/ContactForm";
 import FAQAccordion from "@/components/FAQAccordion";
 
 import { getServerTranslations } from '@/i18n/server';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const [data] = await Promise.all([
+    client.fetch(contactQuery),
+  ]);
+  const { at } = await getServerTranslations();
+
+  const title = `${at(data?.title || 'Contact')} | La Montagne Guide`;
+  const description = data?.description ? at(data.description) : "Contactez Nicolas Draperi, guide de haute montagne. Projet de sommet, question technique, demande d'information.";
+
+  return {
+    title,
+    description,
+  };
+}
 
 export default async function ContactPage() {
   const [data, faqsData] = await Promise.all([

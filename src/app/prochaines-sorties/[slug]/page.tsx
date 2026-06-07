@@ -15,6 +15,7 @@ interface SortiePageProps {
 export async function generateMetadata({ params }: SortiePageProps): Promise<Metadata> {
   const { slug } = await params
   const sortie = await client.fetch(sortieBySlugQuery, { slug })
+  const { at } = await getServerTranslations();
 
   if (!sortie) {
     return {
@@ -23,8 +24,8 @@ export async function generateMetadata({ params }: SortiePageProps): Promise<Met
   }
 
   return {
-    title: `${sortie.title} | La Montagne Guide`,
-    description: sortie.description,
+    title: `${at(sortie.title)} | La Montagne Guide`,
+    description: sortie.description ? at(sortie.description).substring(0, 160) : '',
   }
 }
 
@@ -37,8 +38,28 @@ export default async function SortieDetailPage({ params }: SortiePageProps) {
     notFound()
   }
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": at(sortie.title),
+    "description": sortie.description ? at(sortie.description) : undefined,
+    "location": {
+      "@type": "Place",
+      "name": at(sortie.location) || "Alpes"
+    },
+    "image": sortie.image,
+    "organizer": {
+      "@type": "Person",
+      "name": "Nicolas Draperi"
+    }
+  };
+
   return (
     <main className="relative min-h-screen pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       
       {/* Hero Section */}
       <section className="relative h-[70vh] w-full overflow-hidden">

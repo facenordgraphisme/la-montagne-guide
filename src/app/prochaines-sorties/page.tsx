@@ -1,16 +1,19 @@
+import type { Metadata } from 'next';
 import React from 'react'
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { client } from "@/sanity/lib/client";
 import { sortiesQuery } from "@/sanity/lib/queries";
 import SortiesFilterableList from "@/components/SortiesFilterableList";
-
-export const metadata = {
-  title: 'Prochaines Sorties | La Montagne Guide',
-  description: 'Rejoignez-moi pour des aventures d\'exception aux quatre coins du monde. Alpinisme, escalade, ski et voyages.',
-}
-
 import { getServerTranslations } from '@/i18n/server';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { at } = await getServerTranslations();
+  return {
+    title: `${at('Prochaines Sorties')} | La Montagne Guide`,
+    description: at("Rejoignez-moi pour des aventures d'exception aux quatre coins du monde. Alpinisme, escalade, ski et voyages. Calendrier des départs collectifs."),
+  };
+}
 
 export default async function SortiesPage() {
   const sorties = await client.fetch(sortiesQuery);

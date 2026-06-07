@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import React from 'react'
 import Link from 'next/link';
 import { client } from "@/sanity/lib/client";
@@ -5,6 +6,14 @@ import { activitiesQuery } from "@/sanity/lib/queries";
 import Image from 'next/image';
 
 import { getServerTranslations } from '@/i18n/server';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { at } = await getServerTranslations();
+  return {
+    title: `${at('Prestations')} | La Montagne Guide`,
+    description: at('Découvrez toutes les activités de montagne proposées : Alpinisme, Ski de Randonnée, Escalade, Cascade de Glace, Voyages lointains. Encadrement professionnel.'),
+  };
+}
 
 export default async function PrestationsPage() {
   const sanityActivities = await client.fetch(activitiesQuery);
