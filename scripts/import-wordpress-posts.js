@@ -248,34 +248,35 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
       const currentIdx = galleryCounter++;
       let urls = [];
       
-      // Try parsing gallery_ids or ids from shortcode attributes (e.g. gallery_ids="123,456" or ids="http://...")
-      const idsMatch = match.match(/gallery_ids="([^"]*)"/) || match.match(/ids="([^"]*)"/);
-      let parsedIds = [];
-      if (idsMatch) {
-        parsedIds = idsMatch[1].split(',').map(id => id.trim()).filter(Boolean);
-      }
-
-      // Try looking up these specific IDs inside the CSV Image ID and Image URL columns
-      if (parsedIds.length > 0 && row && row['Image ID'] && row['Image URL']) {
-        const rowIds = row['Image ID'].split(/[|,]/).map(id => id.trim());
-        const rowUrls = row['Image URL'].split(/[|,]/).map(u => u.trim());
-        
-        parsedIds.forEach(id => {
-          const idx = rowIds.indexOf(id);
-          if (idx !== -1 && rowUrls[idx]) {
-            urls.push(rowUrls[idx]);
-          } else {
-            // Check if the ID in the shortcode is actually a URL
-            if (id.startsWith('http') || id.startsWith('//')) {
-              urls.push(id);
-            }
-          }
-        });
-      }
-
-      // Fallback 1: liveGalleries parsed from the original live page scrape
-      if (urls.length === 0 && liveGalleries && liveGalleries[currentIdx] && liveGalleries[currentIdx].length > 0) {
+      // Try liveGalleries parsed from the original live page scrape first (most accurate for ordering)
+      if (liveGalleries && liveGalleries[currentIdx] && liveGalleries[currentIdx].length > 0) {
         urls = liveGalleries[currentIdx];
+      }
+
+      // Fallback 1: Try parsing gallery_ids or ids from shortcode attributes and matching with CSV
+      if (urls.length === 0) {
+        const idsMatch = match.match(/gallery_ids="([^"]*)"/) || match.match(/ids="([^"]*)"/);
+        let parsedIds = [];
+        if (idsMatch) {
+          parsedIds = idsMatch[1].split(',').map(id => id.trim()).filter(Boolean);
+        }
+
+        if (parsedIds.length > 0 && row && row['Image ID'] && row['Image URL']) {
+          const rowIds = row['Image ID'].split(/[|,]/).map(id => id.trim());
+          const rowUrls = row['Image URL'].split(/[|,]/).map(u => u.trim());
+          
+          parsedIds.forEach(id => {
+            const idx = rowIds.indexOf(id);
+            if (idx !== -1 && rowUrls[idx]) {
+              urls.push(rowUrls[idx]);
+            } else {
+              // Check if the ID in the shortcode is actually a URL
+              if (id.startsWith('http') || id.startsWith('//')) {
+                urls.push(id);
+              }
+            }
+          });
+        }
       }
       
       // Fallback 2: All post images from the CSV Image URL column
