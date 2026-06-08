@@ -604,6 +604,221 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
   return groupedBlocks;
 }
 
+// Convert live HTML page elements directly to Portable Text blocks (guarantees layout matching the live site)
+async function convertLiveHtmlToPortableText($wp, row) {
+  let contentArea = $wp('.entry-content');
+  if (contentArea.find('.et_builder_inner_content').length > 0) {
+    contentArea = contentArea.find('.et_builder_inner_content');
+  }
+
+  const blocks = [];
+  
+  // Find structural items in order of appearance
+  const elements = contentArea.find('p, h1, h2, h3, h4, h5, h6, blockquote, ul, ol, .et_pb_gallery, .gallery, .wp-block-gallery, iframe, video, .wp-caption, figure, img');
+  
+  for (let i = 0; i < elements.length; i++) {
+    const el = elements[i];
+    const $el = $wp(el);
+    const tagName = el.tagName.toLowerCase();
+    
+    // Skip nested elements to avoid double parsing
+    if ($el.parents('blockquote, ul, ol, .et_pb_gallery, .gallery, .wp-block-gallery, .wp-caption, figure').length > 0) {
+      continue;
+    }
+    
+    if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName)) {
+      const text = $el.text().trim();
+      if (text) {
+        blocks.push({
+          _key: generateKey(),
+          _type: 'block',
+          style: tagName === 'h2' ? 'h2' : tagName === 'h3' ? 'h3' : 'normal',
+          children: [{ _key: generateKey(), _type: 'span', text }]
+        });
+      }
+    } else if (tagName === 'blockquote') {
+      const text = $el.text().trim();
+      if (text) {
+        blocks.push({
+          _key: generateKey(),
+          _type: 'block',
+          style: 'blockquote',
+          children: [{ _key: generateKey(), _type: 'span', text }]
+        });
+      }
+    } else if (['ul', 'ol'].includes(tagName)) {
+      const listType = tagName === 'ul' ? 'bullet' : 'number';
+      const lis = $el.find('li');
+      for (let j = 0; j < lis.length; j++) {
+        const text = $wp(lis[j]).text().trim();
+        if (text) {
+          blocks.push({
+            _key: generateKey(),
+            _type: 'block',
+            style: 'normal',
+            listItem: listType,
+            children: [{ _key: generateKey(), _type: 'span', text }]
+          });
+        }
+      }
+    } else if ($el.hasClass('et_pb_gallery') || $el.hasClass('gallery') || $el.hasClass('wp-block-gallery')) {
+      const images = [];
+      $el.find('img, a').each((__, imgEl) => {
+        const src = $wp(imgEl).attr('src') || $wp(imgEl).attr('href');
+        if (src && (src.endsWith('.jpg') || src.endsWith('.jpeg') || src.endsWith('.png') || src.includes('/wp-content/uploads/'))) {
+          images.push(src.trim());
+        }
+      });
+      
+      const uniqueUrls = [];
+      const seen = new Set();
+      for (const url of images) {
+        const candidates = getCandidates(url);
+        const originalUrl = candidates[0];
+        if (!seen.has(originalUrl)) {
+          seen.add(originalUrl);
+          uniqueUrls.push(originalUrl);
+        }
+      }
+      
+      const galleryImages = [];
+      for (const imgUrl of uniqueUrls) {
+        const imageAsset = await importImage(imgUrl);
+        if (imageAsset) {
+          imageAsset._key = generateKey();
+          galleryImages.push(imageAsset);
+        }
+      }
+      
+      if (galleryImages.length > 0) {
+        blocks.push({
+          _key: generateKey(),
+          _type: 'gallery',
+          images: galleryImages
+        });
+      }
+    } else if (tagName === 'iframe' || tagName === 'video') {
+      const src = $el.attr('src');
+      if (src) {
+        blocks.push({
+          _key: generateKey(),
+          _type: 'video',
+          url: src.trim().replace(/&amp;/g, '&')
+        });
+      }
+    } else if ($el.hasClass('wp-caption') || tagName === 'figure') {
+      const img = $el.find('img').first();
+      const src = img.attr('src');
+      if (src) {
+        const captionText = $el.hasClass('wp-caption') 
+          ? $el.find('.wp-caption-text').text().trim() 
+          : $el.find('figcaption').text().trim();
+        const altText = img.attr('alt') || undefined;
+        
+        const imageAsset = await importImage(src);
+        if (imageAsset) {
+          imageAsset._key = generateKey();
+          if (captionText) imageAsset.caption = captionText;
+          if (altText) imageAsset.alt = altText;
+          blocks.push(imageAsset);
+        }
+      }
+    } else if (tagName === 'img') {
+      const src = $el.attr('src');
+      if (src) {
+        const altText = $el.attr('alt') || undefined;
+        const imageAsset = await importImage(src);
+        if (imageAsset) {
+          imageAsset._key = generateKey();
+          if (altText) imageAsset.alt = altText;
+          blocks.push(imageAsset);
+        }
+      }
+    } else if (tagName === 'p') {
+      const text = $el.text().trim();
+      const inlineImgs = $el.find('img');
+      const inlineIframes = $el.find('iframe, video');
+      
+      // If there are inline images or videos inside the paragraph, parse them in order first
+      if (inlineImgs.length > 0) {
+        for (let j = 0; j < inlineImgs.length; j++) {
+          const isInsideCaption = $wp(inlineImgs[j]).closest('.wp-caption, figure').length > 0;
+          if (!isInsideCaption) {
+            const src = $wp(inlineImgs[j]).attr('src');
+            if (src) {
+              const imageAsset = await importImage(src);
+              if (imageAsset) {
+                imageAsset._key = generateKey();
+                blocks.push(imageAsset);
+              }
+            }
+          }
+        }
+      }
+
+      if (inlineIframes.length > 0) {
+        for (let j = 0; j < inlineIframes.length; j++) {
+          const src = $wp(inlineIframes[j]).attr('src');
+          if (src) {
+            blocks.push({
+              _key: generateKey(),
+              _type: 'video',
+              url: src.trim().replace(/&amp;/g, '&')
+            });
+          }
+        }
+      }
+      
+      if (text) {
+        blocks.push({
+          _key: generateKey(),
+          _type: 'block',
+          style: 'normal',
+          children: [{ _key: generateKey(), _type: 'span', text }]
+        });
+      }
+    }
+  }
+
+  // Post-process: Group consecutive individual 'image' blocks into a single 'gallery' block
+  const groupedBlocks = [];
+  let currentGalleryImages = [];
+
+  for (const block of blocks) {
+    if (block._type === 'image') {
+      currentGalleryImages.push(block);
+    } else {
+      if (currentGalleryImages.length > 0) {
+        if (currentGalleryImages.length === 1) {
+          groupedBlocks.push(currentGalleryImages[0]);
+        } else {
+          groupedBlocks.push({
+            _key: generateKey(),
+            _type: 'gallery',
+            images: [...currentGalleryImages]
+          });
+        }
+        currentGalleryImages = [];
+      }
+      groupedBlocks.push(block);
+    }
+  }
+
+  if (currentGalleryImages.length > 0) {
+    if (currentGalleryImages.length === 1) {
+      groupedBlocks.push(currentGalleryImages[0]);
+    } else {
+      groupedBlocks.push({
+        _key: generateKey(),
+        _type: 'gallery',
+        images: [...currentGalleryImages]
+      });
+    }
+  }
+
+  return groupedBlocks;
+}
+
 function normalizeTitle(title) {
   if (!title) return '';
   // Decode HTML entities
@@ -787,11 +1002,14 @@ async function run() {
       // 4. Fetch live page to scrape ordered galleries / featured image
       let liveFeaturedImage = null;
       let liveGalleries = [];
+      let liveParsedBlocks = null;
+      let liveScrapeSuccess = false;
       try {
         const liveUrl = `https://la-montagne-guide.fr/${actualSlug}/`;
-        console.log(`[Scrape Live Fallback] Analyse de la page : ${liveUrl}`);
-        const response = await axios.get(liveUrl, { timeout: 8000 });
+        console.log(`[Scrape Live] Analyse de la page : ${liveUrl}`);
+        const response = await axios.get(liveUrl, { timeout: 10000 });
         const $wp = cheerio.load(response.data);
+        liveScrapeSuccess = true;
         
         // Find featured image
         const ogImage = $wp('meta[property="og:image"]').attr('content');
@@ -804,7 +1022,7 @@ async function run() {
           }
         }
         
-        // Find all galleries on page in order
+        // Find all galleries on page in order (as fallback for CSV parser)
         $wp('.et_pb_gallery, .gallery, .wp-block-gallery').each((_, galleryEl) => {
           const galleryUrls = [];
           $wp(galleryEl).find('img, a').each((__, imgEl) => {
@@ -832,9 +1050,10 @@ async function run() {
           }
         });
         
-        console.log(`[Scrape Live Fallback] Récupération réussie : ${liveGalleries.length} galeries distinctes.`);
+        console.log(`[Scrape Live] Extraction en direct du contenu de la page...`);
+        liveParsedBlocks = await convertLiveHtmlToPortableText($wp, row);
       } catch (err) {
-        console.log(`[Scrape Live Fallback] Échec ou timeout de l'analyse en direct : ${err.message}`);
+        console.log(`[Scrape Live] Échec ou timeout de l'analyse en direct : ${err.message}`);
       }
 
       // 5. Upload main featured image if available
@@ -857,8 +1076,15 @@ async function run() {
         }
       }
 
-      // 6. Convert body to Portable Text blocks and download nested images with ordered galleries
-      const bodyBlocks = await convertHtmlToPortableText(row.Content, row, liveGalleries);
+      // 6. Convert body to Portable Text blocks (with HTML live parsing and CSV fallback)
+      let bodyBlocks = [];
+      if (liveScrapeSuccess && liveParsedBlocks && liveParsedBlocks.length > 0) {
+        console.log(`[Parser] Utilisation du contenu parsé en direct de la page HTML.`);
+        bodyBlocks = liveParsedBlocks;
+      } else {
+        console.log(`[Parser] Fallback : Conversion du contenu HTML brute du CSV.`);
+        bodyBlocks = await convertHtmlToPortableText(row.Content, row, liveGalleries);
+      }
 
       // 7. Build document
       const doc = {
