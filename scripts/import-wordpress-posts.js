@@ -74,7 +74,7 @@ async function getOrCreateTag(tagName) {
     console.log(`[Tag] Récupération ou création du tag : "${cleanTagName}"`);
     await client.createOrReplace(doc);
 
-    // Keep only the core reference structure in cache (without the post-specific _key)
+    // Keep only the core reference structure in cache
     const ref = {
       _type: 'reference',
       _ref: tagId
@@ -248,12 +248,39 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
       const currentIdx = galleryCounter++;
       let urls = [];
       
-      if (liveGalleries && liveGalleries[currentIdx] && liveGalleries[currentIdx].length > 0) {
+      // Try parsing gallery_ids or ids from shortcode attributes (e.g. gallery_ids="123,456" or ids="http://...")
+      const idsMatch = match.match(/gallery_ids="([^"]*)"/) || match.match(/ids="([^"]*)"/);
+      let parsedIds = [];
+      if (idsMatch) {
+        parsedIds = idsMatch[1].split(',').map(id => id.trim()).filter(Boolean);
+      }
+
+      // Try looking up these specific IDs inside the CSV Image ID and Image URL columns
+      if (parsedIds.length > 0 && row && row['Image ID'] && row['Image URL']) {
+        const rowIds = row['Image ID'].split(/[|,]/).map(id => id.trim());
+        const rowUrls = row['Image URL'].split(/[|,]/).map(u => u.trim());
+        
+        parsedIds.forEach(id => {
+          const idx = rowIds.indexOf(id);
+          if (idx !== -1 && rowUrls[idx]) {
+            urls.push(rowUrls[idx]);
+          } else {
+            // Check if the ID in the shortcode is actually a URL
+            if (id.startsWith('http') || id.startsWith('//')) {
+              urls.push(id);
+            }
+          }
+        });
+      }
+
+      // Fallback 1: liveGalleries parsed from the original live page scrape
+      if (urls.length === 0 && liveGalleries && liveGalleries[currentIdx] && liveGalleries[currentIdx].length > 0) {
         urls = liveGalleries[currentIdx];
-      } else {
-        if (row && row['Image URL']) {
-          urls = row['Image URL'].split(/[|,]/).map(u => u.trim()).filter(Boolean);
-        }
+      }
+      
+      // Fallback 2: All post images from the CSV Image URL column
+      if (urls.length === 0 && row && row['Image URL']) {
+        urls = row['Image URL'].split(/[|,]/).map(u => u.trim()).filter(Boolean);
       }
       
       const cleanUrls = urls.map(u => u.trim()).filter(u => u.startsWith('http') || u.startsWith('//'));
@@ -576,6 +603,73 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
   return groupedBlocks;
 }
 
+function normalizeTitle(title) {
+  if (!title) return '';
+  // Decode HTML entities
+  let text = title
+    .replace(/&#8211;/g, '-')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#8217;/g, "'")
+    .replace(/&#8220;/g, '"')
+    .replace(/&#8221;/g, '"')
+    .replace(/&#038;/g, '&')
+    .replace(/&#8230;/g, '...');
+  
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove accents
+    .replace(/[\-\u2010-\u2015]/g, ' ') // Dash-like to space
+    .replace(/[^a-z0-9 ]/g, '')     // Remove other alphanumeric
+    .replace(/\s+/g, ' ')           // Collapse spaces
+    .trim();
+}
+
+// Discover the actual slug on WordPress using REST API Search or Direct ID retrieval
+async function getActualWordPressSlug(wpId, title, cleanSlug) {
+  // 1. Try direct retrieval by ID first
+  if (wpId) {
+    try {
+      const url = `https://la-montagne-guide.fr/wp-json/wp/v2/posts/${wpId}`;
+      console.log(`[REST API ID Match] Tentative de récupération directe par ID: ${wpId}`);
+      const response = await axios.get(url, { timeout: 6000 });
+      if (response.status === 200 && response.data && response.data.slug) {
+        console.log(`[REST API ID Match] Trouvé par ID ${wpId} -> ${response.data.slug}`);
+        return response.data.slug;
+      }
+    } catch (err) {
+      console.log(`[REST API ID Match] Échec de la récupération directe par ID ${wpId}: ${err.message}`);
+    }
+  }
+
+  // 2. Try search by title with robust decoding and normalization
+  try {
+    const searchUrl = `https://la-montagne-guide.fr/wp-json/wp/v2/posts?search=${encodeURIComponent(title)}&per_page=10`;
+    console.log(`[REST API Slug Discovery] Recherche par titre: ${title}`);
+    const response = await axios.get(searchUrl, { timeout: 6000 });
+    if (response.status === 200 && response.data && response.data.length > 0) {
+      const normalizedTarget = normalizeTitle(title);
+      
+      const bestMatch = response.data.find(post => {
+        const postTitle = (post.title && post.title.rendered) ? post.title.rendered : '';
+        return normalizeTitle(postTitle) === normalizedTarget;
+      });
+      
+      if (bestMatch && bestMatch.slug) {
+        console.log(`[REST API Slug Match] Trouvé pour "${title}" -> ${bestMatch.slug}`);
+        return bestMatch.slug;
+      }
+    }
+  } catch (err) {
+    console.log(`[REST API Slug Discovery] Échec de la recherche pour "${title}": ${err.message}`);
+  }
+  
+  console.log(`[REST API Slug Discovery] Aucun résultat pour "${title}", fallback sur: ${cleanSlug}`);
+  return cleanSlug; // Default fallback
+}
+
 // Parse Command Line Arguments
 const args = process.argv.slice(2);
 let startIdx = 0;
@@ -687,12 +781,13 @@ async function run() {
 
       // 3. Generate clean Slug
       const cleanSlug = slugify(row.Title) || `article-${wpId}`;
+      const actualSlug = await getActualWordPressSlug(wpId, row.Title, cleanSlug);
 
       // 4. Fetch live page to scrape ordered galleries / featured image
       let liveFeaturedImage = null;
       let liveGalleries = [];
       try {
-        const liveUrl = `https://la-montagne-guide.fr/${cleanSlug}/`;
+        const liveUrl = `https://la-montagne-guide.fr/${actualSlug}/`;
         console.log(`[Scrape Live Fallback] Analyse de la page : ${liveUrl}`);
         const response = await axios.get(liveUrl, { timeout: 8000 });
         const $wp = cheerio.load(response.data);
@@ -771,7 +866,7 @@ async function run() {
         title: row.Title,
         slug: {
           _type: 'slug',
-          current: cleanSlug,
+          current: actualSlug, // Save actual slug matching the original site's permalink
         },
         mainImage: mainImageRef || undefined,
         publishedAt: row.Date ? new Date(row.Date).toISOString() : new Date().toISOString(),
