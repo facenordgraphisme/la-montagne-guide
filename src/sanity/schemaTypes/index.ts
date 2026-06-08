@@ -10,12 +10,14 @@ import { universType } from './univers'
 import { sortieType } from './sortie'
 import { settingsType } from './settings'
 import { faqType } from './faq'
+import { tagType } from './tag'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
     settingsType,
     activityType,
     postType,
+    tagType,
     guideType,
     homeType,
     contactType,

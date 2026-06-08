@@ -252,7 +252,7 @@ export const postsQuery = groq`*[_type == "post"] | order(publishedAt desc) {
   "image": mainImage.asset->url,
   excerpt,
   "body": body,
-  tags
+  "tags": tags[]->name
 }`
 
 export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][0] {
@@ -262,7 +262,7 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
   "image": mainImage.asset->url,
   excerpt,
   body,
-  tags
+  "tags": tags[]->name
 }`
 
 export const settingsQuery = groq`*[_type == "settings"][0]{

@@ -28,6 +28,9 @@ const client = createClient({
   useCdn: false,
 });
 
+// Cache for tag references to avoid duplicate creations / lookups
+const tagCache = {};
+
 // Helper: Slugify title
 function slugify(text) {
   if (!text) return '';
@@ -39,6 +42,43 @@ function slugify(text) {
     .replace(/[^a-z0-9 -]/g, '')    // Remove invalid chars
     .replace(/\s+/g, '-')           // Replace spaces with -
     .replace(/-+/g, '-');           // Remove duplicate -
+}
+
+async function getOrCreateTag(tagName) {
+  const cleanTagName = tagName.trim();
+  if (!cleanTagName) return null;
+
+  if (tagCache[cleanTagName]) {
+    return tagCache[cleanTagName];
+  }
+
+  const tagSlug = slugify(cleanTagName);
+  const tagId = `tag-${tagSlug}`;
+
+  try {
+    const doc = {
+      _type: 'tag',
+      _id: tagId,
+      name: cleanTagName,
+      slug: {
+        _type: 'slug',
+        current: tagSlug,
+      }
+    };
+
+    console.log(`[Tag] Récupération ou création du tag : "${cleanTagName}"`);
+    await client.createOrReplace(doc);
+
+    const ref = {
+      _type: 'reference',
+      _ref: tagId
+    };
+    tagCache[cleanTagName] = ref;
+    return ref;
+  } catch (err) {
+    console.error(`❌ Erreur lors de la création du tag "${cleanTagName}":`, err.message);
+    return null;
+  }
 }
 
 // Helper: Get candidate URLs for WordPress uploads to find the original high-resolution version
@@ -91,7 +131,7 @@ function getCandidates(url) {
       return `${dir}/${baseName}${ext}`;
     };
 
-    // Candidates in order of preference
+    // Candidates in order of preference (original unresized first)
     candidates.push(buildUrl(name, false, null, null));
     if (hasResized) candidates.push(buildUrl(name, true, null, null));
     if (eSuffix) candidates.push(buildUrl(name, false, eSuffix, null));
@@ -113,7 +153,7 @@ async function importImage(url) {
   if (!url) return null;
   
   const candidates = getCandidates(url);
-  let bestUrl = candidates[candidates.length - 1]; // default to original
+  let bestUrl = candidates[candidates.length - 1]; // default to fallback
   let maxBytes = 0;
 
   console.log(`\nRecherche de la meilleure qualité pour l'image : ${url}`);
@@ -185,22 +225,32 @@ async function importImage(url) {
 }
 
 // Convert HTML content and WordPress shortcodes to Portable Text blocks
-async function convertHtmlToPortableText(htmlContent, row) {
+async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
   const blocks = [];
   if (!htmlContent) return blocks;
 
-  // Pre-process shortcodes like [gallery] and [caption]
+  let galleryCounter = 0;
+
+  // Pre-process shortcodes like [gallery], [caption], [embed] and [et_pb_video]
   let cleanedHtml = htmlContent
-    // Clean other gallery shortcodes. Fallback to all images in row['Image URL'] if ids attribute is missing.
-    .replace(/\[gallery[^\]]*\]/g, (match) => {
-      const idsMatch = match.match(/ids="*([^"\]]*)"*/);
+    // Clean video embeds
+    .replace(/\[embed\]([\s\S]*?)\[\/embed\]/g, '<wp-video url="$1"></wp-video>')
+    .replace(/\[et_pb_video[^\]]*src="([^"]*)"[^\]]*\]/g, '<wp-video url="$1"></wp-video>')
+    .replace(/\[et_pb_video[^\]]*src='([^']*)'[^\]]*\]/g, '<wp-video url="$1"></wp-video>')
+    // Clean other gallery shortcodes. Fallback to liveGalleries or row['Image URL']
+    .replace(/\[(?:et_pb_)?gallery[^\]]*\]/g, (match) => {
+      const currentIdx = galleryCounter++;
       let urls = [];
-      if (idsMatch && idsMatch[1]) {
-        urls = idsMatch[1].split(/[|,]/).map(u => u.trim()).filter(Boolean);
-      } else if (row && row['Image URL']) {
-        urls = row['Image URL'].split(/[|,]/).map(u => u.trim()).filter(Boolean);
+      
+      if (liveGalleries && liveGalleries[currentIdx] && liveGalleries[currentIdx].length > 0) {
+        urls = liveGalleries[currentIdx];
+      } else {
+        if (row && row['Image URL']) {
+          urls = row['Image URL'].split(/[|,]/).map(u => u.trim()).filter(Boolean);
+        }
       }
-      const cleanUrls = urls.map(u => u.trim()).filter(Boolean);
+      
+      const cleanUrls = urls.map(u => u.trim()).filter(u => u.startsWith('http') || u.startsWith('//'));
       return `<wp-gallery-container urls="${cleanUrls.join(',')}"></wp-gallery-container>`;
     })
     // Pre-process captions and turn them into wp-image-caption tags
@@ -230,10 +280,11 @@ async function convertHtmlToPortableText(htmlContent, row) {
     const tagName = el.tagName.toLowerCase();
 
     if (tagName === 'p') {
-      const text = $(el).clone().find('wp-image-caption, wp-gallery-container, img').remove().end().text().trim();
+      const text = $(el).clone().find('wp-image-caption, wp-gallery-container, wp-video, img').remove().end().text().trim();
       const imgs = $(el).find('img');
       const galleryContainers = $(el).find('wp-gallery-container');
       const imageCaptions = $(el).find('wp-image-caption');
+      const videos = $(el).find('wp-video');
 
       // Process captions inside paragraph
       if (imageCaptions.length > 0) {
@@ -246,6 +297,19 @@ async function convertHtmlToPortableText(htmlContent, row) {
             imageAsset.caption = caption || undefined;
             imageAsset.alt = alt || undefined;
             blocks.push(imageAsset);
+          }
+        }
+      }
+
+      // Process videos inside paragraph
+      if (videos.length > 0) {
+        for (let j = 0; j < videos.length; j++) {
+          const urlAttr = $(videos[j]).attr('url');
+          if (urlAttr) {
+            blocks.push({
+              _type: 'video',
+              url: urlAttr.trim().replace(/&amp;/g, '&')
+            });
           }
         }
       }
@@ -307,9 +371,18 @@ async function convertHtmlToPortableText(htmlContent, row) {
         imageAsset.alt = alt || undefined;
         blocks.push(imageAsset);
       }
+    } else if (tagName === 'wp-video') {
+      const urlAttr = $(el).attr('url');
+      if (urlAttr) {
+        blocks.push({
+          _type: 'video',
+          url: urlAttr.trim().replace(/&amp;/g, '&')
+        });
+      }
     } else if (tagName === 'a') {
       const imgs = $(el).find('img');
       const captions = $(el).find('wp-image-caption');
+      const videos = $(el).find('wp-video');
       
       if (captions.length > 0) {
         for (let j = 0; j < captions.length; j++) {
@@ -321,6 +394,18 @@ async function convertHtmlToPortableText(htmlContent, row) {
             imageAsset.caption = caption || undefined;
             imageAsset.alt = alt || undefined;
             blocks.push(imageAsset);
+          }
+        }
+      }
+      
+      if (videos.length > 0) {
+        for (let j = 0; j < videos.length; j++) {
+          const urlAttr = $(videos[j]).attr('url');
+          if (urlAttr) {
+            blocks.push({
+              _type: 'video',
+              url: urlAttr.trim().replace(/&amp;/g, '&')
+            });
           }
         }
       }
@@ -464,6 +549,7 @@ async function convertHtmlToPortableText(htmlContent, row) {
 const args = process.argv.slice(2);
 let startIdx = 0;
 let limitCount = 25;
+let cleanAll = false;
 
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--start' && args[i + 1] !== undefined) {
@@ -472,11 +558,26 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === '--limit' && args[i + 1] !== undefined) {
     limitCount = parseInt(args[i + 1], 10);
   }
+  if (args[i] === '--clean') {
+    cleanAll = true;
+  }
 }
 
 async function run() {
   console.log("=== Début de la migration WordPress -> Sanity ===");
   console.log(`Index de départ: ${startIdx}, Limite: ${limitCount}`);
+
+  if (cleanAll) {
+    console.log("Option --clean détectée. Suppression de tous les anciens articles...");
+    const query = `*[_type == "post" && _id match "wp-post-*"]{ _id }`;
+    const oldPosts = await client.fetch(query);
+    console.log(`Trouvé ${oldPosts.length} articles à supprimer.`);
+    for (const p of oldPosts) {
+      console.log(`Suppression du post : ${p._id}`);
+      await client.delete(p._id);
+    }
+    console.log("Suppression terminée.");
+  }
 
   const csvPath = path.join(__dirname, '..', 'public', 'Articles-Export-2026-June-07-1940.csv');
   if (!fs.existsSync(csvPath)) {
@@ -494,6 +595,14 @@ async function run() {
 
   console.log(`Nombre total d'articles trouvés dans le CSV : ${records.length}`);
 
+  // Sort records by Date descending (most recent first) to import newest first
+  console.log("Tri des articles par date décroissante (plus récents en premier)...");
+  records.sort((a, b) => {
+    const timeA = a.Date ? new Date(a.Date).getTime() : 0;
+    const timeB = b.Date ? new Date(b.Date).getTime() : 0;
+    return timeB - timeA;
+  });
+
   const batch = records.slice(startIdx, startIdx + limitCount);
   console.log(`Traitement du lot de ${batch.length} articles (index ${startIdx} à ${startIdx + batch.length - 1})...`);
 
@@ -506,7 +615,7 @@ async function run() {
     const wpId = idKey ? row[idKey] : globalIdx;
     
     console.log(`\n--------------------------------------------------`);
-    console.log(`[${globalIdx + 1}/${records.length}] Importation de : "${row.Title}" (ID WordPress: ${wpId})`);
+    console.log(`[${globalIdx + 1}/${records.length}] Importation de : "${row.Title}" (Date: ${row.Date}, ID WordPress: ${wpId})`);
 
     try {
       // 1. Map ActivityType (Catégories)
@@ -523,7 +632,8 @@ async function run() {
         activityType = 'voyage';
       }
 
-      // 2. Extract Tags and Categories as Tags Array
+      // 2. Extract Tags and Categories as referenced Tag documents
+      const tagRefs = [];
       const tagsSet = new Set();
       if (row.Étiquettes) {
         row.Étiquettes.split('|').map(t => t.trim()).filter(Boolean).forEach(t => tagsSet.add(t));
@@ -534,28 +644,93 @@ async function run() {
           parts.forEach(p => tagsSet.add(p));
         });
       }
-      const tagsArray = Array.from(tagsSet);
-
-      // 3. Upload main featured image if available
-      let mainImageRef = null;
-      if (row['Image URL']) {
-        const imageUrls = row['Image URL'].split('|').filter(Boolean);
-        if (imageUrls.length > 0) {
-          // Use the first image as featured image
-          const imageAsset = await importImage(imageUrls[0]);
-          if (imageAsset) {
-            mainImageRef = imageAsset;
-          }
+      for (const tag of tagsSet) {
+        const ref = await getOrCreateTag(tag);
+        if (ref) {
+          tagRefs.push(ref);
         }
       }
 
-      // 4. Convert body to Portable Text blocks and download nested images
-      const bodyBlocks = await convertHtmlToPortableText(row.Content, row);
-
-      // 5. Generate clean Slug
+      // 3. Generate clean Slug
       const cleanSlug = slugify(row.Title) || `article-${wpId}`;
 
-      // 6. Build document
+      // 4. Fetch live page to scrape ordered galleries / featured image
+      let liveFeaturedImage = null;
+      let liveGalleries = [];
+      try {
+        const liveUrl = `https://la-montagne-guide.fr/${cleanSlug}/`;
+        console.log(`[Scrape Live Fallback] Analyse de la page : ${liveUrl}`);
+        const response = await axios.get(liveUrl, { timeout: 8000 });
+        const $wp = cheerio.load(response.data);
+        
+        // Find featured image
+        const ogImage = $wp('meta[property="og:image"]').attr('content');
+        if (ogImage) {
+          liveFeaturedImage = ogImage;
+        } else {
+          const featImg = $wp('.et_post_meta_wrapper img, .entry-featured-image-url img, .post-thumbnail img').first().attr('src');
+          if (featImg) {
+            liveFeaturedImage = featImg;
+          }
+        }
+        
+        // Find all galleries on page in order
+        $wp('.et_pb_gallery, .gallery, .wp-block-gallery').each((_, galleryEl) => {
+          const galleryUrls = [];
+          $wp(galleryEl).find('img, a').each((__, imgEl) => {
+            const src = $wp(imgEl).attr('src') || $wp(imgEl).attr('href');
+            if (src && (src.endsWith('.jpg') || src.endsWith('.jpeg') || src.endsWith('.png') || src.includes('/wp-content/uploads/'))) {
+              let cleanSrc = src.trim();
+              if (cleanSrc.startsWith('//')) cleanSrc = 'https:' + cleanSrc;
+              galleryUrls.push(cleanSrc);
+            }
+          });
+          
+          // Deduplicate urls and pick original high-res candidates
+          const uniqueUrls = [];
+          const seen = new Set();
+          for (const url of galleryUrls) {
+            const candidates = getCandidates(url);
+            const originalUrl = candidates[0];
+            if (!seen.has(originalUrl)) {
+              seen.add(originalUrl);
+              uniqueUrls.push(originalUrl);
+            }
+          }
+          if (uniqueUrls.length > 0) {
+            liveGalleries.push(uniqueUrls);
+          }
+        });
+        
+        console.log(`[Scrape Live Fallback] Récupération réussie : ${liveGalleries.length} galeries distinctes.`);
+      } catch (err) {
+        console.log(`[Scrape Live Fallback] Échec ou timeout de l'analyse en direct : ${err.message}`);
+      }
+
+      // 5. Upload main featured image if available
+      let mainImageRef = null;
+      let featUrl = null;
+      if (row['Image URL']) {
+        const imageUrls = row['Image URL'].split('|').filter(Boolean);
+        if (imageUrls.length > 0) {
+          featUrl = imageUrls[0];
+        }
+      }
+      if (!featUrl && liveFeaturedImage) {
+        featUrl = liveFeaturedImage;
+        console.log(`Utilisation de l'image mise en avant trouvée en direct : ${featUrl}`);
+      }
+      if (featUrl) {
+        const imageAsset = await importImage(featUrl);
+        if (imageAsset) {
+          mainImageRef = imageAsset;
+        }
+      }
+
+      // 6. Convert body to Portable Text blocks and download nested images with ordered galleries
+      const bodyBlocks = await convertHtmlToPortableText(row.Content, row, liveGalleries);
+
+      // 7. Build document
       const doc = {
         _type: 'post',
         _id: `wp-post-${wpId}`, // Maintain unique reference
@@ -568,7 +743,7 @@ async function run() {
         publishedAt: row.Date ? new Date(row.Date).toISOString() : new Date().toISOString(),
         body: bodyBlocks,
         activityType: activityType,
-        tags: tagsArray.length > 0 ? tagsArray : undefined,
+        tags: tagRefs.length > 0 ? tagRefs : undefined,
       };
 
       // 8. Write to Sanity
@@ -583,7 +758,6 @@ async function run() {
 
   console.log(`\n==================================================`);
   console.log(`Migration du lot terminée avec succès.`);
-  console.log(`Prochain lot conseillé : node scripts/import-wordpress-posts.js --start ${startIdx + limitCount} --limit 25`);
 }
 
 run();

@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { urlFor } from "@/sanity/lib/image";
 import { getServerTranslations } from '@/i18n/server';
 import ImageGallery from '@/components/ImageGallery';
+import { formatFriendlyDate } from '@/utils/date';
 
 // Portable Text components for styling
 const components = {
@@ -63,6 +64,38 @@ const components = {
 
       if (formattedImages.length === 0) return null;
       return <ImageGallery images={formattedImages} />;
+    },
+    video: ({ value }: any) => {
+      if (!value || !value.url) return null;
+      let embedUrl = value.url;
+      // Convert standard YouTube link to embed link
+      if (embedUrl.includes('youtube.com/watch')) {
+        try {
+          const urlObj = new URL(embedUrl);
+          const v = urlObj.searchParams.get('v');
+          if (v) {
+            embedUrl = `https://www.youtube.com/embed/${v}`;
+          }
+        } catch (e) {
+          // ignore
+        }
+      } else if (embedUrl.includes('youtu.be/')) {
+        const parts = embedUrl.split('youtu.be/');
+        if (parts[1]) {
+          const id = parts[1].split(/[?#]/)[0];
+          embedUrl = `https://www.youtube.com/embed/${id}`;
+        }
+      }
+      return (
+        <div className="relative w-full aspect-video my-12 rounded-[2rem] overflow-hidden border border-border">
+          <iframe
+            src={embedUrl}
+            className="absolute inset-0 w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      );
     }
   },
 };
@@ -121,11 +154,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
     }
   };
 
-  const formattedDate = new Date(post.date).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  const formattedDate = formatFriendlyDate(post.date, lang as 'fr' | 'en');
 
   return (
     <main className="relative min-h-screen bg-background text-foreground transition-colors duration-300">

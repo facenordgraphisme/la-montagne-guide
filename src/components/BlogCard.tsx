@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Calendar } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { formatFriendlyDate } from '@/utils/date';
 
 interface BlogCardProps {
   post: {
@@ -17,11 +18,7 @@ interface BlogCardProps {
 
 export default function BlogCard({ post }: BlogCardProps) {
   const { at, t, language } = useLanguage();
-  const formattedDate = new Date(post.date).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  const formattedDate = formatFriendlyDate(post.date, language as 'fr' | 'en');
 
   return (
     <Link href={`/blog/${post.slug}`} className="group block">

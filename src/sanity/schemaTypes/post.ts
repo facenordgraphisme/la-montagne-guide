@@ -60,6 +60,18 @@ export const postType = defineType({
               of: [{ type: 'image', options: { hotspot: true } }]
             }
           ]
+        },
+        {
+          name: 'video',
+          type: 'object',
+          title: 'Vidéo',
+          fields: [
+            {
+              name: 'url',
+              type: 'url',
+              title: 'URL de la vidéo (YouTube, Vimeo, etc.)'
+            }
+          ]
         }
       ],
     }),
@@ -88,11 +100,8 @@ export const postType = defineType({
       name: 'tags',
       title: 'Tags / Catégories',
       type: 'array',
-      of: [{ type: 'string' }],
-      options: {
-        layout: 'tags'
-      },
-      description: 'Tags et catégories importés de WordPress'
+      of: [{ type: 'reference', to: [{ type: 'tag' }] }],
+      description: 'Tags et catégories associés à cet article'
     }),
   ],
 })
