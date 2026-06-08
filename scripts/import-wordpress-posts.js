@@ -31,6 +31,11 @@ const client = createClient({
 // Cache for tag references to avoid duplicate creations / lookups
 const tagCache = {};
 
+// Helper: generate unique keys for array items
+function generateKey() {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
 // Helper: Slugify title
 function slugify(text) {
   if (!text) return '';
@@ -69,6 +74,7 @@ async function getOrCreateTag(tagName) {
     console.log(`[Tag] Récupération ou création du tag : "${cleanTagName}"`);
     await client.createOrReplace(doc);
 
+    // Keep only the core reference structure in cache (without the post-specific _key)
     const ref = {
       _type: 'reference',
       _ref: tagId
@@ -294,6 +300,7 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
           const alt = $(imageCaptions[j]).attr('alt');
           const imageAsset = await importImage(src);
           if (imageAsset) {
+            imageAsset._key = generateKey();
             imageAsset.caption = caption || undefined;
             imageAsset.alt = alt || undefined;
             blocks.push(imageAsset);
@@ -307,6 +314,7 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
           const urlAttr = $(videos[j]).attr('url');
           if (urlAttr) {
             blocks.push({
+              _key: generateKey(),
               _type: 'video',
               url: urlAttr.trim().replace(/&amp;/g, '&')
             });
@@ -323,11 +331,13 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
           for (const u of urls) {
             const imageAsset = await importImage(u);
             if (imageAsset) {
+              imageAsset._key = generateKey();
               galleryImages.push(imageAsset);
             }
           }
           if (galleryImages.length > 0) {
             blocks.push({
+              _key: generateKey(),
               _type: 'gallery',
               images: galleryImages
             });
@@ -343,6 +353,7 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
             const src = $(imgs[j]).attr('src');
             const imageAsset = await importImage(src);
             if (imageAsset) {
+              imageAsset._key = generateKey();
               blocks.push(imageAsset);
             }
           }
@@ -351,10 +362,12 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
       
       if (text) {
         blocks.push({
+          _key: generateKey(),
           _type: 'block',
           style: 'normal',
           children: [
             {
+              _key: generateKey(),
               _type: 'span',
               text: text,
             }
@@ -367,6 +380,7 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
       const alt = $(el).attr('alt');
       const imageAsset = await importImage(src);
       if (imageAsset) {
+        imageAsset._key = generateKey();
         imageAsset.caption = caption || undefined;
         imageAsset.alt = alt || undefined;
         blocks.push(imageAsset);
@@ -375,6 +389,7 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
       const urlAttr = $(el).attr('url');
       if (urlAttr) {
         blocks.push({
+          _key: generateKey(),
           _type: 'video',
           url: urlAttr.trim().replace(/&amp;/g, '&')
         });
@@ -391,6 +406,7 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
           const alt = $(captions[j]).attr('alt');
           const imageAsset = await importImage(src);
           if (imageAsset) {
+            imageAsset._key = generateKey();
             imageAsset.caption = caption || undefined;
             imageAsset.alt = alt || undefined;
             blocks.push(imageAsset);
@@ -403,6 +419,7 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
           const urlAttr = $(videos[j]).attr('url');
           if (urlAttr) {
             blocks.push({
+              _key: generateKey(),
               _type: 'video',
               url: urlAttr.trim().replace(/&amp;/g, '&')
             });
@@ -417,6 +434,7 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
             const src = $(imgs[j]).attr('src');
             const imageAsset = await importImage(src);
             if (imageAsset) {
+              imageAsset._key = generateKey();
               blocks.push(imageAsset);
             }
           }
@@ -429,11 +447,13 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
       for (const u of urls) {
         const imageAsset = await importImage(u);
         if (imageAsset) {
+          imageAsset._key = generateKey();
           galleryImages.push(imageAsset);
         }
       }
       if (galleryImages.length > 0) {
         blocks.push({
+          _key: generateKey(),
           _type: 'gallery',
           images: galleryImages
         });
@@ -442,10 +462,12 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
       const text = $(el).text().trim();
       if (text) {
         blocks.push({
+          _key: generateKey(),
           _type: 'block',
           style: tagName === 'h2' ? 'h2' : tagName === 'h3' ? 'h3' : 'normal',
           children: [
             {
+              _key: generateKey(),
               _type: 'span',
               text: text,
             }
@@ -456,10 +478,12 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
       const text = $(el).text().trim();
       if (text) {
         blocks.push({
+          _key: generateKey(),
           _type: 'block',
           style: 'blockquote',
           children: [
             {
+              _key: generateKey(),
               _type: 'span',
               text: text,
             }
@@ -473,11 +497,13 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
         const text = $(li).text().trim();
         if (text) {
           blocks.push({
+            _key: generateKey(),
             _type: 'block',
             style: 'normal',
             listItem: listType,
             children: [
               {
+                _key: generateKey(),
                 _type: 'span',
                 text: text,
               }
@@ -489,6 +515,7 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
       const src = $(el).attr('src');
       const imageAsset = await importImage(src);
       if (imageAsset) {
+        imageAsset._key = generateKey();
         blocks.push(imageAsset);
       }
     }
@@ -497,10 +524,12 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
   // If no blocks were parsed but we have raw content, fallback to a single block
   if (blocks.length === 0 && htmlContent.trim()) {
     blocks.push({
+      _key: generateKey(),
       _type: 'block',
       style: 'normal',
       children: [
         {
+          _key: generateKey(),
           _type: 'span',
           text: cheerio.load(htmlContent).text().trim().substring(0, 1000)
         }
@@ -521,6 +550,7 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
           groupedBlocks.push(currentGalleryImages[0]);
         } else {
           groupedBlocks.push({
+            _key: generateKey(),
             _type: 'gallery',
             images: [...currentGalleryImages]
           });
@@ -536,6 +566,7 @@ async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
       groupedBlocks.push(currentGalleryImages[0]);
     } else {
       groupedBlocks.push({
+        _key: generateKey(),
         _type: 'gallery',
         images: [...currentGalleryImages]
       });
@@ -647,7 +678,10 @@ async function run() {
       for (const tag of tagsSet) {
         const ref = await getOrCreateTag(tag);
         if (ref) {
-          tagRefs.push(ref);
+          tagRefs.push({
+            _key: generateKey(), // Ensure each item in the document tags array has a unique _key
+            ...ref
+          });
         }
       }
 
