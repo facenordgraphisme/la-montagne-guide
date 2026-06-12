@@ -23,5 +23,19 @@ export const tagType = defineType({
       },
       validation: (Rule) => Rule.required(),
     }),
+    defineField({
+      name: 'tagType',
+      title: 'Type',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Catégorie / Activité', value: 'category' },
+          { title: 'Massif', value: 'massif' },
+          { title: 'Autre', value: 'other' },
+        ],
+      },
+      initialValue: 'other',
+      description: 'Utilisé pour les filtres de la page blog.',
+    }),
   ],
 })

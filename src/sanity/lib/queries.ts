@@ -255,6 +255,29 @@ export const postsQuery = groq`*[_type == "post"] | order(publishedAt desc) {
   "tags": tags[]->name
 }`
 
+export const postSlugsQuery = groq`*[_type == "post"]{ "slug": slug.current }`
+
+export const postsPageQuery = groq`{
+  "posts": *[_type == "post"
+    && (!defined($category) || $category in tags[]->slug.current)
+    && (!defined($massif) || $massif in tags[]->slug.current)
+  ] | order(publishedAt desc) [$start...$end] {
+    title,
+    "slug": slug.current,
+    "date": publishedAt,
+    "image": mainImage.asset->url,
+    excerpt
+  },
+  "total": count(*[_type == "post"
+    && (!defined($category) || $category in tags[]->slug.current)
+    && (!defined($massif) || $massif in tags[]->slug.current)
+  ])
+}`
+
+export const categoryTagsQuery = groq`*[_type == "tag" && tagType == "category"] | order(name asc) { name, "slug": slug.current }`
+
+export const massifTagsQuery = groq`*[_type == "tag" && tagType == "massif"] | order(name asc) { name, "slug": slug.current }`
+
 export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][0] {
   title,
   "slug": slug.current,

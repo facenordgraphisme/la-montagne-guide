@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import React from 'react';
 import Image from 'next/image';
 import { client } from "@/sanity/lib/client";
-import { postBySlugQuery, postsQuery } from "@/sanity/lib/queries";
+import { postBySlugQuery, postSlugsQuery } from "@/sanity/lib/queries";
 import { notFound } from 'next/navigation';
 import { PortableText } from '@portabletext/react';
 import { Calendar, ArrowLeft } from 'lucide-react';
@@ -101,7 +101,7 @@ const components = {
 };
 
 export async function generateStaticParams() {
-  const posts = await client.fetch(postsQuery);
+  const posts = await client.fetch(postSlugsQuery);
   return posts.map((post: any) => ({
     slug: post.slug,
   }));

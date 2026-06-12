@@ -91,6 +91,27 @@ function textBlock(text, style) {
 // Tags
 // ============================================================
 
+// Catégories WP "Massif>X" -> tag "X" classé comme massif (filtre blog)
+const MASSIF_NAMES = new Set([
+  'Aiguilles rouges', 'Calanques', 'Cerces', 'Corse', 'Dévoluy', 'Ecrins', 'Embrunais',
+  'Engadine', 'Genepi team', 'Grand Briançonnais', 'Haute Maurienne', 'Hérault',
+  'Massif central', 'Mont-Blanc', 'Montgenèvre', 'Oberland', 'Oisans', 'Ortles',
+  'Piémont', 'Queyras', 'Sainte Victoire', 'Serre Chevalier', 'Taghia', 'Ubaye',
+  "Val d'Aoste", 'Valais', 'Valgaudemar', 'Valpelline', 'Vercors', 'Verdon', 'Viso', 'Wadi Rum',
+]);
+
+// Catégories/étiquettes WP classées comme catégorie d'activité (filtre blog)
+const CATEGORY_NAMES = new Set([
+  'Alpinisme', 'Escalade', 'Ski', 'Voyage', 'Via ferrata', 'Cascades de glace',
+  'Freerando', 'Raid ski', 'Ski de randonnée', 'Ski hors piste', 'Ski pente raide',
+]);
+
+function classifyTag(cleanTagName) {
+  if (MASSIF_NAMES.has(cleanTagName)) return 'massif';
+  if (CATEGORY_NAMES.has(cleanTagName)) return 'category';
+  return 'other';
+}
+
 const tagCache = {};
 
 async function getOrCreateTag(tagName) {
@@ -108,6 +129,7 @@ async function getOrCreateTag(tagName) {
       _id: tagId,
       name: cleanTagName,
       slug: { _type: 'slug', current: tagSlug },
+      tagType: classifyTag(cleanTagName),
     });
 
     const ref = { _type: 'reference', _ref: tagId };

@@ -5,7 +5,8 @@
       "Bash(xargs grep -l \"Tab\\\\|tab\\\\|Accordion\")",
       "Bash(xargs grep -l \"prestations\")",
       "WebFetch(domain:la-montagne-guide.fr)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(node scripts/import-wordpress-posts.js --start 20 --limit 546)"
     ]
   }
 }
