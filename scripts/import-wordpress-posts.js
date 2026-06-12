@@ -8,7 +8,6 @@ const { createClient } = require('@sanity/client');
 // Disable TLS verification to prevent 'unable to verify the first certificate' in restricted proxy environments
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-// Load environment variables manually since dotenv was installed
 require('dotenv').config();
 
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
@@ -28,70 +27,107 @@ const client = createClient({
   useCdn: false,
 });
 
-// Cache for tag references to avoid duplicate creations / lookups
-const tagCache = {};
+const WP_BASE = 'https://la-montagne-guide.fr';
 
-// Helper: generate unique keys for array items
+// ============================================================
+// Helpers généraux
+// ============================================================
+
 function generateKey() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
-// Helper: Slugify title
 function slugify(text) {
   if (!text) return '';
   return text
     .toString()
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove accents
-    .replace(/[^a-z0-9 -]/g, '')    // Remove invalid chars
-    .replace(/\s+/g, '-')           // Replace spaces with -
-    .replace(/-+/g, '-');           // Remove duplicate -
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9 -]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
 }
+
+function decodeWpEntities(text) {
+  if (!text) return text;
+  return text
+    .replace(/&#8211;/g, '–')
+    .replace(/&#8212;/g, '—')
+    .replace(/&#8216;/g, '‘')
+    .replace(/&#8217;/g, '’')
+    .replace(/&#8220;/g, '“')
+    .replace(/&#8221;/g, '”')
+    .replace(/&#8230;/g, '…')
+    .replace(/&#038;/g, '&')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"');
+}
+
+function escapeAttr(s) {
+  return (s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function textBlock(text, style) {
+  return {
+    _key: generateKey(),
+    _type: 'block',
+    style: style || 'normal',
+    children: [
+      {
+        _key: generateKey(),
+        _type: 'span',
+        text,
+      }
+    ]
+  };
+}
+
+// ============================================================
+// Tags
+// ============================================================
+
+const tagCache = {};
 
 async function getOrCreateTag(tagName) {
   const cleanTagName = tagName.trim();
   if (!cleanTagName) return null;
 
-  if (tagCache[cleanTagName]) {
-    return tagCache[cleanTagName];
-  }
+  if (tagCache[cleanTagName]) return tagCache[cleanTagName];
 
   const tagSlug = slugify(cleanTagName);
   const tagId = `tag-${tagSlug}`;
 
   try {
-    const doc = {
+    await client.createOrReplace({
       _type: 'tag',
       _id: tagId,
       name: cleanTagName,
-      slug: {
-        _type: 'slug',
-        current: tagSlug,
-      }
-    };
+      slug: { _type: 'slug', current: tagSlug },
+    });
 
-    console.log(`[Tag] Récupération ou création du tag : "${cleanTagName}"`);
-    await client.createOrReplace(doc);
-
-    // Keep only the core reference structure in cache
-    const ref = {
-      _type: 'reference',
-      _ref: tagId
-    };
+    const ref = { _type: 'reference', _ref: tagId };
     tagCache[cleanTagName] = ref;
     return ref;
   } catch (err) {
-    console.error(`❌ Erreur lors de la création du tag "${cleanTagName}":`, err.message);
+    console.error(`  ❌ Erreur lors de la création du tag "${cleanTagName}":`, err.message);
     return null;
   }
 }
+
+// ============================================================
+// Résolution / import des images
+// ============================================================
 
 // Helper: Get candidate URLs for WordPress uploads to find the original high-resolution version
 function getCandidates(url) {
   const candidates = [];
   let cleanUrl = url.trim();
-  
+
   if (cleanUrl.startsWith(',')) cleanUrl = cleanUrl.substring(1).trim();
   if (cleanUrl.endsWith(',')) cleanUrl = cleanUrl.substring(0, cleanUrl.length - 1).trim();
   if (cleanUrl.startsWith('//')) cleanUrl = 'https:' + cleanUrl;
@@ -137,7 +173,6 @@ function getCandidates(url) {
       return `${dir}/${baseName}${ext}`;
     };
 
-    // Candidates in order of preference (original unresized first)
     candidates.push(buildUrl(name, false, null, null));
     if (hasResized) candidates.push(buildUrl(name, true, null, null));
     if (eSuffix) candidates.push(buildUrl(name, false, eSuffix, null));
@@ -154,770 +189,430 @@ function getCandidates(url) {
   return Array.from(new Set(candidates));
 }
 
-// Helper: Downloader and Uploader for Images
-async function importImage(url) {
-  if (!url) return null;
-  
+async function pickBestCandidate(url) {
   const candidates = getCandidates(url);
-  let bestUrl = candidates[candidates.length - 1]; // default to fallback
-  let maxBytes = 0;
-
-  console.log(`\nRecherche de la meilleure qualité pour l'image : ${url}`);
-  
-  // Check candidates in parallel
   const checks = candidates.map(async (c) => {
     try {
-      const response = await axios.head(c, { 
-        timeout: 4000,
-        headers: { 'User-Agent': 'Mozilla/5.0' }
-      });
+      const response = await axios.head(c, { timeout: 4000, headers: { 'User-Agent': 'Mozilla/5.0' } });
       if (response.status === 200) {
-        const size = parseInt(response.headers['content-length'] || '0', 10);
-        return { url: c, size, exists: true };
+        return { url: c, size: parseInt(response.headers['content-length'] || '0', 10) };
       }
     } catch (e) {
-      // Ignore
+      // ignore
     }
-    return { url: c, size: 0, exists: false };
+    return { url: c, size: -1 };
   });
 
   const results = await Promise.all(checks);
-  
-  let chosen = null;
-  for (const res of results) {
-    if (res.exists && res.size > maxBytes) {
-      maxBytes = res.size;
-      chosen = res.url;
-    }
+  let best = null;
+  for (const r of results) {
+    if (r.size >= 0 && (!best || r.size > best.size)) best = r;
   }
+  return best ? best.url : candidates[candidates.length - 1];
+}
 
-  if (chosen) {
-    bestUrl = chosen;
-    console.log(`Meilleure version trouvée : ${bestUrl} (${(maxBytes / 1024).toFixed(1)} KB)`);
-  } else {
-    console.log(`Aucune alternative trouvée, utilisation de l'URL par défaut : ${bestUrl}`);
+// Cache: original URL -> { _type: 'image', asset: { _type: 'reference', _ref } } | null
+const imageCache = new Map();
+
+async function importImage(url) {
+  if (!url) return null;
+  let cleanUrl = url.trim();
+  if (cleanUrl.startsWith('//')) cleanUrl = 'https:' + cleanUrl;
+  if (!/^https?:\/\//i.test(cleanUrl)) return null;
+
+  if (imageCache.has(cleanUrl)) {
+    const base = imageCache.get(cleanUrl);
+    return base ? { _type: 'image', asset: { ...base.asset }, _key: generateKey() } : null;
   }
 
   try {
-    console.log(`Téléchargement de l'image : ${bestUrl}`);
+    const bestUrl = await pickBestCandidate(cleanUrl);
+    console.log(`    [Image] ${cleanUrl} -> ${bestUrl}`);
+
     const response = await axios({
       method: 'get',
       url: bestUrl,
       responseType: 'arraybuffer',
-      timeout: 25000,
+      timeout: 30000,
+      headers: { 'User-Agent': 'Mozilla/5.0' },
     });
-    
+
     const buffer = Buffer.from(response.data);
     const filename = decodeURIComponent(path.basename(bestUrl.split('?')[0])) || 'image.jpg';
-    
-    console.log(`Upload de l'image sur Sanity...`);
+
     const asset = await client.assets.upload('image', buffer, {
       filename,
       contentType: response.headers['content-type'] || 'image/jpeg',
     });
-    
-    console.log(`Image uploadée avec succès. ID: ${asset._id}`);
-    return {
-      _type: 'image',
-      asset: {
-        _type: 'reference',
-        _ref: asset._id,
-      }
-    };
-  } catch (error) {
-    console.error(`❌ Échec du téléchargement/upload de l'image : ${bestUrl}`, error.message);
+
+    const base = { _type: 'image', asset: { _type: 'reference', _ref: asset._id } };
+    imageCache.set(cleanUrl, base);
+    return { _type: 'image', asset: { ...base.asset }, _key: generateKey() };
+  } catch (err) {
+    console.error(`    ❌ Échec image ${cleanUrl}: ${err.message}`);
+    imageCache.set(cleanUrl, null);
     return null;
   }
 }
 
-// Convert HTML content and WordPress shortcodes to Portable Text blocks
-async function convertHtmlToPortableText(htmlContent, row, liveGalleries = []) {
-  const blocks = [];
-  if (!htmlContent) return blocks;
+// ============================================================
+// Résolution des médias (CSV + API REST WordPress)
+// ============================================================
 
-  let galleryCounter = 0;
+// Construit une map { wpMediaId -> { url, alt, caption } } à partir des colonnes CSV de la ligne
+function buildRowMediaMap(row) {
+  const ids = (row['Image ID'] || '').split('|').map(s => s.trim());
+  const urls = (row['Image URL'] || '').split('|').map(s => s.trim());
+  const alts = (row['Image Alt Text'] || '').split('|').map(s => decodeWpEntities(s.trim()));
+  const captions = (row['Image Caption'] || '').split('|').map(s => decodeWpEntities(s.trim()));
 
-  // Pre-process shortcodes like [gallery], [caption], [embed] and [et_pb_video]
-  let cleanedHtml = htmlContent
-    // Clean video embeds
-    .replace(/\[embed\]([\s\S]*?)\[\/embed\]/g, '<wp-video url="$1"></wp-video>')
-    .replace(/\[et_pb_video[^\]]*src="([^"]*)"[^\]]*\]/g, '<wp-video url="$1"></wp-video>')
-    .replace(/\[et_pb_video[^\]]*src='([^']*)'[^\]]*\]/g, '<wp-video url="$1"></wp-video>')
-    // Clean other gallery shortcodes. Fallback to liveGalleries or row['Image URL']
-    .replace(/\[(?:et_pb_)?gallery[^\]]*\]/g, (match) => {
-      const currentIdx = galleryCounter++;
-      let urls = [];
-      
-      // Try liveGalleries parsed from the original live page scrape first (most accurate for ordering)
-      if (liveGalleries && liveGalleries[currentIdx] && liveGalleries[currentIdx].length > 0) {
-        urls = liveGalleries[currentIdx];
-      }
-
-      // Fallback 1: Try parsing gallery_ids or ids from shortcode attributes and matching with CSV
-      if (urls.length === 0) {
-        const idsMatch = match.match(/gallery_ids="([^"]*)"/) || match.match(/ids="([^"]*)"/);
-        let parsedIds = [];
-        if (idsMatch) {
-          parsedIds = idsMatch[1].split(',').map(id => id.trim()).filter(Boolean);
-        }
-
-        if (parsedIds.length > 0 && row && row['Image ID'] && row['Image URL']) {
-          const rowIds = row['Image ID'].split(/[|,]/).map(id => id.trim());
-          const rowUrls = row['Image URL'].split(/[|,]/).map(u => u.trim());
-          
-          parsedIds.forEach(id => {
-            const idx = rowIds.indexOf(id);
-            if (idx !== -1 && rowUrls[idx]) {
-              urls.push(rowUrls[idx]);
-            } else {
-              // Check if the ID in the shortcode is actually a URL
-              if (id.startsWith('http') || id.startsWith('//')) {
-                urls.push(id);
-              }
-            }
-          });
-        }
-      }
-      
-      // Fallback 2: All post images from the CSV Image URL column
-      if (urls.length === 0 && row && row['Image URL']) {
-        urls = row['Image URL'].split(/[|,]/).map(u => u.trim()).filter(Boolean);
-      }
-      
-      const cleanUrls = urls.map(u => u.trim()).filter(u => u.startsWith('http') || u.startsWith('//'));
-      return `<wp-gallery-container urls="${cleanUrls.join(',')}"></wp-gallery-container>`;
-    })
-    // Pre-process captions and turn them into wp-image-caption tags
-    .replace(/\[caption([^\]]*)\]([\s\S]*?)\[\/caption\]/g, (match, attrs, content) => {
-      const capMatch = attrs.match(/caption="([^"]*)"/);
-      let captionText = capMatch ? capMatch[1] : '';
-
-      const $ = cheerio.load(content);
-      const img = $('img');
-      const src = img.attr('src') || '';
-      const alt = img.attr('alt') || '';
-      
-      if (!captionText) {
-        captionText = $.text().replace(/\s+/g, ' ').trim();
-      }
-
-      return `<wp-image-caption src="${src}" caption="${captionText}" alt="${alt}"></wp-image-caption>`;
+  const map = new Map();
+  ids.forEach((id, idx) => {
+    if (!id) return;
+    map.set(id, {
+      url: urls[idx] || '',
+      alt: alts[idx] || '',
+      caption: captions[idx] || '',
     });
-
-  const $ = cheerio.load(cleanedHtml);
-
-  // Traverse children of body
-  const bodyChildren = $('body').children();
-
-  for (let i = 0; i < bodyChildren.length; i++) {
-    const el = bodyChildren[i];
-    const tagName = el.tagName.toLowerCase();
-
-    if (tagName === 'p') {
-      const text = $(el).clone().find('wp-image-caption, wp-gallery-container, wp-video, img').remove().end().text().trim();
-      const imgs = $(el).find('img');
-      const galleryContainers = $(el).find('wp-gallery-container');
-      const imageCaptions = $(el).find('wp-image-caption');
-      const videos = $(el).find('wp-video');
-
-      // Process captions inside paragraph
-      if (imageCaptions.length > 0) {
-        for (let j = 0; j < imageCaptions.length; j++) {
-          const src = $(imageCaptions[j]).attr('src');
-          const caption = $(imageCaptions[j]).attr('caption');
-          const alt = $(imageCaptions[j]).attr('alt');
-          const imageAsset = await importImage(src);
-          if (imageAsset) {
-            imageAsset._key = generateKey();
-            imageAsset.caption = caption || undefined;
-            imageAsset.alt = alt || undefined;
-            blocks.push(imageAsset);
-          }
-        }
-      }
-
-      // Process videos inside paragraph
-      if (videos.length > 0) {
-        for (let j = 0; j < videos.length; j++) {
-          const urlAttr = $(videos[j]).attr('url');
-          if (urlAttr) {
-            blocks.push({
-              _key: generateKey(),
-              _type: 'video',
-              url: urlAttr.trim().replace(/&amp;/g, '&')
-            });
-          }
-        }
-      }
-
-      // Process galleries inside paragraph
-      if (galleryContainers.length > 0) {
-        for (let j = 0; j < galleryContainers.length; j++) {
-          const urlsAttr = $(galleryContainers[j]).attr('urls') || '';
-          const urls = urlsAttr.split(',').filter(Boolean);
-          const galleryImages = [];
-          for (const u of urls) {
-            const imageAsset = await importImage(u);
-            if (imageAsset) {
-              imageAsset._key = generateKey();
-              galleryImages.push(imageAsset);
-            }
-          }
-          if (galleryImages.length > 0) {
-            blocks.push({
-              _key: generateKey(),
-              _type: 'gallery',
-              images: galleryImages
-            });
-          }
-        }
-      }
-
-      // Process individual images inside paragraph
-      if (imgs.length > 0) {
-        for (let j = 0; j < imgs.length; j++) {
-          const isInsideCaption = $(imgs[j]).closest('wp-image-caption').length > 0;
-          if (!isInsideCaption) {
-            const src = $(imgs[j]).attr('src');
-            const imageAsset = await importImage(src);
-            if (imageAsset) {
-              imageAsset._key = generateKey();
-              blocks.push(imageAsset);
-            }
-          }
-        }
-      }
-      
-      if (text) {
-        blocks.push({
-          _key: generateKey(),
-          _type: 'block',
-          style: 'normal',
-          children: [
-            {
-              _key: generateKey(),
-              _type: 'span',
-              text: text,
-            }
-          ]
-        });
-      }
-    } else if (tagName === 'wp-image-caption') {
-      const src = $(el).attr('src');
-      const caption = $(el).attr('caption');
-      const alt = $(el).attr('alt');
-      const imageAsset = await importImage(src);
-      if (imageAsset) {
-        imageAsset._key = generateKey();
-        imageAsset.caption = caption || undefined;
-        imageAsset.alt = alt || undefined;
-        blocks.push(imageAsset);
-      }
-    } else if (tagName === 'wp-video') {
-      const urlAttr = $(el).attr('url');
-      if (urlAttr) {
-        blocks.push({
-          _key: generateKey(),
-          _type: 'video',
-          url: urlAttr.trim().replace(/&amp;/g, '&')
-        });
-      }
-    } else if (tagName === 'a') {
-      const imgs = $(el).find('img');
-      const captions = $(el).find('wp-image-caption');
-      const videos = $(el).find('wp-video');
-      
-      if (captions.length > 0) {
-        for (let j = 0; j < captions.length; j++) {
-          const src = $(captions[j]).attr('src');
-          const caption = $(captions[j]).attr('caption');
-          const alt = $(captions[j]).attr('alt');
-          const imageAsset = await importImage(src);
-          if (imageAsset) {
-            imageAsset._key = generateKey();
-            imageAsset.caption = caption || undefined;
-            imageAsset.alt = alt || undefined;
-            blocks.push(imageAsset);
-          }
-        }
-      }
-      
-      if (videos.length > 0) {
-        for (let j = 0; j < videos.length; j++) {
-          const urlAttr = $(videos[j]).attr('url');
-          if (urlAttr) {
-            blocks.push({
-              _key: generateKey(),
-              _type: 'video',
-              url: urlAttr.trim().replace(/&amp;/g, '&')
-            });
-          }
-        }
-      }
-      
-      if (imgs.length > 0) {
-        for (let j = 0; j < imgs.length; j++) {
-          const isInsideCaption = $(imgs[j]).closest('wp-image-caption').length > 0;
-          if (!isInsideCaption) {
-            const src = $(imgs[j]).attr('src');
-            const imageAsset = await importImage(src);
-            if (imageAsset) {
-              imageAsset._key = generateKey();
-              blocks.push(imageAsset);
-            }
-          }
-        }
-      }
-    } else if (tagName === 'wp-gallery-container') {
-      const urlsAttr = $(el).attr('urls') || '';
-      const urls = urlsAttr.split(',').filter(Boolean);
-      const galleryImages = [];
-      for (const u of urls) {
-        const imageAsset = await importImage(u);
-        if (imageAsset) {
-          imageAsset._key = generateKey();
-          galleryImages.push(imageAsset);
-        }
-      }
-      if (galleryImages.length > 0) {
-        blocks.push({
-          _key: generateKey(),
-          _type: 'gallery',
-          images: galleryImages
-        });
-      }
-    } else if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName)) {
-      const text = $(el).text().trim();
-      if (text) {
-        blocks.push({
-          _key: generateKey(),
-          _type: 'block',
-          style: tagName === 'h2' ? 'h2' : tagName === 'h3' ? 'h3' : 'normal',
-          children: [
-            {
-              _key: generateKey(),
-              _type: 'span',
-              text: text,
-            }
-          ]
-        });
-      }
-    } else if (tagName === 'blockquote') {
-      const text = $(el).text().trim();
-      if (text) {
-        blocks.push({
-          _key: generateKey(),
-          _type: 'block',
-          style: 'blockquote',
-          children: [
-            {
-              _key: generateKey(),
-              _type: 'span',
-              text: text,
-            }
-          ]
-        });
-      }
-    } else if (['ul', 'ol'].includes(tagName)) {
-      const listType = tagName === 'ul' ? 'bullet' : 'number';
-      const lis = $(el).find('li');
-      lis.each((_, li) => {
-        const text = $(li).text().trim();
-        if (text) {
-          blocks.push({
-            _key: generateKey(),
-            _type: 'block',
-            style: 'normal',
-            listItem: listType,
-            children: [
-              {
-                _key: generateKey(),
-                _type: 'span',
-                text: text,
-              }
-            ]
-          });
-        }
-      });
-    } else if (tagName === 'img') {
-      const src = $(el).attr('src');
-      const imageAsset = await importImage(src);
-      if (imageAsset) {
-        imageAsset._key = generateKey();
-        blocks.push(imageAsset);
-      }
-    }
-  }
-
-  // If no blocks were parsed but we have raw content, fallback to a single block
-  if (blocks.length === 0 && htmlContent.trim()) {
-    blocks.push({
-      _key: generateKey(),
-      _type: 'block',
-      style: 'normal',
-      children: [
-        {
-          _key: generateKey(),
-          _type: 'span',
-          text: cheerio.load(htmlContent).text().trim().substring(0, 1000)
-        }
-      ]
-    });
-  }
-
-  // Post-process: Group consecutive individual 'image' blocks into a single 'gallery' block
-  const groupedBlocks = [];
-  let currentGalleryImages = [];
-
-  for (const block of blocks) {
-    if (block._type === 'image') {
-      currentGalleryImages.push(block);
-    } else {
-      if (currentGalleryImages.length > 0) {
-        if (currentGalleryImages.length === 1) {
-          groupedBlocks.push(currentGalleryImages[0]);
-        } else {
-          groupedBlocks.push({
-            _key: generateKey(),
-            _type: 'gallery',
-            images: [...currentGalleryImages]
-          });
-        }
-        currentGalleryImages = [];
-      }
-      groupedBlocks.push(block);
-    }
-  }
-
-  if (currentGalleryImages.length > 0) {
-    if (currentGalleryImages.length === 1) {
-      groupedBlocks.push(currentGalleryImages[0]);
-    } else {
-      groupedBlocks.push({
-        _key: generateKey(),
-        _type: 'gallery',
-        images: [...currentGalleryImages]
-      });
-    }
-  }
-
-  return groupedBlocks;
+  });
+  return map;
 }
 
-// Convert live HTML page elements directly to Portable Text blocks (guarantees layout matching the live site)
-async function convertLiveHtmlToPortableText($wp, row) {
-  let contentArea = $wp('.entry-content');
-  if (contentArea.find('.et_builder_inner_content').length > 0) {
-    contentArea = contentArea.find('.et_builder_inner_content');
+// Cache REST: wpMediaId -> { url, alt, caption } | null
+const mediaCache = new Map();
+
+async function resolveMediaFromRest(mediaId) {
+  if (mediaCache.has(mediaId)) return mediaCache.get(mediaId);
+
+  let result = null;
+  try {
+    const res = await axios.get(`${WP_BASE}/wp-json/wp/v2/media/${mediaId}`, { timeout: 8000 });
+    const data = res.data;
+    const sizes = (data.media_details && data.media_details.sizes) || {};
+    const url = (sizes.full && sizes.full.source_url) || (sizes.large && sizes.large.source_url) || data.source_url;
+    const alt = data.alt_text || '';
+    const caption = (data.caption && data.caption.rendered)
+      ? cheerio.load(data.caption.rendered).text().replace(/\s+/g, ' ').trim()
+      : '';
+    if (url) result = { url, alt, caption };
+  } catch (err) {
+    console.log(`    [Media REST] Échec résolution media ${mediaId}: ${err.message}`);
   }
 
+  mediaCache.set(mediaId, result);
+  return result;
+}
+
+// Résout une référence (ID de média WordPress OU URL directe) en { url, alt, caption }
+async function resolveMedia(idOrUrl, rowMediaMap) {
+  const val = (idOrUrl || '').trim();
+  if (!val) return null;
+
+  if (val.startsWith('http') || val.startsWith('//')) {
+    return { url: val.startsWith('//') ? 'https:' + val : val, alt: '', caption: '' };
+  }
+
+  if (rowMediaMap.has(val)) {
+    const entry = rowMediaMap.get(val);
+    if (entry.url) return entry;
+  }
+
+  return await resolveMediaFromRest(val);
+}
+
+// ============================================================
+// Pré-traitement des shortcodes WordPress / Divi
+// ============================================================
+
+function preprocessShortcodes(html, { divi }) {
+  let s = html;
+
+  // Supprime les commentaires Gutenberg (<!-- wp:... --> / <!-- /wp:... -->)
+  s = s.replace(/<!--\s*\/?wp:[^>]*-->/g, '');
+
+  // [embed]url[/embed]
+  s = s.replace(/\[embed\]([\s\S]*?)\[\/embed\]/g, (m, url) => `<wp-video data-url="${escapeAttr(url.trim())}"></wp-video>`);
+
+  if (divi) {
+    // [et_pb_video ... src="..."]...[/et_pb_video]
+    s = s.replace(/\[et_pb_video([^\]]*)\](?:[\s\S]*?\[\/et_pb_video\])?/g, (m, attrs) => {
+      const srcMatch = attrs.match(/src=["']([^"']*)["']/);
+      const url = srcMatch ? srcMatch[1] : '';
+      return url ? `<wp-video data-url="${escapeAttr(url)}"></wp-video>` : '';
+    });
+
+    // [et_pb_gallery ... gallery_ids="..."]...[/et_pb_gallery]
+    s = s.replace(/\[et_pb_gallery([^\]]*)\](?:[\s\S]*?\[\/et_pb_gallery\])?/g, (m, attrs) => {
+      const idsMatch = attrs.match(/gallery_ids=["']([^"']*)["']/);
+      const ids = idsMatch ? idsMatch[1] : '';
+      return ids ? `<wp-gallery data-ids="${escapeAttr(ids)}"></wp-gallery>` : '';
+    });
+
+    // [et_pb_image ... src="..." alt="..."]...[/et_pb_image]
+    s = s.replace(/\[et_pb_image([^\]]*)\](?:[\s\S]*?\[\/et_pb_image\])?/g, (m, attrs) => {
+      const srcMatch = attrs.match(/src=["']([^"']*)["']/);
+      const altMatch = attrs.match(/alt=["']([^"']*)["']/);
+      const url = srcMatch ? srcMatch[1] : '';
+      const alt = altMatch ? altMatch[1] : '';
+      return url ? `<wp-image data-src="${escapeAttr(url)}" data-alt="${escapeAttr(alt)}"></wp-image>` : '';
+    });
+  }
+
+  // [gallery ids="..."] (legacy - ids numériques WordPress ou URLs séparées par | ou ,)
+  s = s.replace(/\[gallery([^\]]*)\]/g, (m, attrs) => {
+    const idsMatch = attrs.match(/ids=["']([^"']*)["']/);
+    const ids = idsMatch ? idsMatch[1] : '';
+    return ids ? `<wp-gallery data-ids="${escapeAttr(ids)}"></wp-gallery>` : '';
+  });
+
+  // [caption ...]<img.../>[/caption]
+  s = s.replace(/\[caption([^\]]*)\]([\s\S]*?)\[\/caption\]/g, (m, attrs, content) => {
+    const capMatch = attrs.match(/caption=["']([^"']*)["']/);
+    let captionText = capMatch ? capMatch[1] : '';
+
+    const $$ = cheerio.load(content);
+    const img = $$('img').first();
+    const src = img.attr('src') || '';
+    const alt = img.attr('alt') || '';
+
+    if (!captionText) captionText = $$.text().replace(/\s+/g, ' ').trim();
+
+    return src
+      ? `<wp-image-caption data-src="${escapeAttr(src)}" data-caption="${escapeAttr(captionText)}" data-alt="${escapeAttr(alt)}"></wp-image-caption>`
+      : '';
+  });
+
+  if (divi) {
+    // Supprime les shortcodes et_pb_* restants (sections, rows, columns, text, etc.) en gardant leur contenu interne
+    s = s.replace(/\[\/?et_pb_[^\]]*\]/g, '');
+  }
+
+  return s;
+}
+
+// ============================================================
+// Conversion HTML -> Portable Text
+// ============================================================
+
+async function processSpecialElement($, el, blocks, rowMediaMap) {
+  const $el = $(el);
+  const tagName = el.tagName.toLowerCase();
+
+  if (tagName === 'wp-gallery') {
+    const idsAttr = $el.attr('data-ids') || '';
+    const ids = idsAttr.split(/[|,]/).map(s => s.trim()).filter(Boolean);
+    const images = [];
+    for (const id of ids) {
+      const media = await resolveMedia(id, rowMediaMap);
+      if (media && media.url) {
+        const imgRef = await importImage(media.url);
+        if (imgRef) {
+          if (media.alt) imgRef.alt = media.alt;
+          if (media.caption) imgRef.caption = media.caption;
+          images.push(imgRef);
+        }
+      }
+    }
+    if (images.length > 0) {
+      blocks.push({ _key: generateKey(), _type: 'gallery', images });
+    }
+  } else if (tagName === 'wp-video') {
+    const url = ($el.attr('data-url') || '').trim().replace(/&amp;/g, '&');
+    if (url) blocks.push({ _key: generateKey(), _type: 'video', url });
+  } else if (tagName === 'wp-image' || tagName === 'img') {
+    const src = $el.attr(tagName === 'wp-image' ? 'data-src' : 'src');
+    const altAttr = $el.attr(tagName === 'wp-image' ? 'data-alt' : 'alt');
+    const media = await resolveMedia(src, rowMediaMap);
+    if (media && media.url) {
+      const imgRef = await importImage(media.url);
+      if (imgRef) {
+        if (altAttr) imgRef.alt = decodeWpEntities(altAttr);
+        else if (media.alt) imgRef.alt = media.alt;
+        blocks.push(imgRef);
+      }
+    }
+  } else if (tagName === 'wp-image-caption') {
+    const src = $el.attr('data-src');
+    const caption = $el.attr('data-caption');
+    const alt = $el.attr('data-alt');
+    const media = await resolveMedia(src, rowMediaMap);
+    if (media && media.url) {
+      const imgRef = await importImage(media.url);
+      if (imgRef) {
+        if (caption) imgRef.caption = decodeWpEntities(caption);
+        if (alt) imgRef.alt = decodeWpEntities(alt);
+        blocks.push(imgRef);
+      }
+    }
+  }
+}
+
+const SPECIAL_SELECTOR = 'wp-image-caption, wp-gallery, wp-video, wp-image, img';
+
+async function nodesToBlocks($, nodes, rowMediaMap) {
   const blocks = [];
-  
-  // Find structural items in order of appearance
-  const elements = contentArea.find('p, h1, h2, h3, h4, h5, h6, blockquote, ul, ol, .et_pb_gallery, .gallery, .wp-block-gallery, iframe, video, .wp-caption, figure, img');
-  
-  for (let i = 0; i < elements.length; i++) {
-    const el = elements[i];
-    const $el = $wp(el);
-    const tagName = el.tagName.toLowerCase();
-    
-    // Skip nested elements to avoid double parsing
-    if ($el.parents('blockquote, ul, ol, .et_pb_gallery, .gallery, .wp-block-gallery, .wp-caption, figure').length > 0) {
+
+  for (const el of nodes) {
+    if (el.type === 'text') {
+      const text = $(el).text().replace(/\s+/g, ' ').trim();
+      if (text) blocks.push(textBlock(text, 'normal'));
       continue;
     }
-    
-    if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName)) {
-      const text = $el.text().trim();
-      if (text) {
-        blocks.push({
-          _key: generateKey(),
-          _type: 'block',
-          style: tagName === 'h2' ? 'h2' : tagName === 'h3' ? 'h3' : 'normal',
-          children: [{ _key: generateKey(), _type: 'span', text }]
-        });
+    if (el.type !== 'tag') continue;
+
+    const tagName = el.tagName.toLowerCase();
+    const $el = $(el);
+
+    if (tagName === 'p' || tagName === 'div' || tagName === 'span') {
+      const specials = $el.find(SPECIAL_SELECTOR).toArray();
+      const textOnly = $el.clone();
+      textOnly.find(SPECIAL_SELECTOR).remove();
+      const text = textOnly.text().replace(/\s+/g, ' ').trim();
+
+      for (const sp of specials) {
+        await processSpecialElement($, sp, blocks, rowMediaMap);
       }
+      if (text) blocks.push(textBlock(text, 'normal'));
+    } else if (/^h[1-6]$/.test(tagName)) {
+      const text = $el.text().trim();
+      if (text) blocks.push(textBlock(text, tagName === 'h2' ? 'h2' : tagName === 'h3' ? 'h3' : 'normal'));
     } else if (tagName === 'blockquote') {
       const text = $el.text().trim();
-      if (text) {
-        blocks.push({
-          _key: generateKey(),
-          _type: 'block',
-          style: 'blockquote',
-          children: [{ _key: generateKey(), _type: 'span', text }]
-        });
-      }
-    } else if (['ul', 'ol'].includes(tagName)) {
+      if (text) blocks.push(textBlock(text, 'blockquote'));
+    } else if (tagName === 'ul' || tagName === 'ol') {
       const listType = tagName === 'ul' ? 'bullet' : 'number';
-      const lis = $el.find('li');
-      for (let j = 0; j < lis.length; j++) {
-        const text = $wp(lis[j]).text().trim();
-        if (text) {
-          blocks.push({
-            _key: generateKey(),
-            _type: 'block',
-            style: 'normal',
-            listItem: listType,
-            children: [{ _key: generateKey(), _type: 'span', text }]
-          });
-        }
-      }
-    } else if ($el.hasClass('et_pb_gallery') || $el.hasClass('gallery') || $el.hasClass('wp-block-gallery')) {
-      const images = [];
-      $el.find('img, a').each((__, imgEl) => {
-        const src = $wp(imgEl).attr('src') || $wp(imgEl).attr('href');
-        if (src && (src.endsWith('.jpg') || src.endsWith('.jpeg') || src.endsWith('.png') || src.includes('/wp-content/uploads/'))) {
-          images.push(src.trim());
-        }
+      $el.find('li').each((_, li) => {
+        const text = $(li).text().trim();
+        if (text) blocks.push({ ...textBlock(text, 'normal'), listItem: listType });
       });
-      
-      const uniqueUrls = [];
-      const seen = new Set();
-      for (const url of images) {
-        const candidates = getCandidates(url);
-        const originalUrl = candidates[0];
-        if (!seen.has(originalUrl)) {
-          seen.add(originalUrl);
-          uniqueUrls.push(originalUrl);
-        }
-      }
-      
-      const galleryImages = [];
-      for (const imgUrl of uniqueUrls) {
-        const imageAsset = await importImage(imgUrl);
-        if (imageAsset) {
-          imageAsset._key = generateKey();
-          galleryImages.push(imageAsset);
-        }
-      }
-      
-      if (galleryImages.length > 0) {
-        blocks.push({
-          _key: generateKey(),
-          _type: 'gallery',
-          images: galleryImages
-        });
-      }
-    } else if (tagName === 'iframe' || tagName === 'video') {
-      const src = $el.attr('src');
-      if (src) {
-        blocks.push({
-          _key: generateKey(),
-          _type: 'video',
-          url: src.trim().replace(/&amp;/g, '&')
-        });
-      }
-    } else if ($el.hasClass('wp-caption') || tagName === 'figure') {
+    } else if (SPECIAL_SELECTOR.includes(tagName)) {
+      await processSpecialElement($, el, blocks, rowMediaMap);
+    } else if (tagName === 'figure') {
       const img = $el.find('img').first();
       const src = img.attr('src');
+      const alt = img.attr('alt') || undefined;
+      const caption = $el.find('figcaption').text().trim() || undefined;
       if (src) {
-        const captionText = $el.hasClass('wp-caption') 
-          ? $el.find('.wp-caption-text').text().trim() 
-          : $el.find('figcaption').text().trim();
-        const altText = img.attr('alt') || undefined;
-        
-        const imageAsset = await importImage(src);
-        if (imageAsset) {
-          imageAsset._key = generateKey();
-          if (captionText) imageAsset.caption = captionText;
-          if (altText) imageAsset.alt = altText;
-          blocks.push(imageAsset);
-        }
-      }
-    } else if (tagName === 'img') {
-      const src = $el.attr('src');
-      if (src) {
-        const altText = $el.attr('alt') || undefined;
-        const imageAsset = await importImage(src);
-        if (imageAsset) {
-          imageAsset._key = generateKey();
-          if (altText) imageAsset.alt = altText;
-          blocks.push(imageAsset);
-        }
-      }
-    } else if (tagName === 'p') {
-      const text = $el.text().trim();
-      const inlineImgs = $el.find('img');
-      const inlineIframes = $el.find('iframe, video');
-      
-      // If there are inline images or videos inside the paragraph, parse them in order first
-      if (inlineImgs.length > 0) {
-        for (let j = 0; j < inlineImgs.length; j++) {
-          const isInsideCaption = $wp(inlineImgs[j]).closest('.wp-caption, figure').length > 0;
-          if (!isInsideCaption) {
-            const src = $wp(inlineImgs[j]).attr('src');
-            if (src) {
-              const imageAsset = await importImage(src);
-              if (imageAsset) {
-                imageAsset._key = generateKey();
-                blocks.push(imageAsset);
-              }
-            }
+        const media = await resolveMedia(src, rowMediaMap);
+        if (media && media.url) {
+          const imgRef = await importImage(media.url);
+          if (imgRef) {
+            if (caption) imgRef.caption = decodeWpEntities(caption);
+            if (alt) imgRef.alt = decodeWpEntities(alt);
+            blocks.push(imgRef);
           }
         }
       }
-
-      if (inlineIframes.length > 0) {
-        for (let j = 0; j < inlineIframes.length; j++) {
-          const src = $wp(inlineIframes[j]).attr('src');
-          if (src) {
-            blocks.push({
-              _key: generateKey(),
-              _type: 'video',
-              url: src.trim().replace(/&amp;/g, '&')
-            });
-          }
-        }
-      }
-      
-      if (text) {
-        blocks.push({
-          _key: generateKey(),
-          _type: 'block',
-          style: 'normal',
-          children: [{ _key: generateKey(), _type: 'span', text }]
-        });
+    } else {
+      // Wrapper inconnu : on continue récursivement sur ses enfants
+      const childNodes = $el.contents().toArray();
+      if (childNodes.length > 0) {
+        const nested = await nodesToBlocks($, childNodes, rowMediaMap);
+        blocks.push(...nested);
       }
     }
   }
 
-  // Post-process: Group consecutive individual 'image' blocks into a single 'gallery' block
-  const groupedBlocks = [];
-  let currentGalleryImages = [];
+  return blocks;
+}
+
+// Regroupe les images individuelles consécutives en blocs "gallery"
+function groupImagesIntoGalleries(blocks) {
+  const grouped = [];
+  let current = [];
+
+  const flush = () => {
+    if (current.length === 0) return;
+    if (current.length === 1) {
+      grouped.push(current[0]);
+    } else {
+      grouped.push({ _key: generateKey(), _type: 'gallery', images: current });
+    }
+    current = [];
+  };
 
   for (const block of blocks) {
     if (block._type === 'image') {
-      currentGalleryImages.push(block);
+      current.push(block);
     } else {
-      if (currentGalleryImages.length > 0) {
-        if (currentGalleryImages.length === 1) {
-          groupedBlocks.push(currentGalleryImages[0]);
-        } else {
-          groupedBlocks.push({
-            _key: generateKey(),
-            _type: 'gallery',
-            images: [...currentGalleryImages]
-          });
-        }
-        currentGalleryImages = [];
-      }
-      groupedBlocks.push(block);
+      flush();
+      grouped.push(block);
     }
   }
+  flush();
 
-  if (currentGalleryImages.length > 0) {
-    if (currentGalleryImages.length === 1) {
-      groupedBlocks.push(currentGalleryImages[0]);
-    } else {
-      groupedBlocks.push({
-        _key: generateKey(),
-        _type: 'gallery',
-        images: [...currentGalleryImages]
-      });
-    }
-  }
-
-  return groupedBlocks;
+  return grouped;
 }
 
-function normalizeTitle(title) {
-  if (!title) return '';
-  // Decode HTML entities
-  let text = title
-    .replace(/&#8211;/g, '-')
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
-    .replace(/&#8217;/g, "'")
-    .replace(/&#8220;/g, '"')
-    .replace(/&#8221;/g, '"')
-    .replace(/&#038;/g, '&')
-    .replace(/&#8230;/g, '...');
-  
-  return text
-    .toString()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove accents
-    .replace(/[\-\u2010-\u2015]/g, ' ') // Dash-like to space
-    .replace(/[^a-z0-9 ]/g, '')     // Remove other alphanumeric
-    .replace(/\s+/g, ' ')           // Collapse spaces
-    .trim();
+async function parseContent(content, rowMediaMap) {
+  if (!content || !content.trim()) return [];
+
+  const isDivi = /\[et_pb_/i.test(content);
+  const preprocessed = preprocessShortcodes(content, { divi: isDivi });
+  const $ = cheerio.load(preprocessed);
+
+  const blocks = await nodesToBlocks($, $('body').contents().toArray(), rowMediaMap);
+  return groupImagesIntoGalleries(blocks);
 }
 
-// Discover the actual slug on WordPress using REST API Search or Direct ID retrieval
-async function getActualWordPressSlug(wpId, title, cleanSlug) {
-  // 1. Try direct retrieval by ID first
-  if (wpId) {
-    try {
-      const url = `https://la-montagne-guide.fr/wp-json/wp/v2/posts/${wpId}`;
-      console.log(`[REST API ID Match] Tentative de récupération directe par ID: ${wpId}`);
-      const response = await axios.get(url, { timeout: 6000 });
-      if (response.status === 200 && response.data && response.data.slug) {
-        console.log(`[REST API ID Match] Trouvé par ID ${wpId} -> ${response.data.slug}`);
-        return response.data.slug;
+function deriveExcerpt(bodyBlocks) {
+  for (const block of bodyBlocks) {
+    if (block._type === 'block' && block.style === 'normal' && !block.listItem) {
+      const text = (block.children || []).map(c => c.text || '').join('').trim();
+      if (text) {
+        if (text.length <= 197) return text;
+        const truncated = text.slice(0, 197);
+        const lastSpace = truncated.lastIndexOf(' ');
+        const cut = lastSpace > 100 ? truncated.slice(0, lastSpace) : truncated;
+        return cut.trim() + '...';
       }
-    } catch (err) {
-      console.log(`[REST API ID Match] Échec de la récupération directe par ID ${wpId}: ${err.message}`);
     }
   }
+  return undefined;
+}
 
-  // 2. Try search by title with robust decoding and normalization
+// ============================================================
+// Résolution du slug canonique via l'API REST WordPress
+// ============================================================
+
+async function resolveCanonicalSlug(wpId, title) {
   try {
-    const searchUrl = `https://la-montagne-guide.fr/wp-json/wp/v2/posts?search=${encodeURIComponent(title)}&per_page=10`;
-    console.log(`[REST API Slug Discovery] Recherche par titre: ${title}`);
-    const response = await axios.get(searchUrl, { timeout: 6000 });
-    if (response.status === 200 && response.data && response.data.length > 0) {
-      const normalizedTarget = normalizeTitle(title);
-      
-      const bestMatch = response.data.find(post => {
-        const postTitle = (post.title && post.title.rendered) ? post.title.rendered : '';
-        return normalizeTitle(postTitle) === normalizedTarget;
-      });
-      
-      if (bestMatch && bestMatch.slug) {
-        console.log(`[REST API Slug Match] Trouvé pour "${title}" -> ${bestMatch.slug}`);
-        return bestMatch.slug;
-      }
-    }
+    const res = await axios.get(`${WP_BASE}/wp-json/wp/v2/posts/${wpId}`, { timeout: 8000 });
+    if (res.data && res.data.slug) return res.data.slug;
   } catch (err) {
-    console.log(`[REST API Slug Discovery] Échec de la recherche pour "${title}": ${err.message}`);
+    console.log(`  [Slug REST] Échec pour ID ${wpId}: ${err.message}`);
   }
-  
-  console.log(`[REST API Slug Discovery] Aucun résultat pour "${title}", fallback sur: ${cleanSlug}`);
-  return cleanSlug; // Default fallback
+  return slugify(title);
 }
 
-// Parse Command Line Arguments
+// ============================================================
+// Programme principal
+// ============================================================
+
 const args = process.argv.slice(2);
 let startIdx = 0;
-let limitCount = 25;
+let limitCount = 20;
 let cleanAll = false;
 
 for (let i = 0; i < args.length; i++) {
-  if (args[i] === '--start' && args[i + 1] !== undefined) {
-    startIdx = parseInt(args[i + 1], 10);
-  }
-  if (args[i] === '--limit' && args[i + 1] !== undefined) {
-    limitCount = parseInt(args[i + 1], 10);
-  }
-  if (args[i] === '--clean') {
-    cleanAll = true;
-  }
+  if (args[i] === '--start' && args[i + 1] !== undefined) startIdx = parseInt(args[i + 1], 10);
+  if (args[i] === '--limit' && args[i + 1] !== undefined) limitCount = parseInt(args[i + 1], 10);
+  if (args[i] === '--clean') cleanAll = true;
 }
 
 async function run() {
-  console.log("=== Début de la migration WordPress -> Sanity ===");
-  console.log(`Index de départ: ${startIdx}, Limite: ${limitCount}`);
+  console.log("=== Migration WordPress -> Sanity (v2) ===");
 
   if (cleanAll) {
-    console.log("Option --clean détectée. Suppression de tous les anciens articles...");
-    const query = `*[_type == "post" && _id match "wp-post-*"]{ _id }`;
+    console.log("Nettoyage : suppression des anciens articles importés (wp-post-*)...");
+    const query = `*[_type == "post" && (_id match "wp-post-*" || _id match "drafts.wp-post-*")]{_id, title}`;
     const oldPosts = await client.fetch(query);
-    console.log(`Trouvé ${oldPosts.length} articles à supprimer.`);
+    console.log(`Trouvé ${oldPosts.length} article(s) à supprimer.`);
     for (const p of oldPosts) {
-      console.log(`Suppression du post : ${p._id}`);
+      console.log(`  Suppression: ${p._id} (${p.title || 'sans titre'})`);
       await client.delete(p._id);
     }
-    console.log("Suppression terminée.");
+    console.log("Nettoyage terminé.\n");
   }
 
   const csvPath = path.join(__dirname, '..', 'public', 'Articles-Export-2026-June-07-1940.csv');
@@ -927,17 +622,11 @@ async function run() {
   }
 
   const fileContent = fs.readFileSync(csvPath, 'utf8');
-  console.log("Lecture du fichier CSV...");
-  const records = parse(fileContent, {
-    columns: true,
-    skip_empty_lines: true,
-    trim: true,
-  });
-
+  const records = parse(fileContent, { columns: true, skip_empty_lines: true, trim: true });
   console.log(`Nombre total d'articles trouvés dans le CSV : ${records.length}`);
 
-  // Sort records by Date descending (most recent first) to import newest first
-  console.log("Tri des articles par date décroissante (plus récents en premier)...");
+  const idKey = Object.keys(records[0]).find(k => k.trim().replace(/^﻿/, '').toLowerCase() === 'id');
+
   records.sort((a, b) => {
     const timeA = a.Date ? new Date(a.Date).getTime() : 0;
     const timeB = b.Date ? new Date(b.Date).getTime() : 0;
@@ -945,175 +634,90 @@ async function run() {
   });
 
   const batch = records.slice(startIdx, startIdx + limitCount);
-  console.log(`Traitement du lot de ${batch.length} articles (index ${startIdx} à ${startIdx + batch.length - 1})...`);
+  console.log(`Traitement de ${batch.length} article(s) (index ${startIdx} à ${startIdx + batch.length - 1} sur ${records.length})\n`);
 
   for (let i = 0; i < batch.length; i++) {
     const row = batch[i];
     const globalIdx = startIdx + i;
-    
-    // Dynamically detect the 'id' key to handle potential UTF-8 BOM characters
-    const idKey = Object.keys(row).find(k => k.trim().replace(/^\uFEFF/i, '').toLowerCase() === 'id');
-    const wpId = idKey ? row[idKey] : globalIdx;
-    
-    console.log(`\n--------------------------------------------------`);
-    console.log(`[${globalIdx + 1}/${records.length}] Importation de : "${row.Title}" (Date: ${row.Date}, ID WordPress: ${wpId})`);
+    const wpId = row[idKey];
+
+    console.log(`--------------------------------------------------`);
+    console.log(`[${globalIdx + 1}/${records.length}] "${row.Title}" (Date: ${row.Date}, ID WordPress: ${wpId})`);
 
     try {
-      // 1. Map ActivityType (Catégories)
+      // 1. ActivityType depuis les catégories
       const categories = row.Catégories || '';
-      let activityType = undefined;
       const lowerCats = categories.toLowerCase();
-      if (lowerCats.includes('alpinisme')) {
-        activityType = 'alpinisme';
-      } else if (lowerCats.includes('ski')) {
-        activityType = 'ski';
-      } else if (lowerCats.includes('escalade')) {
-        activityType = 'escalade';
-      } else if (lowerCats.includes('voyage')) {
-        activityType = 'voyage';
-      }
+      let activityType;
+      if (lowerCats.includes('alpinisme')) activityType = 'alpinisme';
+      else if (lowerCats.includes('ski')) activityType = 'ski';
+      else if (lowerCats.includes('escalade')) activityType = 'escalade';
+      else if (lowerCats.includes('voyage')) activityType = 'voyage';
 
-      // 2. Extract Tags and Categories as referenced Tag documents
-      const tagRefs = [];
+      // 2. Tags / catégories -> références "tag"
       const tagsSet = new Set();
       if (row.Étiquettes) {
         row.Étiquettes.split('|').map(t => t.trim()).filter(Boolean).forEach(t => tagsSet.add(t));
       }
       if (row.Catégories) {
         row.Catégories.split('|').forEach(cat => {
-          const parts = cat.split('>').map(p => p.trim()).filter(Boolean);
-          parts.forEach(p => tagsSet.add(p));
+          cat.split('>').map(p => p.trim()).filter(Boolean).forEach(p => tagsSet.add(p));
         });
       }
+      const tagRefs = [];
       for (const tag of tagsSet) {
         const ref = await getOrCreateTag(tag);
-        if (ref) {
-          tagRefs.push({
-            _key: generateKey(), // Ensure each item in the document tags array has a unique _key
-            ...ref
-          });
-        }
+        if (ref) tagRefs.push({ _key: generateKey(), ...ref });
       }
 
-      // 3. Generate clean Slug
-      const cleanSlug = slugify(row.Title) || `article-${wpId}`;
-      const actualSlug = await getActualWordPressSlug(wpId, row.Title, cleanSlug);
+      // 3. Slug canonique (API REST WordPress, fallback slugify)
+      const actualSlug = await resolveCanonicalSlug(wpId, row.Title) || slugify(row.Title) || `article-${wpId}`;
+      console.log(`  Slug: ${actualSlug}`);
 
-      // 4. Fetch live page to scrape ordered galleries / featured image
-      let liveFeaturedImage = null;
-      let liveGalleries = [];
-      let liveParsedBlocks = null;
-      let liveScrapeSuccess = false;
-      try {
-        const liveUrl = `https://la-montagne-guide.fr/${actualSlug}/`;
-        console.log(`[Scrape Live] Analyse de la page : ${liveUrl}`);
-        const response = await axios.get(liveUrl, { timeout: 10000 });
-        const $wp = cheerio.load(response.data);
-        liveScrapeSuccess = true;
-        
-        // Find featured image
-        const ogImage = $wp('meta[property="og:image"]').attr('content');
-        if (ogImage) {
-          liveFeaturedImage = ogImage;
-        } else {
-          const featImg = $wp('.et_post_meta_wrapper img, .entry-featured-image-url img, .post-thumbnail img').first().attr('src');
-          if (featImg) {
-            liveFeaturedImage = featImg;
-          }
-        }
-        
-        // Find all galleries on page in order (as fallback for CSV parser)
-        $wp('.et_pb_gallery, .gallery, .wp-block-gallery').each((_, galleryEl) => {
-          const galleryUrls = [];
-          $wp(galleryEl).find('img, a').each((__, imgEl) => {
-            const src = $wp(imgEl).attr('src') || $wp(imgEl).attr('href');
-            if (src && (src.endsWith('.jpg') || src.endsWith('.jpeg') || src.endsWith('.png') || src.includes('/wp-content/uploads/'))) {
-              let cleanSrc = src.trim();
-              if (cleanSrc.startsWith('//')) cleanSrc = 'https:' + cleanSrc;
-              galleryUrls.push(cleanSrc);
-            }
-          });
-          
-          // Deduplicate urls and pick original high-res candidates
-          const uniqueUrls = [];
-          const seen = new Set();
-          for (const url of galleryUrls) {
-            const candidates = getCandidates(url);
-            const originalUrl = candidates[0];
-            if (!seen.has(originalUrl)) {
-              seen.add(originalUrl);
-              uniqueUrls.push(originalUrl);
-            }
-          }
-          if (uniqueUrls.length > 0) {
-            liveGalleries.push(uniqueUrls);
-          }
-        });
-        
-        console.log(`[Scrape Live] Extraction en direct du contenu de la page...`);
-        liveParsedBlocks = await convertLiveHtmlToPortableText($wp, row);
-      } catch (err) {
-        console.log(`[Scrape Live] Échec ou timeout de l'analyse en direct : ${err.message}`);
-      }
+      // 4. Map des médias attachés depuis le CSV (id WP -> url/alt/caption)
+      const rowMediaMap = buildRowMediaMap(row);
 
-      // 5. Upload main featured image if available
+      // 5. Conversion du contenu en blocs Portable Text
+      console.log(`  Analyse du contenu...`);
+      const bodyBlocks = await parseContent(row.Content || '', rowMediaMap);
+      console.log(`  ${bodyBlocks.length} bloc(s) générés.`);
+
+      // 6. Image principale (première de la colonne "Image URL")
       let mainImageRef = null;
-      let featUrl = null;
-      if (row['Image URL']) {
-        const imageUrls = row['Image URL'].split('|').filter(Boolean);
-        if (imageUrls.length > 0) {
-          featUrl = imageUrls[0];
-        }
-      }
-      if (!featUrl && liveFeaturedImage) {
-        featUrl = liveFeaturedImage;
-        console.log(`Utilisation de l'image mise en avant trouvée en direct : ${featUrl}`);
-      }
-      if (featUrl) {
-        const imageAsset = await importImage(featUrl);
-        if (imageAsset) {
-          mainImageRef = imageAsset;
-        }
+      const featUrls = (row['Image URL'] || '').split('|').map(s => s.trim()).filter(Boolean);
+      if (featUrls.length > 0) {
+        const imgRef = await importImage(featUrls[0]);
+        if (imgRef) mainImageRef = { _type: 'image', asset: imgRef.asset };
       }
 
-      // 6. Convert body to Portable Text blocks (with HTML live parsing and CSV fallback)
-      let bodyBlocks = [];
-      if (liveScrapeSuccess && liveParsedBlocks && liveParsedBlocks.length > 0) {
-        console.log(`[Parser] Utilisation du contenu parsé en direct de la page HTML.`);
-        bodyBlocks = liveParsedBlocks;
-      } else {
-        console.log(`[Parser] Fallback : Conversion du contenu HTML brute du CSV.`);
-        bodyBlocks = await convertHtmlToPortableText(row.Content, row, liveGalleries);
-      }
+      // 7. Extrait dérivé du premier paragraphe non vide
+      const excerpt = deriveExcerpt(bodyBlocks);
 
-      // 7. Build document
+      // 8. Construction et écriture du document
       const doc = {
         _type: 'post',
-        _id: `wp-post-${wpId}`, // Maintain unique reference
-        title: row.Title,
-        slug: {
-          _type: 'slug',
-          current: actualSlug, // Save actual slug matching the original site's permalink
-        },
+        _id: `wp-post-${wpId}`,
+        title: decodeWpEntities(row.Title),
+        slug: { _type: 'slug', current: actualSlug },
+        excerpt,
         mainImage: mainImageRef || undefined,
         publishedAt: row.Date ? new Date(row.Date).toISOString() : new Date().toISOString(),
         body: bodyBlocks,
-        activityType: activityType,
+        activityType,
         tags: tagRefs.length > 0 ? tagRefs : undefined,
       };
 
-      // 8. Write to Sanity
-      console.log(`Création ou mise à jour de l'article dans Sanity...`);
       await client.createOrReplace(doc);
-      console.log(`✅ Article importé avec succès dans Sanity.`);
-
+      console.log(`  ✅ Article importé avec succès.`);
     } catch (err) {
-      console.error(`❌ Erreur lors de l'importation de l'article (ID ${wpId}):`, err);
+      console.error(`  ❌ Erreur lors de l'importation de l'article (ID ${wpId}):`, err);
     }
   }
 
-  console.log(`\n==================================================`);
-  console.log(`Migration du lot terminée avec succès.`);
+  console.log(`\n=== Migration du lot terminée ===`);
 }
 
-run();
+run().catch(err => {
+  console.error(err);
+  process.exit(1);
+});

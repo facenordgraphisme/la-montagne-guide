@@ -47,7 +47,14 @@ export const postType = defineType({
       type: 'array',
       of: [
         { type: 'block' },
-        { type: 'image', options: { hotspot: true } },
+        {
+          type: 'image',
+          options: { hotspot: true },
+          fields: [
+            { name: 'alt', type: 'string', title: 'Texte alternatif' },
+            { name: 'caption', type: 'string', title: 'Légende' },
+          ],
+        },
         {
           name: 'gallery',
           type: 'object',
@@ -57,7 +64,14 @@ export const postType = defineType({
               name: 'images',
               type: 'array',
               title: 'Images',
-              of: [{ type: 'image', options: { hotspot: true } }]
+              of: [{
+                type: 'image',
+                options: { hotspot: true },
+                fields: [
+                  { name: 'alt', type: 'string', title: 'Texte alternatif' },
+                  { name: 'caption', type: 'string', title: 'Légende' },
+                ],
+              }]
             }
           ]
         },

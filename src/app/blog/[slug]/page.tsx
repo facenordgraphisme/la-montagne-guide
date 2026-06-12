@@ -217,12 +217,6 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
               </div>
             )}
 
-            {post.excerpt && (
-              <p className="text-xl md:text-2xl font-medium text-foreground/90 mb-10 leading-relaxed border-l-2 border-accent pl-6">
-                {at(post.excerpt)}
-              </p>
-            )}
-            
             <div className="prose-custom">
               <PortableText value={translatePortableText(post.body)} components={components} />
             </div>
