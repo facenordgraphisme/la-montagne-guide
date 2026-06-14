@@ -5,7 +5,7 @@ import { client } from "@/sanity/lib/client";
 import { postBySlugQuery, postSlugsQuery } from "@/sanity/lib/queries";
 import { notFound } from 'next/navigation';
 import { PortableText } from '@portabletext/react';
-import { Calendar, ArrowLeft } from 'lucide-react';
+import { Calendar, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { urlFor } from "@/sanity/lib/image";
 import { getServerTranslations } from '@/i18n/server';
@@ -189,17 +189,52 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
       <section className="py-16">
         <div className="container mx-auto px-6">
           <div className="max-w-3xl mx-auto">
+            {/* Top Navigation */}
+            {(post.prevPost || post.nextPost) && (
+              <div className="flex items-center justify-between border-b border-border/40 pb-6 mb-8 gap-4">
+                {post.prevPost ? (
+                  <Link 
+                    href={`/blog/${post.prevPost.slug}`}
+                    className="group flex items-center gap-2 text-foreground/60 hover:text-accent transition-colors text-sm max-w-[48%] text-left"
+                  >
+                    <ChevronLeft size={18} className="shrink-0 transition-transform group-hover:-translate-x-1" />
+                    <span className="font-semibold line-clamp-1">{at(post.prevPost.title)}</span>
+                  </Link>
+                ) : (
+                  <div />
+                )}
+                
+                {post.nextPost ? (
+                  <Link 
+                    href={`/blog/${post.nextPost.slug}`}
+                    className="group flex items-center gap-2 text-foreground/60 hover:text-accent transition-colors text-sm max-w-[48%] text-right justify-end ml-auto"
+                  >
+                    <span className="font-semibold line-clamp-1">{at(post.nextPost.title)}</span>
+                    <ChevronRight size={18} className="shrink-0 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                ) : (
+                  <div />
+                )}
+              </div>
+            )}
+
             {/* Tags / Catégories */}
             {post.tags && post.tags.length > 0 && (
               <div className="flex flex-wrap gap-2.5 mb-8">
-                {post.tags.map((tag: string, idx: number) => (
-                  <span 
-                    key={idx} 
-                    className="inline-flex items-center bg-accent/10 text-accent font-semibold px-3.5 py-1.5 rounded-full text-xs uppercase tracking-wider border border-accent/20 hover:bg-accent/20 transition-colors duration-300 select-none"
-                  >
-                    {tag}
-                  </span>
-                ))}
+                {post.tags.map((tag: any, idx: number) => {
+                  const href = tag.tagType === 'massif' 
+                    ? `/blog?massif=${tag.slug}` 
+                    : `/blog?category=${tag.slug}`;
+                  return (
+                    <Link 
+                      key={idx} 
+                      href={href}
+                      className="inline-flex items-center bg-accent/10 text-accent font-semibold px-3.5 py-1.5 rounded-full text-xs uppercase tracking-wider border border-accent/20 hover:bg-accent/20 transition-colors duration-300 select-none"
+                    >
+                      {tag.name}
+                    </Link>
+                  );
+                })}
               </div>
             )}
 
@@ -208,7 +243,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
               <div className="relative w-full aspect-[16/10] md:aspect-[16/9] max-h-[450px] rounded-3xl overflow-hidden border border-border mb-10 shadow-lg">
                 <Image
                   src={post.image}
-                  alt={at(post.title)}
+                  alt={post.imageAlt ? at(post.imageAlt) : at(post.title)}
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 800px"
@@ -217,9 +252,54 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
               </div>
             )}
 
-            <div className="prose-custom">
+            <div className="prose-custom mb-16">
               <PortableText value={translatePortableText(post.body)} components={components} />
             </div>
+
+            {/* Photo Gallery (Root level) */}
+            {post.gallery && post.gallery.length > 0 && (
+              <div className="mt-16 border-t border-border/40 pt-10 mb-16">
+                <h2 className="text-3xl font-black tracking-tighter uppercase mb-8">
+                  {at('Galerie')} <span className="text-accent italic">{at('Photos')}</span>
+                </h2>
+                <ImageGallery images={post.gallery.map((img: any) => ({ src: img.url, alt: img.alt || '' }))} />
+              </div>
+            )}
+
+            {/* Bottom Navigation */}
+            {(post.prevPost || post.nextPost) && (
+              <div className="flex items-center justify-between border-t border-border/40 pt-8 mt-12 gap-4">
+                {post.prevPost ? (
+                  <Link 
+                    href={`/blog/${post.prevPost.slug}`}
+                    className="group flex items-center gap-2.5 text-foreground/60 hover:text-accent transition-colors text-sm max-w-[48%] text-left"
+                  >
+                    <ChevronLeft size={20} className="shrink-0 transition-transform group-hover:-translate-x-1" />
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase tracking-wider text-foreground/40 font-bold">{at('Article précédent')}</span>
+                      <span className="font-bold line-clamp-1">{at(post.prevPost.title)}</span>
+                    </div>
+                  </Link>
+                ) : (
+                  <div />
+                )}
+                
+                {post.nextPost ? (
+                  <Link 
+                    href={`/blog/${post.nextPost.slug}`}
+                    className="group flex items-center gap-2.5 text-foreground/60 hover:text-accent transition-colors text-sm max-w-[48%] text-right justify-end ml-auto"
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase tracking-wider text-foreground/40 font-bold">{at('Article suivant')}</span>
+                      <span className="font-bold line-clamp-1">{at(post.nextPost.title)}</span>
+                    </div>
+                    <ChevronRight size={20} className="shrink-0 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                ) : (
+                  <div />
+                )}
+              </div>
+            )}
           </div>
         </div>
       </section>

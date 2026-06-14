@@ -21,6 +21,7 @@ interface Sejour {
 
 interface Sortie {
   date: string
+  startDate?: string
   availableSpots: string
   isFull: boolean
   titleOverride?: string
@@ -68,12 +69,16 @@ const UpcomingSorties = ({
 
   const safeData = data || []
   
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
   const filteredSorties = safeData.filter(s => {
     if (!s.sejour) return false;
-    
-    const matchesCategory = filter === 'Tous les séjours' || getCategoryDisplay(s.sejour.activityType) === getCategoryDisplay(filter.toLowerCase());
-    // Special case for filters
-    const matchesCategoryFixed = filter === 'Tous les séjours' || s.sejour.activityType.toLowerCase().includes(filter.toLowerCase().replace('Tous les séjours', ''));
+
+    // Filter out past departures
+    const start = s.startDate ? new Date(s.startDate) : null;
+    if (start) start.setHours(0, 0, 0, 0);
+    if (start && start < today) return false;
     
     // Simplification for the filter logic to be language independent
     const currentCat = filter === 'Tous les séjours' ? 'all' : filter;

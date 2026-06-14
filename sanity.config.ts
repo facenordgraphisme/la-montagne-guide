@@ -2,6 +2,7 @@ import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
 import { visionTool } from '@sanity/vision'
 import { frFRLocale } from '@sanity/locale-fr-fr'
+import { media } from 'sanity-plugin-media'
 import { schema } from './src/sanity/schemaTypes'
 import { structure } from './src/sanity/structure'
 import { StudioLogo } from './src/sanity/components/StudioLogo'
@@ -20,6 +21,7 @@ export default defineConfig({
     structureTool({ structure }), 
     visionTool(),
     frFRLocale(),
+    media(),
   ],
   schema,
 })

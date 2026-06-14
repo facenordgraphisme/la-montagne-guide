@@ -55,6 +55,7 @@ export const testimonialsQuery = groq`*[_type == "testimonial"] | order(_created
 
 export const sortiesQuery = groq`*[_type == "sortie"] | order(startDate asc) {
   date,
+  startDate,
   availableSpots,
   isFull,
   titleOverride,
@@ -138,14 +139,18 @@ export const postsBySejourQuery = groq`*[_type == "post" && relatedSejour._ref =
   "slug": slug.current,
   "date": publishedAt,
   "image": mainImage.asset->url,
+  "imageAlt": mainImage.alt,
+  "imageName": mainImage.imageName,
   excerpt
 }`
 
-export const postsByActivityQuery = groq`*[_type == "post" && activityType == $activityType && !(relatedSejour._ref in $excludedIds)] | order(publishedAt desc)[0...6] {
+export const postsByActivityQuery = groq`*[_type == "post" && (activityType == $activityType || activityType->_ref == $activityType || activityType->type == $activityType || activityType->slug.current == $activityType) && !(relatedSejour._ref in $excludedIds)] | order(publishedAt desc)[0...6] {
   title,
   "slug": slug.current,
   "date": publishedAt,
   "image": mainImage.asset->url,
+  "imageAlt": mainImage.alt,
+  "imageName": mainImage.imageName,
   excerpt
 }`
 
@@ -219,6 +224,8 @@ export const blogTeaserQuery = groq`*[_type == "post"] | order(publishedAt desc)
   "slug": slug.current,
   "date": publishedAt,
   "image": mainImage.asset->url,
+  "imageAlt": mainImage.alt,
+  "imageName": mainImage.imageName,
   "excerpt": pt::text(body)
 }`
 
@@ -250,6 +257,8 @@ export const postsQuery = groq`*[_type == "post"] | order(publishedAt desc) {
   "slug": slug.current,
   "date": publishedAt,
   "image": mainImage.asset->url,
+  "imageAlt": mainImage.alt,
+  "imageName": mainImage.imageName,
   excerpt,
   "body": body,
   "tags": tags[]->name
@@ -266,6 +275,8 @@ export const postsPageQuery = groq`{
     "slug": slug.current,
     "date": publishedAt,
     "image": mainImage.asset->url,
+    "imageAlt": mainImage.alt,
+    "imageName": mainImage.imageName,
     excerpt
   },
   "total": count(*[_type == "post"
@@ -283,9 +294,20 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
   "slug": slug.current,
   "date": publishedAt,
   "image": mainImage.asset->url,
+  "imageAlt": mainImage.alt,
+  "imageName": mainImage.imageName,
   excerpt,
   body,
-  "tags": tags[]->name
+  "gallery": gallery[]{alt, "url": asset->url},
+  "tags": tags[]->{ name, "slug": slug.current, tagType },
+  "prevPost": *[_type == "post" && (publishedAt < ^.publishedAt || (publishedAt == ^.publishedAt && _createdAt < ^._createdAt))] | order(publishedAt desc, _createdAt desc)[0] {
+    title,
+    "slug": slug.current
+  },
+  "nextPost": *[_type == "post" && (publishedAt > ^.publishedAt || (publishedAt == ^.publishedAt && _createdAt > ^._createdAt))] | order(publishedAt asc, _createdAt asc)[0] {
+    title,
+    "slug": slug.current
+  }
 }`
 
 export const settingsQuery = groq`*[_type == "settings"][0]{

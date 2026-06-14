@@ -195,6 +195,9 @@ export const sejourType = defineType({
       name: 'gallery',
       title: 'Galerie photos',
       type: 'array',
+      options: {
+        layout: 'grid',
+      },
       of: [
         {
           type: 'image',

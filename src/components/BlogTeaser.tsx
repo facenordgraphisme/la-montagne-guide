@@ -10,6 +10,7 @@ interface Post {
   excerpt: string
   date: string
   image: string
+  imageAlt?: string
   slug: string
 }
 
@@ -46,6 +47,7 @@ const BlogTeaser = ({
       excerpt: at("Retour sur une semaine de ski de randonnée entre crêtes sauvages et neige de cinéma..."),
       date: at("Mars 2026"),
       image: "/photos/DSC_6614.jpg",
+      imageAlt: "",
       slug: "expedition-queyras"
     },
     {
@@ -53,6 +55,7 @@ const BlogTeaser = ({
       excerpt: at("Sélection des itinéraires incontournables pour s'initier ou se perfectionner cet hiver..."),
       date: at("Janvier 2026"),
       image: "/photos/DSC_6753.jpg",
+      imageAlt: "",
       slug: "cascades-glace-top"
     },
     {
@@ -60,6 +63,7 @@ const BlogTeaser = ({
       excerpt: at("Conseils d'expert pour l'entraînement physique et le choix du matériel avant l'été..."),
       date: at("Avril 2026"),
       image: "/images/alpinisme.jpg",
+      imageAlt: "",
       slug: "prepa-alpinisme"
     }
   ]
@@ -85,7 +89,7 @@ const BlogTeaser = ({
                 {post.image && (
                   <Image
                     src={post.image}
-                    alt={at(post.title)}
+                    alt={post.imageAlt ? at(post.imageAlt) : at(post.title)}
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-105"

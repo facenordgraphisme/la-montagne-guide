@@ -35,6 +35,20 @@ export const postType = defineType({
       options: {
         hotspot: true,
       },
+      fields: [
+        {
+          name: 'alt',
+          type: 'string',
+          title: 'Texte alternatif (Alt Text)',
+          description: 'Important pour l\'accessibilité et le référencement (SEO).',
+        },
+        {
+          name: 'imageName',
+          type: 'string',
+          title: 'Nom personnalisé / Titre de l\'image',
+          description: 'Pour organiser ou nommer l\'image.',
+        }
+      ]
     }),
     defineField({
       name: 'publishedAt',
@@ -92,15 +106,8 @@ export const postType = defineType({
     defineField({
       name: 'activityType',
       title: 'Catégorie (Type d\'activité)',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'Alpinisme', value: 'alpinisme' },
-          { title: 'Ski de randonnée', value: 'ski' },
-          { title: 'Escalade', value: 'escalade' },
-          { title: 'Voyage', value: 'voyage' },
-        ],
-      },
+      type: 'reference',
+      to: [{ type: 'activity' }],
       description: 'Catégorie principale de cet article — utilisée pour afficher les articles pertinents sur les pages séjour.',
     }),
     defineField({
@@ -116,6 +123,24 @@ export const postType = defineType({
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'tag' }] }],
       description: 'Tags et catégories associés à cet article'
+    }),
+    defineField({
+      name: 'gallery',
+      title: 'Galerie photos (Bas d\'article)',
+      type: 'array',
+      options: {
+        layout: 'grid',
+      },
+      of: [
+        {
+          type: 'image',
+          options: { hotspot: true },
+          fields: [
+            defineField({ name: 'alt', type: 'string', title: 'Texte alternatif' }),
+          ],
+        },
+      ],
+      description: 'Optionnel. Galerie de photos qui s\'affichera automatiquement en bas de l\'article.',
     }),
   ],
 })

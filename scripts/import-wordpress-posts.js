@@ -346,7 +346,7 @@ async function resolveMedia(idOrUrl, rowMediaMap) {
 // Pré-traitement des shortcodes WordPress / Divi
 // ============================================================
 
-function preprocessShortcodes(html, { divi }) {
+function preprocessShortcodes(html, { divi, attachedMediaIds }) {
   let s = html;
 
   // Supprime les commentaires Gutenberg (<!-- wp:... --> / <!-- /wp:... -->)
@@ -381,9 +381,10 @@ function preprocessShortcodes(html, { divi }) {
   }
 
   // [gallery ids="..."] (legacy - ids numériques WordPress ou URLs séparées par | ou ,)
+  // Sans attribut "ids", WordPress affiche toutes les images jointes à l'article (attachedMediaIds)
   s = s.replace(/\[gallery([^\]]*)\]/g, (m, attrs) => {
     const idsMatch = attrs.match(/ids=["']([^"']*)["']/);
-    const ids = idsMatch ? idsMatch[1] : '';
+    const ids = idsMatch ? idsMatch[1] : (attachedMediaIds || []).join(',');
     return ids ? `<wp-gallery data-ids="${escapeAttr(ids)}"></wp-gallery>` : '';
   });
 
@@ -470,6 +471,7 @@ async function processSpecialElement($, el, blocks, rowMediaMap) {
 }
 
 const SPECIAL_SELECTOR = 'wp-image-caption, wp-gallery, wp-video, wp-image, img';
+const SPECIAL_TAGS = ['wp-image-caption', 'wp-gallery', 'wp-video', 'wp-image', 'img'];
 
 async function nodesToBlocks($, nodes, rowMediaMap) {
   const blocks = [];
@@ -507,7 +509,7 @@ async function nodesToBlocks($, nodes, rowMediaMap) {
         const text = $(li).text().trim();
         if (text) blocks.push({ ...textBlock(text, 'normal'), listItem: listType });
       });
-    } else if (SPECIAL_SELECTOR.includes(tagName)) {
+    } else if (SPECIAL_TAGS.includes(tagName)) {
       await processSpecialElement($, el, blocks, rowMediaMap);
     } else if (tagName === 'figure') {
       const img = $el.find('img').first();
@@ -570,7 +572,8 @@ async function parseContent(content, rowMediaMap) {
   if (!content || !content.trim()) return [];
 
   const isDivi = /\[et_pb_/i.test(content);
-  const preprocessed = preprocessShortcodes(content, { divi: isDivi });
+  const attachedMediaIds = Array.from(rowMediaMap.keys());
+  const preprocessed = preprocessShortcodes(content, { divi: isDivi, attachedMediaIds });
   const $ = cheerio.load(preprocessed);
 
   const blocks = await nodesToBlocks($, $('body').contents().toArray(), rowMediaMap);

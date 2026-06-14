@@ -22,6 +22,7 @@ interface Sejour {
 
 interface Sortie {
   date: string
+  startDate?: string
   availableSpots: string
   isFull: boolean
   titleOverride?: string
@@ -76,6 +77,10 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
   const { at, t, language } = useLanguage()
   const [filter, setFilter] = useState(at('Tout voir'))
   const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [showPastSorties, setShowPastSorties] = useState(false)
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
   const categories = [at('Tout voir'), at('Alpinisme'), at('Escalade'), at('Ski'), at('Voyage'), at('Cascade de glace'), at('Paralpinisme')]
 
@@ -115,9 +120,21 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
     return level ? map[level] || level : ''
   }
 
-  const filteredSorties = initialSorties.filter(s => {
-    if (!s.sejour) return false;
-    return filter === at('Tout voir') || getCategoryLabel(s.sejour.activityType) === filter;
+  const filteredSorties = initialSorties
+    .filter(s => {
+      if (!s.sejour) return false;
+      return filter === at('Tout voir') || getCategoryLabel(s.sejour.activityType) === filter;
+    })
+    .map(s => {
+      const start = s.startDate ? new Date(s.startDate) : null;
+      if (start) start.setHours(0, 0, 0, 0);
+      const isPassed = start ? start < today : false;
+      return { ...s, isPassed };
+    });
+
+  const visibleSorties = filteredSorties.filter(s => {
+    if (showPastSorties) return true;
+    return !s.isPassed;
   });
 
   // Calendar Logic
@@ -141,7 +158,7 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
     for (let d = 1; d <= totalDays; d++) {
       const dateStr = `${d < 10 ? '0' + d : d}`;
       
-      const dailySorties = filteredSorties.filter(s => {
+      const dailySorties = visibleSorties.filter(s => {
         const parts = s.date.split(' ');
         const day = parts[0];
         const sMonth = parts[1]?.toLowerCase();
@@ -219,27 +236,36 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
       {/* Main Content */}
       <div className="flex-1 space-y-12">
         {/* Filters */}
-        <div className="flex flex-wrap gap-2 mb-12">
-          {categories.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setFilter(cat)}
-              className={`px-6 py-2 rounded-full text-[10px] font-black transition-all uppercase tracking-widest border ${
-                filter === cat
-                  ? 'bg-accent border-accent text-white shadow-xl scale-105'
-                  : 'bg-transparent border-white/10 text-foreground/40 hover:border-accent/40'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-12">
+          <div className="flex flex-wrap gap-2">
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setFilter(cat)}
+                className={`px-6 py-2 rounded-full text-[10px] font-black transition-all uppercase tracking-widest border ${
+                  filter === cat
+                    ? 'bg-accent border-accent text-white shadow-xl scale-105'
+                    : 'bg-transparent border-white/10 text-foreground/40 hover:border-accent/40'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setShowPastSorties(!showPastSorties)}
+            className="px-6 py-2 rounded-full text-[10px] font-black transition-all uppercase tracking-widest border border-accent text-accent hover:bg-accent hover:text-white shrink-0"
+          >
+            {showPastSorties ? at('Masquer les sorties passées') : at('Voir les sorties passées')}
+          </button>
         </div>
 
         {/* Grid of smaller cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <AnimatePresence mode="popLayout">
-            {filteredSorties.length > 0 ? (
-              filteredSorties.map((s, index) => (
+            {visibleSorties.length > 0 ? (
+              visibleSorties.map((s, index) => (
                 <motion.div
                   key={index}
                   layout
@@ -247,7 +273,11 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.4, delay: index * 0.05 }}
-                  className="group glass rounded-[40px] overflow-hidden flex flex-col border border-white/5 hover:border-accent/30 transition-all duration-500 shadow-xl"
+                  className={`group glass rounded-[40px] overflow-hidden flex flex-col border transition-all duration-500 shadow-xl ${
+                    s.isPassed 
+                      ? 'border-white/5 opacity-55 grayscale' 
+                      : 'border-white/5 hover:border-accent/30'
+                  }`}
                 >
                   {/* Image Card */}
                   <div className="relative aspect-[1.4] overflow-hidden">
@@ -269,6 +299,11 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                       {s.isFull && (
                         <span className="px-3 py-1 bg-red-500 text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-lg">
                           {at('Complet')}
+                        </span>
+                      )}
+                      {s.isPassed && (
+                        <span className="px-3 py-1 bg-zinc-600 text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-lg">
+                          {at('Terminée')}
                         </span>
                       )}
                     </div>
@@ -294,7 +329,7 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Users size={14} className="text-accent" />
-                          {at(s.availableSpots)}
+                          {s.isPassed ? at('Date passée') : at(s.availableSpots)}
                         </div>
                         <div className="flex items-center gap-1.5 text-highlight">
                           <BarChart3 size={14} />
@@ -312,6 +347,16 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                         <span className="text-xl font-black text-foreground">{at(s.sejour?.basePrice)}</span>
                       </div>
                       {(() => {
+                        if (s.isPassed) {
+                          return (
+                            <div 
+                              className="w-10 h-10 bg-foreground/10 rounded-xl flex items-center justify-center text-foreground/30 cursor-not-allowed"
+                              title={at("Cette sortie est passée")}
+                            >
+                              <ArrowRight size={18} />
+                            </div>
+                          );
+                        }
                         const universSlug = s.sejour?.subCategory?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
                         return (
                           <Link 
