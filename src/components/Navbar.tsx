@@ -32,7 +32,13 @@ const Navbar = ({ sanityActivities }: { sanityActivities?: any[] }) => {
   ]
 
   const activities = sanityActivities && sanityActivities.length > 0 
-    ? sanityActivities 
+    ? sanityActivities.map(act => {
+        const def = defaultActivities.find(d => d.slug === act.slug)
+        return {
+          ...act,
+          image: act.image || def?.image || "/images/hero.jpg"
+        }
+      })
     : defaultActivities;
 
   return (

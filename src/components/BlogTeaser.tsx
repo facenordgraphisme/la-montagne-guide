@@ -4,6 +4,7 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useLanguage } from '@/context/LanguageContext'
+import { getVanityImageUrl } from '@/sanity/lib/image'
 
 interface Post {
   title: string
@@ -11,6 +12,7 @@ interface Post {
   date: string
   image: string
   imageAlt?: string
+  imageName?: string
   slug: string
 }
 
@@ -48,6 +50,7 @@ const BlogTeaser = ({
       date: at("Mars 2026"),
       image: "/photos/DSC_6614.jpg",
       imageAlt: "",
+      imageName: "",
       slug: "expedition-queyras"
     },
     {
@@ -56,6 +59,7 @@ const BlogTeaser = ({
       date: at("Janvier 2026"),
       image: "/photos/DSC_6753.jpg",
       imageAlt: "",
+      imageName: "",
       slug: "cascades-glace-top"
     },
     {
@@ -64,6 +68,7 @@ const BlogTeaser = ({
       date: at("Avril 2026"),
       image: "/images/alpinisme.jpg",
       imageAlt: "",
+      imageName: "",
       slug: "prepa-alpinisme"
     }
   ]
@@ -88,7 +93,7 @@ const BlogTeaser = ({
               <div className="relative aspect-[16/10] rounded-[32px] overflow-hidden mb-6 shadow-lg">
                 {post.image && (
                   <Image
-                    src={post.image}
+                    src={getVanityImageUrl(post.image, post.imageName || post.imageAlt || post.title)}
                     alt={post.imageAlt ? at(post.imageAlt) : at(post.title)}
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"

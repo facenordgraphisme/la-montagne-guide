@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation';
 import { PortableText } from '@portabletext/react';
 import { Calendar, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { urlFor } from "@/sanity/lib/image";
+import { urlFor, getVanityImageUrl } from "@/sanity/lib/image";
 import { getServerTranslations } from '@/i18n/server';
 import ImageGallery from '@/components/ImageGallery';
 import { formatFriendlyDate } from '@/utils/date';
@@ -242,7 +242,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
             {post.image && (
               <div className="relative w-full aspect-[16/10] md:aspect-[16/9] max-h-[450px] rounded-3xl overflow-hidden border border-border mb-10 shadow-lg">
                 <Image
-                  src={post.image}
+                  src={getVanityImageUrl(post.image, post.imageName || post.imageAlt || post.title)}
                   alt={post.imageAlt ? at(post.imageAlt) : at(post.title)}
                   fill
                   priority

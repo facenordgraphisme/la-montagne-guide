@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Calendar } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { formatFriendlyDate } from '@/utils/date';
+import { getVanityImageUrl } from '@/sanity/lib/image';
 
 interface BlogCardProps {
   post: {
@@ -13,6 +14,7 @@ interface BlogCardProps {
     date: string;
     image: string;
     imageAlt?: string;
+    imageName?: string;
     excerpt?: string;
   };
 }
@@ -28,7 +30,7 @@ export default function BlogCard({ post }: BlogCardProps) {
         <div className="relative h-64 overflow-hidden">
           {post.image ? (
             <Image
-              src={post.image}
+              src={getVanityImageUrl(post.image, post.imageName || post.imageAlt || post.title)}
               alt={post.imageAlt ? at(post.imageAlt) : at(post.title)}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
