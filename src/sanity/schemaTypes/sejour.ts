@@ -1,6 +1,5 @@
 import { defineField, defineType } from 'sanity'
 import { Mountain } from 'lucide-react'
-import { AutoFilenameImageInput } from '../components/AutoFilenameImageInput'
 
 export const sejourType = defineType({
   name: 'sejour',
@@ -203,9 +202,6 @@ export const sejourType = defineType({
         {
           type: 'image',
           options: { hotspot: true },
-          components: {
-            input: AutoFilenameImageInput
-          },
           fields: [
             defineField({ name: 'alt', type: 'string', title: 'Texte alternatif' }),
           ],

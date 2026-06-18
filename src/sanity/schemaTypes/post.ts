@@ -1,6 +1,5 @@
 import { defineField, defineType } from 'sanity'
 import { FileText } from 'lucide-react'
-import { AutoFilenameImageInput } from '../components/AutoFilenameImageInput'
 
 export const postType = defineType({
   name: 'post',
@@ -36,9 +35,6 @@ export const postType = defineType({
       options: {
         hotspot: true,
       },
-      components: {
-        input: AutoFilenameImageInput
-      },
       fields: [
         {
           name: 'alt',
@@ -68,9 +64,6 @@ export const postType = defineType({
         {
           type: 'image',
           options: { hotspot: true },
-          components: {
-            input: AutoFilenameImageInput
-          },
           fields: [
             { name: 'alt', type: 'string', title: 'Texte alternatif' },
             { name: 'caption', type: 'string', title: 'Légende' },
@@ -88,9 +81,6 @@ export const postType = defineType({
               of: [{
                 type: 'image',
                 options: { hotspot: true },
-                components: {
-                  input: AutoFilenameImageInput
-                },
                 fields: [
                   { name: 'alt', type: 'string', title: 'Texte alternatif' },
                   { name: 'caption', type: 'string', title: 'Légende' },
@@ -145,9 +135,6 @@ export const postType = defineType({
         {
           type: 'image',
           options: { hotspot: true },
-          components: {
-            input: AutoFilenameImageInput
-          },
           fields: [
             defineField({ name: 'alt', type: 'string', title: 'Texte alternatif' }),
           ],
