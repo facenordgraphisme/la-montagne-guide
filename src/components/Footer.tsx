@@ -102,7 +102,20 @@ const Footer = ({ contactData, settingsData }: FooterProps) => {
         </div>
         
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between gap-4 text-sm text-foreground/30 font-medium">
-          <p>© {new Date().getFullYear()} {settingsData?.siteName || "La Montagne Guide"}. {language === 'en' && settingsData?.copyrightEn ? settingsData.copyrightEn : (settingsData?.copyright || at('Tous droits réservés.'))}</p>
+          <div>
+            <p>© {new Date().getFullYear()} {settingsData?.siteName || "La Montagne Guide"}. {language === 'en' && settingsData?.copyrightEn ? settingsData.copyrightEn : (settingsData?.copyright || at('Tous droits réservés.'))}</p>
+            <p className="mt-1.5 text-[11px] text-foreground/20">
+              {at('Propulsé par')}{' '}
+              <a 
+                href="https://facenordgraphisme.fr" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="hover:text-accent transition-colors underline decoration-dotted"
+              >
+                Face Nord Graphisme
+              </a>
+            </p>
+          </div>
           <div className="flex gap-8">
             <Link href="/mentions-legales" className="hover:text-accent transition-colors">{at('Mentions Légales')}</Link>
             <Link href="/confidentialite" className="hover:text-accent transition-colors">{at('Confidentialité')}</Link>
