@@ -8,13 +8,33 @@ interface RichContentProps {
   value: any[]
 }
 
+const isChildrenEmpty = (children: any) => {
+  if (!children) return true;
+  if (Array.isArray(children)) {
+    return children.length === 0 || (children.length === 1 && (children[0] === '' || children[0] === null));
+  }
+  return children === '';
+};
+
 // Composants PortableText avec support des styles d'alignement — définis côté client
 const portableTextComponents: PortableTextComponents = {
   block: {
-    blockCenter: ({ children }) => <p style={{ textAlign: 'center' }}>{children}</p>,
-    blockRight: ({ children }) => <p style={{ textAlign: 'right' }}>{children}</p>,
-    blockJustify: ({ children }) => <p style={{ textAlign: 'justify' }}>{children}</p>,
-    normal: ({ children }) => <p>{children}</p>,
+    blockCenter: ({ children }) => {
+      const isEmpty = isChildrenEmpty(children);
+      return <p style={{ textAlign: 'center', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
+    },
+    blockRight: ({ children }) => {
+      const isEmpty = isChildrenEmpty(children);
+      return <p style={{ textAlign: 'right', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
+    },
+    blockJustify: ({ children }) => {
+      const isEmpty = isChildrenEmpty(children);
+      return <p style={{ textAlign: 'justify', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
+    },
+    normal: ({ children }) => {
+      const isEmpty = isChildrenEmpty(children);
+      return <p style={{ minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
+    },
     h2: ({ children }) => <h2>{children}</h2>,
     h3: ({ children }) => <h3>{children}</h3>,
   },

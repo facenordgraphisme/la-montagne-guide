@@ -16,9 +16,22 @@ const VALID_ACTIVITIES = ['alpinisme', 'ski', 'escalade', 'cascade-de-glace', 'p
 
 const blockAlignComponents = {
   block: {
-    blockCenter: ({ children }: any) => <p style={{ textAlign: 'center' }}>{children}</p>,
-    blockRight: ({ children }: any) => <p style={{ textAlign: 'right' }}>{children}</p>,
-    blockJustify: ({ children }: any) => <p style={{ textAlign: 'justify' }}>{children}</p>,
+    normal: ({ children }: any) => {
+      const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
+      return <p style={{ minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
+    },
+    blockCenter: ({ children }: any) => {
+      const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
+      return <p style={{ textAlign: 'center', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
+    },
+    blockRight: ({ children }: any) => {
+      const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
+      return <p style={{ textAlign: 'right', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
+    },
+    blockJustify: ({ children }: any) => {
+      const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
+      return <p style={{ textAlign: 'justify', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
+    },
   }
 };
 

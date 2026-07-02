@@ -18,10 +18,38 @@ const components = {
     h1: ({ children }: any) => <h1 className="text-4xl md:text-5xl font-bold mb-8 mt-12 text-foreground">{children}</h1>,
     h2: ({ children }: any) => <h2 className="text-3xl md:text-4xl font-bold mb-6 mt-10 text-foreground">{children}</h2>,
     h3: ({ children }: any) => <h3 className="text-2xl md:text-3xl font-bold mb-4 mt-8 text-foreground">{children}</h3>,
-    normal: ({ children }: any) => <p className="text-lg md:text-xl text-foreground/70 leading-relaxed mb-6">{children}</p>,
-    blockCenter: ({ children }: any) => <p className="text-lg md:text-xl text-foreground/70 leading-relaxed mb-6 text-center">{children}</p>,
-    blockRight: ({ children }: any) => <p className="text-lg md:text-xl text-foreground/70 leading-relaxed mb-6 text-right">{children}</p>,
-    blockJustify: ({ children }: any) => <p className="text-lg md:text-xl text-foreground/70 leading-relaxed mb-6 text-justify">{children}</p>,
+    normal: ({ children }: any) => {
+      const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
+      return (
+        <p className="text-lg md:text-xl text-foreground/70 leading-relaxed mb-6 text-justify" style={isEmpty ? { minHeight: '1.5em' } : undefined}>
+          {isEmpty ? '\u00a0' : children}
+        </p>
+      );
+    },
+    blockCenter: ({ children }: any) => {
+      const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
+      return (
+        <p className="text-lg md:text-xl text-foreground/70 leading-relaxed mb-6 text-center" style={isEmpty ? { minHeight: '1.5em' } : undefined}>
+          {isEmpty ? '\u00a0' : children}
+        </p>
+      );
+    },
+    blockRight: ({ children }: any) => {
+      const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
+      return (
+        <p className="text-lg md:text-xl text-foreground/70 leading-relaxed mb-6 text-right" style={isEmpty ? { minHeight: '1.5em' } : undefined}>
+          {isEmpty ? '\u00a0' : children}
+        </p>
+      );
+    },
+    blockJustify: ({ children }: any) => {
+      const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
+      return (
+        <p className="text-lg md:text-xl text-foreground/70 leading-relaxed mb-6 text-justify" style={isEmpty ? { minHeight: '1.5em' } : undefined}>
+          {isEmpty ? '\u00a0' : children}
+        </p>
+      );
+    },
     blockquote: ({ children }: any) => (
       <blockquote className="border-l-4 border-accent pl-6 py-4 my-10 italic text-2xl text-foreground/90 bg-accent/5 rounded-r-2xl">
         {children}
@@ -34,6 +62,7 @@ const components = {
   },
   types: {
     image: ({ value }: any) => {
+      if (!value || !value.asset) return null;
       return (
         <div className="my-12">
           <div className="relative w-full h-[400px] md:h-[600px] rounded-[2rem] overflow-hidden border border-border">
