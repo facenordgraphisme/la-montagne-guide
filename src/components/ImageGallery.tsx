@@ -7,6 +7,7 @@ import { X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 interface GalleryImage {
   src: string;
   alt: string;
+  caption?: string;
 }
 
 interface ImageGalleryProps {
@@ -59,27 +60,33 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
   return (
     <div className="my-12">
       {/* Grid Layout */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
         {images.map((img, idx) => (
-          <button
-            key={idx}
-            onClick={() => openLightbox(idx)}
-            className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-border group hover:border-accent/40 transition-all duration-300 block w-full text-left cursor-pointer"
-          >
-            <Image
-              src={img.src}
-              alt={img.alt || 'Image galerie'}
-              fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
-              <span className="text-white text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-background/80 px-4 py-2 rounded-full backdrop-blur-xs flex items-center gap-1.5 shadow-lg border border-white/10">
-                <ZoomIn size={14} />
-                Zoom
-              </span>
-            </div>
-          </button>
+          <div key={idx} className="flex flex-col gap-2">
+            <button
+              onClick={() => openLightbox(idx)}
+              className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-border group hover:border-accent/40 transition-all duration-300 block w-full text-left cursor-pointer"
+            >
+              <Image
+                src={img.src}
+                alt={img.alt || img.caption || 'Image galerie'}
+                fill
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+                <span className="text-white text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-background/80 px-4 py-2 rounded-full backdrop-blur-xs flex items-center gap-1.5 shadow-lg border border-white/10">
+                  <ZoomIn size={14} />
+                  Zoom
+                </span>
+              </div>
+            </button>
+            {img.caption && (
+              <p className="text-center text-xs text-foreground/60 italic font-medium px-2">
+                {img.caption}
+              </p>
+            )}
+          </div>
         ))}
       </div>
 
@@ -144,10 +151,10 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
           </div>
 
           {/* Caption / Footer */}
-          {images[selectedIndex].alt && (
+          {(images[selectedIndex].caption || images[selectedIndex].alt) && (
             <div className="text-center text-white/80 max-w-2xl mx-auto z-10 pb-2">
               <p className="text-sm md:text-base bg-white/5 border border-white/10 backdrop-blur-md px-4 py-2 rounded-xl">
-                {images[selectedIndex].alt}
+                {images[selectedIndex].caption || images[selectedIndex].alt}
               </p>
             </div>
           )}

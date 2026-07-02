@@ -14,6 +14,14 @@ import { getServerTranslations } from '@/i18n/server';
 
 const VALID_ACTIVITIES = ['alpinisme', 'ski', 'escalade', 'cascade-de-glace', 'paralpinisme', 'voyages'];
 
+const blockAlignComponents = {
+  block: {
+    blockCenter: ({ children }: any) => <p style={{ textAlign: 'center' }}>{children}</p>,
+    blockRight: ({ children }: any) => <p style={{ textAlign: 'right' }}>{children}</p>,
+    blockJustify: ({ children }: any) => <p style={{ textAlign: 'justify' }}>{children}</p>,
+  }
+};
+
 export async function generateMetadata({ params }: { params: Promise<{ activitySlug: string }> }): Promise<Metadata> {
   const { activitySlug } = await params;
   if (!VALID_ACTIVITIES.includes(activitySlug)) {
@@ -104,7 +112,6 @@ export default async function ActivityLandingPage({ params }: { params: Promise<
       <section className="py-24">
         <div className="container mx-auto px-6">
           <div className="text-center mb-20">
-            <span className="text-accent font-black tracking-widest uppercase text-xs mb-4 block">{at(activity.universBadge || "NOS UNIVERS")}</span>
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-6">{at(activity.universTitle || "Choisissez votre univers")}</h2>
             <p className="text-lg text-foreground/60 max-w-2xl mx-auto font-medium">
               {at(activity.universDescription || "Découvrez nos différentes approches de la montagne, adaptées à vos envies et à votre niveau.")}
@@ -140,7 +147,7 @@ export default async function ActivityLandingPage({ params }: { params: Promise<
                     <div className="text-foreground/60 text-lg mb-8 max-w-md line-clamp-2 font-medium opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
                       {univ.description && (
                         <div className="prose-custom prose-sm">
-                          <PortableText value={translatePortableText(univ.description)} />
+                          <PortableText value={translatePortableText(univ.description)} components={blockAlignComponents} />
                         </div>
                       )}
                     </div>

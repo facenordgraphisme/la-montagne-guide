@@ -73,7 +73,18 @@ export const homeType = defineType({
       name: 'aboutDescription',
       title: 'Description À Propos',
       type: 'array',
-      of: [{ type: 'block' }],
+      of: [{
+        type: 'block',
+        styles: [
+          { title: 'Normal', value: 'normal' },
+          { title: 'H2', value: 'h2' },
+          { title: 'H3', value: 'h3' },
+          { title: 'Centré', value: 'blockCenter' },
+          { title: 'Justifié', value: 'blockJustify' },
+          { title: 'Droite', value: 'blockRight' },
+          { title: 'Citation', value: 'blockquote' }
+        ]
+      }],
       group: 'about',
     }),
     defineField({

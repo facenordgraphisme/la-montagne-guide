@@ -8,6 +8,14 @@ import { PortableText } from '@portabletext/react'
 
 import { useLanguage } from '@/context/LanguageContext'
 
+const blockAlignComponents = {
+  block: {
+    blockCenter: ({ children }: any) => <p style={{ textAlign: 'center' }}>{children}</p>,
+    blockRight: ({ children }: any) => <p style={{ textAlign: 'right' }}>{children}</p>,
+    blockJustify: ({ children }: any) => <p style={{ textAlign: 'justify' }}>{children}</p>,
+  }
+}
+
 interface AboutProps {
   badge?: string
   title?: string
@@ -70,7 +78,7 @@ const AboutSection = ({
             </h2>
             <div className="space-y-6 text-foreground/70 text-lg leading-relaxed mb-10">
               {description ? (
-                <PortableText value={translatePortableText(description)} />
+                <PortableText value={translatePortableText(description)} components={blockAlignComponents} />
               ) : (
                 <>
                   <p>

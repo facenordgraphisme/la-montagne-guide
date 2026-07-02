@@ -7,6 +7,14 @@ import { PortableText } from '@portabletext/react'
 import { useLanguage } from '@/context/LanguageContext'
 import UpcomingSorties from "@/components/UpcomingSorties"
 
+const blockAlignComponents = {
+  block: {
+    blockCenter: ({ children }: any) => <p style={{ textAlign: 'center' }}>{children}</p>,
+    blockRight: ({ children }: any) => <p style={{ textAlign: 'right' }}>{children}</p>,
+    blockJustify: ({ children }: any) => <p style={{ textAlign: 'justify' }}>{children}</p>,
+  }
+}
+
 interface PrestationContentProps {
   data: any
   initialLang?: 'fr' | 'en'
@@ -164,7 +172,7 @@ const PrestationContent = ({ data, initialLang = 'fr' }: PrestationContentProps)
                 <div key={i} className="group p-8 rounded-[40px] border border-border hover:border-accent transition-all hover:bg-accent/5">
                   <h3 className="text-2xl font-bold mb-4 group-hover:text-accent transition-colors">{at(univ.title)}</h3>
                   <div className="text-foreground/60 leading-relaxed prose-p:mb-0">
-                    <PortableText value={translatePortableText(univ.description)} />
+                    <PortableText value={translatePortableText(univ.description)} components={blockAlignComponents} />
                   </div>
                 </div>
               ))}

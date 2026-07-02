@@ -298,7 +298,7 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
   "imageName": mainImage.imageName,
   excerpt,
   body,
-  "gallery": gallery[]{alt, "url": asset->url},
+  "gallery": gallery[]{caption, "url": asset->url},
   "tags": tags[]->{ name, "slug": slug.current, tagType },
   "prevPost": *[_type == "post" && (publishedAt < ^.publishedAt || (publishedAt == ^.publishedAt && _createdAt < ^._createdAt))] | order(publishedAt desc, _createdAt desc)[0] {
     title,

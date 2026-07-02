@@ -24,6 +24,14 @@ function blocksToText(blocks: any, lang: string): string {
     .trim();
 }
 
+const blockAlignComponents = {
+  block: {
+    blockCenter: ({ children }: any) => <p style={{ textAlign: 'center' }}>{children}</p>,
+    blockRight: ({ children }: any) => <p style={{ textAlign: 'right' }}>{children}</p>,
+    blockJustify: ({ children }: any) => <p style={{ textAlign: 'justify' }}>{children}</p>,
+  }
+};
+
 export async function generateMetadata({ params }: { params: Promise<{ activitySlug: string, subCategorySlug: string }> }): Promise<Metadata> {
   const { activitySlug, subCategorySlug } = await params;
   const activity = await client.fetch(activityBySlugQuery, { slug: activitySlug });
@@ -118,7 +126,6 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
             {at('RETOUR À')} {at(activity.title).toUpperCase()}
           </Link>
           
-          <span className="text-accent font-black tracking-[0.4em] uppercase text-xs mb-6 block">{at("L'UNIVERS")}</span>
           <h1 className="text-6xl md:text-9xl font-black tracking-tighter uppercase leading-[0.8] text-white mb-12">
             {at(currentUnivers.title)}
           </h1>
@@ -131,7 +138,7 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
           <div className="glass p-12 md:p-24 rounded-[60px] border border-white/10 shadow-2xl bg-background/80 backdrop-blur-3xl max-w-5xl mx-auto text-center relative">
             <div className="prose-custom prose-xl mx-auto mb-16">
               {currentUnivers.description ? (
-                <PortableText value={translatePortableText(currentUnivers.description)} />
+                <PortableText value={translatePortableText(currentUnivers.description)} components={blockAlignComponents} />
               ) : (
                 <p className="text-foreground/60">{at('Description à venir pour cet univers.')}</p>
               )}

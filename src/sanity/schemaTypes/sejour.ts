@@ -119,7 +119,18 @@ export const sejourType = defineType({
       name: 'content',
       title: 'Contenu riche (Programme, etc.)',
       type: 'array',
-      of: [{ type: 'block' }, { type: 'image' }],
+      of: [{
+        type: 'block',
+        styles: [
+          { title: 'Normal', value: 'normal' },
+          { title: 'H2', value: 'h2' },
+          { title: 'H3', value: 'h3' },
+          { title: 'Centré', value: 'blockCenter' },
+          { title: 'Justifié', value: 'blockJustify' },
+          { title: 'Droite', value: 'blockRight' },
+          { title: 'Citation', value: 'blockquote' }
+        ],
+      }, { type: 'image' }],
     }),
     defineField({
       name: 'programme',

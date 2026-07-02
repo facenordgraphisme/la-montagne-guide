@@ -37,12 +37,6 @@ export const postType = defineType({
       },
       fields: [
         {
-          name: 'alt',
-          type: 'string',
-          title: 'Texte alternatif (Alt Text)',
-          description: 'Important pour l\'accessibilité et le référencement (SEO).',
-        },
-        {
           name: 'imageName',
           type: 'string',
           title: 'Nom personnalisé / Titre de l\'image',
@@ -60,12 +54,22 @@ export const postType = defineType({
       title: 'Corps',
       type: 'array',
       of: [
-        { type: 'block' },
+        {
+          type: 'block',
+          styles: [
+            { title: 'Normal', value: 'normal' },
+            { title: 'H2', value: 'h2' },
+            { title: 'H3', value: 'h3' },
+            { title: 'Centré', value: 'blockCenter' },
+            { title: 'Justifié', value: 'blockJustify' },
+            { title: 'Droite', value: 'blockRight' },
+            { title: 'Citation', value: 'blockquote' }
+          ]
+        },
         {
           type: 'image',
           options: { hotspot: true },
           fields: [
-            { name: 'alt', type: 'string', title: 'Texte alternatif' },
             { name: 'caption', type: 'string', title: 'Légende' },
           ],
         },
@@ -82,7 +86,6 @@ export const postType = defineType({
                 type: 'image',
                 options: { hotspot: true },
                 fields: [
-                  { name: 'alt', type: 'string', title: 'Texte alternatif' },
                   { name: 'caption', type: 'string', title: 'Légende' },
                 ],
               }]
@@ -136,7 +139,7 @@ export const postType = defineType({
           type: 'image',
           options: { hotspot: true },
           fields: [
-            defineField({ name: 'alt', type: 'string', title: 'Texte alternatif' }),
+            { name: 'caption', type: 'string', title: 'Légende' },
           ],
         },
       ],

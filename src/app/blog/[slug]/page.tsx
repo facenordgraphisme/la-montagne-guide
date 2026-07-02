@@ -19,6 +19,9 @@ const components = {
     h2: ({ children }: any) => <h2 className="text-3xl md:text-4xl font-bold mb-6 mt-10 text-foreground">{children}</h2>,
     h3: ({ children }: any) => <h3 className="text-2xl md:text-3xl font-bold mb-4 mt-8 text-foreground">{children}</h3>,
     normal: ({ children }: any) => <p className="text-lg md:text-xl text-foreground/70 leading-relaxed mb-6">{children}</p>,
+    blockCenter: ({ children }: any) => <p className="text-lg md:text-xl text-foreground/70 leading-relaxed mb-6 text-center">{children}</p>,
+    blockRight: ({ children }: any) => <p className="text-lg md:text-xl text-foreground/70 leading-relaxed mb-6 text-right">{children}</p>,
+    blockJustify: ({ children }: any) => <p className="text-lg md:text-xl text-foreground/70 leading-relaxed mb-6 text-justify">{children}</p>,
     blockquote: ({ children }: any) => (
       <blockquote className="border-l-4 border-accent pl-6 py-4 my-10 italic text-2xl text-foreground/90 bg-accent/5 rounded-r-2xl">
         {children}
@@ -57,7 +60,8 @@ const components = {
           if (!img || !img.asset) return null;
           return {
             src: urlFor(img).url(),
-            alt: img.alt || ''
+            alt: img.caption || '',
+            caption: img.caption || ''
           };
         })
         .filter(Boolean);
@@ -262,7 +266,7 @@ export default async function PostDetail({ params }: { params: Promise<{ slug: s
                 <h2 className="text-3xl font-black tracking-tighter uppercase mb-8">
                   {at('Galerie')} <span className="text-accent italic">{at('Photos')}</span>
                 </h2>
-                <ImageGallery images={post.gallery.map((img: any) => ({ src: img.url, alt: img.alt || '' }))} />
+                <ImageGallery images={post.gallery.map((img: any) => ({ src: img.url, alt: img.caption || '', caption: img.caption || '' }))} />
               </div>
             )}
 
