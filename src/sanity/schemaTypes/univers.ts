@@ -52,5 +52,11 @@ export const universType = defineType({
       type: 'image',
       options: { hotspot: true },
     }),
+    defineField({
+      name: 'catalogTitle',
+      title: 'Titre du catalogue de séjours',
+      type: 'string',
+      description: 'Optionnel. Par défaut: "Catalogue Séjours".',
+    }),
   ],
 })

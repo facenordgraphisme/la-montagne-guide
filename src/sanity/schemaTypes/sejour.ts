@@ -226,5 +226,11 @@ export const sejourType = defineType({
       initialValue: false,
       description: 'Cochez pour masquer les dates de sorties sur la page de ce séjour (ex: séjour uniquement sur demande privée).',
     }),
+    defineField({
+      name: 'bookAdventureUrl',
+      title: 'Lien de réservation Book\'Adventure (Séjour)',
+      type: 'url',
+      description: 'Optionnel. Si défini, le bouton de réservation principal renverra vers ce lien plutôt que vers le formulaire de contact.',
+    }),
   ],
 })

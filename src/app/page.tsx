@@ -7,21 +7,25 @@ import AdventureStart from "@/components/AdventureStart";
 import ContactHome from "@/components/ContactHome";
 import Testimonials from "@/components/Testimonials";
 import BlogTeaser from "@/components/BlogTeaser";
+import FAQAccordion from "@/components/FAQAccordion";
 import Footer from "@/components/Footer";
 import PartnersSlider from "@/components/PartnersSlider";
 
 import { client } from "@/sanity/lib/client";
-import { homeQuery, sortiesQuery, testimonialsQuery, blogTeaserQuery, activitiesQuery, settingsQuery } from "@/sanity/lib/queries";
+import { homeQuery, sortiesQuery, testimonialsQuery, blogTeaserQuery, activitiesQuery, settingsQuery, faqsQuery } from "@/sanity/lib/queries";
+import { getServerTranslations } from '@/i18n/server';
 
 export default async function Home() {
   const homeData = await client.fetch(homeQuery);
+  const { at } = await getServerTranslations();
   const limit = homeData?.featuredPostsLimit || 3;
-  const [sortiesData, testimonialsData, blogTeaserData, activitiesData, settingsData] = await Promise.all([
+  const [sortiesData, testimonialsData, blogTeaserData, activitiesData, settingsData, faqsData] = await Promise.all([
     client.fetch(sortiesQuery),
     client.fetch(testimonialsQuery),
     client.fetch(blogTeaserQuery, { limit }),
     client.fetch(activitiesQuery),
-    client.fetch(settingsQuery)
+    client.fetch(settingsQuery),
+    client.fetch(faqsQuery)
   ]);
 
   const jsonLd = {
@@ -112,6 +116,7 @@ export default async function Home() {
             className="bg-background"
           />
         )}
+        <FAQAccordion faqs={faqsData} />
         {!settingsData?.hidePartners && (
           <PartnersSlider partners={settingsData?.partners} />
         )}

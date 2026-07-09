@@ -103,8 +103,8 @@ export const sejoursByActivityQuery = groq`*[_type == "sejour" && activityType =
 
 export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $slug][0] {
   ...,
-  "slug": slug.current,
   "subCategory": subCategory->slug.current,
+  "subCategoryTitle": subCategory->title,
   "image": image.asset->url,
   priceEncadrement,
   priceFraisSejour,
@@ -183,7 +183,8 @@ export const activitiesQuery = groq`*[_type == "activity"] | order(title asc) {
     title,
     "slug": slug.current,
     description,
-    "image": image.asset->url
+    "image": image.asset->url,
+    catalogTitle
   },
   price,
   period,
@@ -210,7 +211,8 @@ export const activityBySlugQuery = groq`*[_type == "activity" && slug.current ==
     title,
     "slug": slug.current,
     description,
-    "image": image.asset->url
+    "image": image.asset->url,
+    catalogTitle
   },
   price,
   period,
@@ -241,7 +243,13 @@ export const guideQuery = groq`*[_type == "guide"][0] {
   certificationSub,
   experience,
   experienceSub,
-  values
+  values,
+  sections[] {
+    title,
+    content,
+    image,
+    imagePosition
+  }
 }`
 
 export const contactQuery = groq`*[_type == "contact"][0] {

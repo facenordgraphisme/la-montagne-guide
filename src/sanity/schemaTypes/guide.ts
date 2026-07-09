@@ -90,5 +90,52 @@ export const guideType = defineType({
         },
       ],
     }),
+    defineField({
+      name: 'sections',
+      title: 'Sections de la biographie',
+      type: 'array',
+      description: 'Ajoutez des blocs de contenu alternés (image à gauche ou à droite) pour structurer le texte.',
+      of: [
+        {
+          type: 'object',
+          name: 'aboutSection',
+          title: 'Section de contenu',
+          fields: [
+            defineField({ name: 'title', title: 'Titre de la section', type: 'string' }),
+            defineField({
+              name: 'content',
+              title: 'Contenu (Texte)',
+              type: 'array',
+              of: [{
+                type: 'block',
+                styles: [
+                  { title: 'Normal', value: 'normal' },
+                  { title: 'H2', value: 'h2' },
+                  { title: 'H3', value: 'h3' },
+                  { title: 'Centré', value: 'blockCenter' },
+                  { title: 'Justifié', value: 'blockJustify' },
+                  { title: 'Droite', value: 'blockRight' },
+                  { title: 'Citation', value: 'blockquote' }
+                ]
+              }]
+            }),
+            defineField({ name: 'image', title: 'Image', type: 'image', options: { hotspot: true } }),
+            defineField({
+              name: 'imagePosition',
+              title: 'Position de l\'image',
+              type: 'string',
+              initialValue: 'left',
+              options: {
+                list: [
+                  { title: 'Image à gauche, texte à droite', value: 'left' },
+                  { title: 'Image à droite, texte à gauche', value: 'right' }
+                ],
+                layout: 'radio'
+              }
+            })
+          ]
+        }
+      ]
+    }),
   ],
 })

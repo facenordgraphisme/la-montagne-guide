@@ -44,7 +44,7 @@ export default async function ContactPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-8">{at(contact.title)}</h1>
-            <p className="text-white/60 text-lg max-w-2xl mx-auto">
+            <p className="text-foreground/60 text-lg max-w-2xl mx-auto">
               {at(contact.description)}
             </p>
           </div>
@@ -55,15 +55,15 @@ export default async function ContactPage() {
             <div className="flex flex-col justify-center space-y-12">
               <div>
                 <h4 className="font-bold text-accent mb-2 uppercase tracking-widest text-xs">{at('Email')}</h4>
-                <p className="text-2xl font-bold text-white">{contact.email}</p>
+                <p className="text-2xl font-bold text-foreground">{contact.email}</p>
               </div>
               <div>
                 <h4 className="font-bold text-accent mb-2 uppercase tracking-widest text-xs">{at('Téléphone')}</h4>
-                <p className="text-2xl font-bold text-white">{contact.phone}</p>
+                <p className="text-2xl font-bold text-foreground">{contact.phone}</p>
               </div>
               <div>
                 <h4 className="font-bold text-accent mb-2 uppercase tracking-widest text-xs">{at('Localisation')}</h4>
-                <p className="text-2xl font-bold text-white">{at(contact.location)}</p>
+                <p className="text-2xl font-bold text-foreground">{at(contact.location)}</p>
               </div>
             </div>
           </div>

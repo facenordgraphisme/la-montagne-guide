@@ -41,6 +41,10 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+p {
+  text-align: justify;
+}
+
 @layer utilities {
   .glass {
     background: rgba(var(--card), 0.9);

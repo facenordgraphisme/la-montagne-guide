@@ -125,10 +125,10 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
         <div className="container relative z-10 px-6 pt-32 max-w-5xl">
           <Link
             href={`/${activitySlug}/${subCategorySlug}`}
-            className="inline-flex items-center gap-2 text-accent font-bold mb-8 hover:gap-4 transition-all duration-300"
+            className="inline-flex items-center gap-2 text-accent font-bold mb-8 hover:gap-4 transition-all duration-300 uppercase"
           >
             <ArrowLeft size={20} />
-            {at("RETOUR À L'UNIVERS")}
+            {at("RETOUR À")} {sejour.subCategoryTitle ? at(sejour.subCategoryTitle) : at("L'UNIVERS")}
           </Link>
 
           <div className="flex flex-wrap gap-4 mb-8">
@@ -143,7 +143,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
             )}
           </div>
 
-          <h1 className="text-5xl md:text-8xl lg:text-9xl font-black tracking-tighter uppercase leading-[0.8] text-white">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter uppercase leading-[1.0] text-white">
             {at(sejour.title)}
           </h1>
         </div>

@@ -94,7 +94,6 @@ export default async function ActivityLandingPage({ params }: { params: Promise<
           <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-background via-transparent to-black/20" />
         </div>
         <div className="container relative z-10 px-6 text-center pt-20">
-          <span className="text-accent font-black tracking-[0.4em] uppercase text-xs mb-6 block">{at(activity.subtitle || "AVENTURE")}</span>
           <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-white uppercase mb-8 leading-[0.8]">{at(activity.title)}</h1>
           <p className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed font-medium">
             {at(activity.intro || activity.description?.substring(0, 200))}
@@ -154,20 +153,9 @@ export default async function ActivityLandingPage({ params }: { params: Promise<
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
                   
                   <div className="absolute inset-0 p-12 flex flex-col justify-end">
-                    <h3 className="text-3xl md:text-5xl font-black text-foreground uppercase tracking-tighter mb-4 group-hover:text-accent transition-colors">
+                    <h3 className="text-3xl md:text-5xl font-black text-foreground uppercase tracking-tighter group-hover:text-accent transition-colors">
                       {at(univ.title)}
                     </h3>
-                    <div className="text-foreground/60 text-lg mb-8 max-w-md line-clamp-2 font-medium opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
-                      {univ.description && (
-                        <div className="prose-custom prose-sm">
-                          <PortableText value={translatePortableText(univ.description)} components={blockAlignComponents} />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3 text-accent font-black uppercase tracking-widest text-xs">
-                      {at('Découvrir le catalogue')}
-                      <ArrowRight size={16} className="group-hover:translate-x-2 transition-transform" />
-                    </div>
                   </div>
                 </Link>
               );

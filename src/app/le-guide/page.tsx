@@ -5,6 +5,7 @@ import { client } from "@/sanity/lib/client";
 import { guideQuery, settingsQuery } from "@/sanity/lib/queries";
 import { PortableText } from "@portabletext/react";
 import PartnersSlider from "@/components/PartnersSlider";
+import { urlFor } from "@/sanity/lib/image";
 
 import { getServerTranslations } from '@/i18n/server';
 
@@ -44,9 +45,10 @@ export default async function GuidePage() {
     experienceSub: at("Années d'expérience"),
     values: [
       { title: at("Sécurité"), description: at("La base de toute aventure. Une analyse constante des conditions pour un plaisir serein.") },
-      { title: at("Adaptabilité"), description: at("La montagne impose son rythme, je m'adapte pour que votre expérience soit optimale.") },
+      { title: at("Adaptabilité"), description: at("La montagne impose son rythme, je m'adaptte pour que votre expérience soit optimale.") },
       { title: at("Pédagogie"), description: at("Plus qu'un guide, je suis là pour vous apprendre à devenir autonome en montagne.") }
-    ]
+    ],
+    sections: []
   };
 
   const guide = data || fallback;
@@ -68,47 +70,95 @@ export default async function GuidePage() {
         </div>
       </section>
 
-      {/* Main Bio Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <div className="relative aspect-[4/5] rounded-[60px] overflow-hidden shadow-2xl">
-              <Image
-                src={guide.image || "/images/guide.jpg"}
-                alt="Nicolas Draperi"
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
-              />
+      {/* Main Bio Sections */}
+      {guide.sections && guide.sections.length > 0 ? (
+        guide.sections.map((sect: any, idx: number) => {
+          const isImageLeft = sect.imagePosition === 'left';
+          return (
+            <section key={idx} className={`py-20 ${idx % 2 === 0 ? '' : 'bg-surface/30'}`}>
+              <div className="container mx-auto px-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+                  {/* Image Column */}
+                  <div className={`relative aspect-[4/5] rounded-[60px] overflow-hidden shadow-2xl ${isImageLeft ? '' : 'lg:order-last'}`}>
+                    {sect.image ? (
+                      <Image
+                        src={urlFor(sect.image).url()}
+                        alt={sect.title || "Nicolas Draperi"}
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-accent/10 flex items-center justify-center">
+                        <span className="text-foreground/30">Pas d'image</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Text Column */}
+                  <div className="space-y-8 text-lg text-foreground/70 leading-relaxed">
+                    {sect.title && (
+                      <h2 className="text-4xl font-bold text-foreground">{at(sect.title)}</h2>
+                    )}
+                    <div className="prose prose-invert prose-lg max-w-none text-foreground/70">
+                      {sect.content && (
+                        <PortableText value={translatePortableText(sect.content)} />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          );
+        })
+      ) : (
+        /* Fallback section */
+        <section className="py-20">
+          <div className="container mx-auto px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+              <div className="relative aspect-[4/5] rounded-[60px] overflow-hidden shadow-2xl">
+                <Image
+                  src={guide.image || "/images/guide.jpg"}
+                  alt="Nicolas Draperi"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover"
+                />
+              </div>
+
+              <div className="space-y-8 text-lg text-foreground/70 leading-relaxed">
+                <h2 className="text-4xl font-bold text-foreground">{at(guide.bioTitle)}</h2>
+                <div className="prose prose-invert prose-lg max-w-none text-foreground/70">
+                  {guide.bio ? (
+                    <PortableText value={translatePortableText(guide.bio)} />
+                  ) : (
+                    <>
+                      <p>
+                        {at('Installé à Champcella, au pied du massif des Écrins et aux portes du Queyras, je vis ma passion pour la montagne au quotidien. En tant que Guide de Haute Montagne UIAGM, mon métier est avant tout une histoire de partage et de transmission.')}
+                      </p>
+                      <p>
+                        {at('Ma philosophie repose sur une approche authentique et humaine de la montagne. Chaque cordée est unique, et ma priorité est de m\'adapter à votre rythme, à vos envies et à vos capacités, tout en garantissant une sécurité absolue.')}
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
+          </div>
+        </section>
+      )}
 
-            <div className="space-y-8 text-lg text-foreground/70 leading-relaxed">
-              <h2 className="text-4xl font-bold text-foreground">{at(guide.bioTitle)}</h2>
-              <div className="prose prose-invert prose-lg max-w-none text-foreground/70">
-                {guide.bio ? (
-                  <PortableText value={translatePortableText(guide.bio)} />
-                ) : (
-                  <>
-                    <p>
-                      {at('Installé à Champcella, au pied du massif des Écrins et aux portes du Queyras, je vis ma passion pour la montagne au quotidien. En tant que Guide de Haute Montagne UIAGM, mon métier est avant tout une histoire de partage et de transmission.')}
-                    </p>
-                    <p>
-                      {at('Ma philosophie repose sur une approche authentique et humaine de la montagne. Chaque cordée est unique, et ma priorité est de m\'adapter à votre rythme, à vos envies et à vos capacités, tout en garantissant une sécurité absolue.')}
-                    </p>
-                  </>
-                )}
-              </div>
-
-              <div className="pt-8 grid grid-cols-2 gap-8">
-                <div className="glass p-6 rounded-3xl">
-                  <p className="text-3xl font-bold text-highlight">{at(guide.certification)}</p>
-                  <p className="text-xs uppercase tracking-widest font-bold opacity-50">{at(guide.certificationSub)}</p>
-                </div>
-                <div className="glass p-6 rounded-3xl">
-                  <p className="text-3xl font-bold text-highlight">{at(guide.experience)}</p>
-                  <p className="text-xs uppercase tracking-widest font-bold opacity-50">{at(guide.experienceSub)}</p>
-                </div>
-              </div>
+      {/* Stats Banner */}
+      <section className="py-12 border-y border-border/10 bg-surface/20">
+        <div className="container mx-auto px-6 max-w-4xl">
+          <div className="grid grid-cols-2 gap-8 md:gap-16 text-center">
+            <div>
+              <p className="text-4xl md:text-6xl font-black text-highlight mb-2">{at(guide.certification)}</p>
+              <p className="text-xs md:text-sm uppercase tracking-widest font-black opacity-50">{at(guide.certificationSub)}</p>
+            </div>
+            <div>
+              <p className="text-4xl md:text-6xl font-black text-highlight mb-2">{at(guide.experience)}</p>
+              <p className="text-xs md:text-sm uppercase tracking-widest font-black opacity-50">{at(guide.experienceSub)}</p>
             </div>
           </div>
         </div>

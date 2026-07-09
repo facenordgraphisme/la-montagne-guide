@@ -77,12 +77,12 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
           <span className="text-accent font-bold tracking-widest uppercase text-xs mb-3 block">
             {language === 'en' ? 'GOT QUESTIONS?' : 'UNE QUESTION ?'}
           </span>
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
             {language === 'en' ? 'Frequently Asked Questions' : 'Foire Aux Questions'}
           </h2>
           <div className="w-16 h-1 bg-accent mx-auto rounded-full mt-4" />
         </div>
-
+ 
         {/* Categories Tab Selector */}
         <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-10">
           {categories.map((cat) => {
@@ -98,7 +98,7 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
                 className={`px-5 py-2.5 rounded-full text-sm font-semibold tracking-wide border transition-all duration-300 ${
                   isActive
                     ? 'bg-accent border-accent text-white shadow-[0_0_15px_rgba(0,242,254,0.3)]'
-                    : 'bg-white/[0.02] border-white/5 text-foreground/60 hover:text-white hover:border-white/10'
+                    : 'bg-foreground/[0.02] border-foreground/5 text-foreground/60 hover:text-foreground hover:border-foreground/10'
                 }`}
               >
                 {label}
@@ -106,7 +106,7 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
             )
           })}
         </div>
-
+ 
         {/* FAQ Accordion List */}
         <div className="space-y-4">
           <AnimatePresence mode="popLayout">
@@ -114,7 +114,7 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
               const isOpen = activeId === item._id
               const question = language === 'en' ? item.questionEn : item.question
               const answer = language === 'en' ? item.answerEn : item.answer
-
+ 
               return (
                 <motion.div
                   key={item._id}
@@ -125,24 +125,24 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
                   transition={{ duration: 0.3 }}
                   className={`glass border rounded-3xl overflow-hidden transition-all duration-300 ${
                     isOpen 
-                      ? 'border-accent/40 bg-white/[0.03] shadow-[0_4px_30px_rgba(0,242,254,0.05)]' 
-                      : 'border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]'
+                      ? 'border-accent/40 bg-foreground/[0.03] shadow-[0_4px_30px_rgba(0,242,254,0.05)]' 
+                      : 'border-foreground/5 bg-foreground/[0.01] hover:border-foreground/10 hover:bg-foreground/[0.02]'
                   }`}
                 >
                   {/* Accordion Trigger */}
                   <button
                     onClick={() => toggleItem(item._id)}
-                    className="w-full flex items-center justify-between gap-6 px-6 md:px-8 py-5 text-left text-base md:text-lg font-bold text-white transition-colors duration-200"
+                    className="w-full flex items-center justify-between gap-6 px-6 md:px-8 py-5 text-left text-base md:text-lg font-bold text-foreground transition-colors duration-200"
                   >
                     <span className="flex items-center gap-3">
                       <HelpCircle className={`w-5 h-5 shrink-0 transition-colors duration-300 ${isOpen ? 'text-accent' : 'text-foreground/40'}`} />
                       {question}
                     </span>
-                    <span className={`p-1.5 rounded-full bg-white/5 text-foreground/50 transition-all duration-300 ${isOpen ? 'rotate-180 bg-accent/15 text-accent' : 'group-hover:text-white'}`}>
+                    <span className={`p-1.5 rounded-full bg-foreground/5 text-foreground/50 transition-all duration-300 ${isOpen ? 'rotate-180 bg-accent/15 text-accent' : 'hover:text-foreground'}`}>
                       <ChevronDown className="w-4 h-4" />
                     </span>
                   </button>
-
+ 
                   {/* Accordion Content */}
                   <AnimatePresence initial={false}>
                     {isOpen && (
@@ -153,7 +153,7 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
                         transition={{ duration: 0.3, ease: 'easeInOut' }}
                         className="overflow-hidden"
                       >
-                        <div className="px-6 md:px-8 pb-6 text-sm md:text-base text-foreground/70 leading-relaxed border-t border-white/5 pt-4">
+                        <div className="px-6 md:px-8 pb-6 text-sm md:text-base text-foreground/70 leading-relaxed border-t border-foreground/5 pt-4">
                           <p>{answer}</p>
                         </div>
                       </motion.div>

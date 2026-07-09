@@ -184,10 +184,13 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
       <section className="py-24 bg-card/5">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-4">
-              {at('Catalogue')} <span className="text-accent italic">{at('Séjours')}</span>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase">
+              {currentUnivers.catalogTitle ? at(currentUnivers.catalogTitle) : (
+                <>
+                  {at('Catalogue')} <span className="text-accent italic">{at('Séjours')}</span>
+                </>
+              )}
             </h2>
-            <p className="text-foreground/40 font-bold uppercase tracking-widest text-xs">{at('Découvrez nos aventures dans cet univers')}</p>
           </div>
 
           {filteredSejours.length > 0 ? (

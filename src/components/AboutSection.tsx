@@ -3,6 +3,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import Image from 'next/image'
 
 import { PortableText } from '@portabletext/react'
 
@@ -45,10 +46,12 @@ const AboutSection = ({
   titleAccent = "DRAPERI",
   description,
   image = "/images/guide.jpg",
-  experience = 15,
+  experience = 16,
   className = "bg-background"
 }: AboutProps) => {
   const { at, t, translatePortableText } = useLanguage()
+  const displayExperience = experience === 14 || experience === 15 ? 16 : experience;
+
   return (
     <section id="a-propos" className={`py-24 px-6 overflow-hidden transition-colors duration-300 ${className}`}>
       <div className="container mx-auto">
@@ -67,15 +70,6 @@ const AboutSection = ({
             </div>
             {/* Decorative element */}
             <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-accent rounded-full blur-[100px] opacity-20 -z-10" />
-            <div className="absolute top-1/2 -right-8 glass p-6 rounded-2xl hidden md:block">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-accent rounded-full flex items-center justify-center font-bold">{experience}+</div>
-                <div>
-                  <p className="text-xs text-foreground/60 uppercase tracking-wider font-bold">{t('about.yearsExperience')}</p>
-                  <p className="font-medium">{t('about.role')}</p>
-                </div>
-              </div>
-            </div>
           </motion.div>
 
           <motion.div
@@ -104,9 +98,39 @@ const AboutSection = ({
               )}
             </div>
             
-            <Link href="/le-guide" className="btn-primary inline-block">
-              {t('about.learnMore')}
-            </Link>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+              <Link href="/le-guide" className="btn-primary inline-block shrink-0 text-center">
+                {t('about.learnMore')}
+              </Link>
+              
+              <div className="flex items-center gap-6 flex-wrap">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-accent/15 border border-accent/30 text-accent rounded-full flex items-center justify-center font-bold text-lg shrink-0">
+                    {displayExperience}+
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-foreground/50 uppercase tracking-widest font-black leading-tight">{t('about.yearsExperience')}</p>
+                    <p className="font-bold text-sm text-foreground/80">{t('about.role')}</p>
+                  </div>
+                </div>
+
+                <div className="h-12 w-px bg-foreground/10 hidden sm:block" />
+
+                <div className="flex items-center gap-3">
+                  <Image 
+                    src="/images/uiagm-logo.png" 
+                    alt="Logo UIAGM - IFMGA - IVBV" 
+                    width={48} 
+                    height={48} 
+                    className="object-contain w-12 h-12"
+                  />
+                  <div className="text-[9px] font-black text-foreground/50 uppercase tracking-widest leading-tight">
+                    Guide de Haute Montagne<br/>
+                    <span className="text-accent">UIAGM / IFMGA</span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
           </motion.div>
         </div>
