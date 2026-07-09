@@ -9,6 +9,27 @@ import { getServerTranslations } from '@/i18n/server';
 import UpcomingSorties from "@/components/UpcomingSorties";
 import { PortableText } from '@portabletext/react';
 
+const blockAlignComponents = {
+  block: {
+    normal: ({ children }: any) => {
+      const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
+      return <p style={{ minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
+    },
+    blockCenter: ({ children }: any) => {
+      const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
+      return <p style={{ textAlign: 'center', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
+    },
+    blockRight: ({ children }: any) => {
+      const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
+      return <p style={{ textAlign: 'right', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
+    },
+    blockJustify: ({ children }: any) => {
+      const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
+      return <p style={{ textAlign: 'justify', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
+    },
+  }
+};
+
 export async function generateStaticParams() {
   const activities = await client.fetch(activitiesQuery);
   return activities.map((activity: any) => ({
@@ -196,7 +217,7 @@ export default async function PrestationDetail({ params }: { params: Promise<{ s
                 <div key={i} className="group p-8 rounded-[40px] border border-border hover:border-accent transition-all hover:bg-accent/5">
                   <h3 className="text-2xl font-bold mb-4 group-hover:text-accent transition-colors">{univ.title}</h3>
                   <div className="text-foreground/60 leading-relaxed prose-p:mb-0">
-                    <PortableText value={univ.description} />
+                    <PortableText value={univ.description} components={blockAlignComponents} />
                   </div>
                 </div>
               ))}

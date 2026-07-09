@@ -9,6 +9,27 @@ import { urlFor } from "@/sanity/lib/image";
 
 import { getServerTranslations } from '@/i18n/server';
 
+const blockAlignComponents = {
+  block: {
+    normal: ({ children }: any) => {
+      const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
+      return <p style={{ minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
+    },
+    blockCenter: ({ children }: any) => {
+      const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
+      return <p style={{ textAlign: 'center', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
+    },
+    blockRight: ({ children }: any) => {
+      const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
+      return <p style={{ textAlign: 'right', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
+    },
+    blockJustify: ({ children }: any) => {
+      const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
+      return <p style={{ textAlign: 'justify', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
+    },
+  }
+};
+
 export async function generateMetadata(): Promise<Metadata> {
   const [data, settingsData] = await Promise.all([
     client.fetch(guideQuery),
@@ -102,7 +123,7 @@ export default async function GuidePage() {
                     )}
                     <div className="prose prose-invert prose-lg max-w-none text-foreground/70">
                       {sect.content && (
-                        <PortableText value={translatePortableText(sect.content)} />
+                        <PortableText value={translatePortableText(sect.content)} components={blockAlignComponents} />
                       )}
                     </div>
                   </div>
@@ -130,7 +151,7 @@ export default async function GuidePage() {
                 <h2 className="text-4xl font-bold text-foreground">{at(guide.bioTitle)}</h2>
                 <div className="prose prose-invert prose-lg max-w-none text-foreground/70">
                   {guide.bio ? (
-                    <PortableText value={translatePortableText(guide.bio)} />
+                    <PortableText value={translatePortableText(guide.bio)} components={blockAlignComponents} />
                   ) : (
                     <>
                       <p>
