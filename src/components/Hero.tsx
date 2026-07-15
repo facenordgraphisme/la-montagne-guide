@@ -12,6 +12,11 @@ interface HeroProps {
   subtitle?: string
   description?: string
   images?: string[]
+  textAlign?: string
+  btnDiscoverText?: string
+  btnDiscoverTextEn?: string
+  btnDeparturesText?: string
+  btnDeparturesTextEn?: string
 }
 
 const Hero = ({ 
@@ -23,9 +28,14 @@ const Hero = ({
     '/photos/DSC_6701.jpg',
     '/photos/DSC_6612.jpg',
     '/photos/DSC_6683.jpg',
-  ]
+  ],
+  textAlign = 'center',
+  btnDiscoverText,
+  btnDiscoverTextEn,
+  btnDeparturesText,
+  btnDeparturesTextEn
 }: HeroProps) => {
-  const { at, t } = useLanguage()
+  const { at, t, language } = useLanguage()
   const [currentBg, setCurrentBg] = React.useState(0)
   const backgrounds = (images && images.length > 0) ? images : ['/images/hero.jpg']
 
@@ -36,6 +46,10 @@ const Hero = ({
     }, 6000)
     return () => clearInterval(timer)
   }, [backgrounds.length])
+
+  const alignClass = textAlign === 'left' ? 'text-left items-start' : textAlign === 'right' ? 'text-right items-end' : 'text-center items-center';
+  const descAlignClass = textAlign === 'left' ? 'mr-auto' : textAlign === 'right' ? 'ml-auto' : 'mx-auto';
+  const btnAlignClass = textAlign === 'left' ? 'justify-start' : textAlign === 'right' ? 'justify-end' : 'justify-center';
 
   return (
     <section className="relative h-screen w-full overflow-hidden flex items-center justify-center">
@@ -63,12 +77,12 @@ const Hero = ({
         <div className="absolute inset-0 bg-black/40 bg-gradient-to-b from-black/60 via-transparent to-black" />
       </div>
 
-      <div className="container relative z-10 px-6 text-center pt-20">
+      <div className={`container relative z-10 px-6 pt-20 flex flex-col ${alignClass}`}>
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-[#ffffff]"
+          className="text-[#ffffff] w-full max-w-4xl"
         >
           <span className="text-[#f97316] font-black tracking-widest uppercase text-sm mb-4 block">
             {at(subtitle)}
@@ -76,13 +90,21 @@ const Hero = ({
           <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 uppercase whitespace-pre-line">
             {at(title)}
           </h1>
-          <p className="max-w-2xl mx-auto text-lg text-white/80 mb-10 leading-relaxed whitespace-pre-line">
+          <p className={`max-w-2xl text-lg text-white/80 mb-10 leading-relaxed whitespace-pre-line ${descAlignClass}`}>
             {at(description)}
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/prestations" className="btn-primary !text-white">{t('hero.discover')}</Link>
+          <div className={`flex flex-col sm:flex-row items-center gap-4 ${btnAlignClass}`}>
+            <Link href="/activites" className="btn-primary !text-white">
+              {language === 'en' 
+                ? (btnDiscoverTextEn || btnDiscoverText || t('hero.discover')) 
+                : (btnDiscoverText || t('hero.discover'))
+              }
+            </Link>
             <Link href="/prochaines-sorties" className="px-8 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full font-medium transition-all text-white">
-              {t('hero.departures')}
+              {language === 'en' 
+                ? (btnDeparturesTextEn || btnDeparturesText || t('hero.departures')) 
+                : (btnDeparturesText || t('hero.departures'))
+              }
             </Link>
           </div>
         </motion.div>

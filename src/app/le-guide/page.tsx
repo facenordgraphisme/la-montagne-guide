@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
 import React from 'react'
 import Image from 'next/image';
+import Link from 'next/link';
 import { client } from "@/sanity/lib/client";
 import { guideQuery, settingsQuery } from "@/sanity/lib/queries";
 import { PortableText } from "@portabletext/react";
 import PartnersSlider from "@/components/PartnersSlider";
 import { urlFor } from "@/sanity/lib/image";
+import FAQAccordion from "@/components/FAQAccordion";
 
 import { getServerTranslations } from '@/i18n/server';
 
@@ -27,6 +29,11 @@ const blockAlignComponents = {
       const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
       return <p style={{ textAlign: 'justify', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
     },
+    blockquote: ({ children }: any) => (
+      <blockquote className="border-l-4 border-accent pl-6 py-4 my-8 italic text-xl text-foreground/80 bg-accent/5 rounded-r-2xl text-justify">
+        {children}
+      </blockquote>
+    ),
   }
 };
 
@@ -126,6 +133,13 @@ export default async function GuidePage() {
                         <PortableText value={translatePortableText(sect.content)} components={blockAlignComponents} />
                       )}
                     </div>
+                    {idx === guide.sections.length - 1 && (
+                      <div className="pt-6">
+                        <Link href="/contact" className="btn-primary inline-block">
+                          {at('Contactez-moi')}
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -163,6 +177,11 @@ export default async function GuidePage() {
                     </>
                   )}
                 </div>
+                <div className="pt-6">
+                  <Link href="/contact" className="btn-primary inline-block">
+                    {at('Contactez-moi')}
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -170,38 +189,50 @@ export default async function GuidePage() {
       )}
 
       {/* Stats Banner */}
-      <section className="py-12 border-y border-border/10 bg-surface/20">
-        <div className="container mx-auto px-6 max-w-4xl">
-          <div className="grid grid-cols-2 gap-8 md:gap-16 text-center">
-            <div>
-              <p className="text-4xl md:text-6xl font-black text-highlight mb-2">{at(guide.certification)}</p>
-              <p className="text-xs md:text-sm uppercase tracking-widest font-black opacity-50">{at(guide.certificationSub)}</p>
-            </div>
-            <div>
-              <p className="text-4xl md:text-6xl font-black text-highlight mb-2">{at(guide.experience)}</p>
-              <p className="text-xs md:text-sm uppercase tracking-widest font-black opacity-50">{at(guide.experienceSub)}</p>
+      {!guide.hideStats && (
+        <section className="py-12 border-y border-border/10 bg-surface/20">
+          <div className="container mx-auto px-6 max-w-4xl">
+            <div className="grid grid-cols-2 gap-8 md:gap-16 text-center">
+              <div>
+                <p className="text-4xl md:text-6xl font-black text-highlight mb-2">{at(guide.certification)}</p>
+                <p className="text-xs md:text-sm uppercase tracking-widest font-black opacity-50">{at(guide.certificationSub)}</p>
+              </div>
+              <div>
+                <p className="text-4xl md:text-6xl font-black text-highlight mb-2">{at(guide.experience)}</p>
+                <p className="text-xs md:text-sm uppercase tracking-widest font-black opacity-50">{at(guide.experienceSub)}</p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Philosophy / Values Section */}
-      <section className="py-20 bg-accent/5">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">{at('Mes Valeurs')}</h2>
-            <div className="w-20 h-1.5 bg-accent mx-auto rounded-full" />
+      {!guide.hideValues && (
+        <section className="py-20 bg-accent/5">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold mb-4">{at('Mes Valeurs')}</h2>
+              <div className="w-20 h-1.5 bg-accent mx-auto rounded-full" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {(guide.values || []).map((v: any, index: number) => (
+                <div key={index} className="glass p-10 rounded-[40px] hover:border-accent transition-colors">
+                  <h3 className="text-2xl font-bold mb-4 text-accent">{at(v.title)}</h3>
+                  <p className="text-foreground/60">{at(v.description)}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {(guide.values || []).map((v: any, index: number) => (
-              <div key={index} className="glass p-10 rounded-[40px] hover:border-accent transition-colors">
-                <h3 className="text-2xl font-bold mb-4 text-accent">{at(v.title)}</h3>
-                <p className="text-foreground/60">{at(v.description)}</p>
-              </div>
-            ))}
+        </section>
+      )}
+
+      {guide.faqs && guide.faqs.length > 0 && (
+        <section className="py-20 border-t border-border/10">
+          <div className="container mx-auto px-6">
+            <FAQAccordion faqs={guide.faqs} />
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {!settingsData?.hidePartners && (
         <PartnersSlider partners={settingsData?.partners} />

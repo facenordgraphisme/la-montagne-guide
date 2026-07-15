@@ -2,21 +2,35 @@ import type { Metadata } from 'next';
 import React from 'react'
 import Link from 'next/link';
 import { client } from "@/sanity/lib/client";
-import { activitiesQuery } from "@/sanity/lib/queries";
+import { activitiesQuery, settingsQuery } from "@/sanity/lib/queries";
 import Image from 'next/image';
 
 import { getServerTranslations } from '@/i18n/server';
 
 export async function generateMetadata(): Promise<Metadata> {
+  const [settingsData] = await Promise.all([
+    client.fetch(settingsQuery)
+  ]);
   const { at } = await getServerTranslations();
+
+  const title = settingsData?.activitiesPageTitle 
+    ? `${at(settingsData.activitiesPageTitle)} | La Montagne Guide` 
+    : `${at('Activités')} | La Montagne Guide`;
+  const description = settingsData?.activitiesPageDescription
+    ? at(settingsData.activitiesPageDescription)
+    : at('Découvrez toutes les activités de montagne proposées : Alpinisme, Ski de Randonnée, Escalade, Cascade de Glace, Voyages lointains. Encadrement professionnel.');
+
   return {
-    title: `${at('Prestations')} | La Montagne Guide`,
-    description: at('Découvrez toutes les activités de montagne proposées : Alpinisme, Ski de Randonnée, Escalade, Cascade de Glace, Voyages lointains. Encadrement professionnel.'),
+    title,
+    description,
   };
 }
 
-export default async function PrestationsPage() {
-  const sanityActivities = await client.fetch(activitiesQuery);
+export default async function ActivitesPage() {
+  const [sanityActivities, settingsData] = await Promise.all([
+    client.fetch(activitiesQuery),
+    client.fetch(settingsQuery)
+  ]);
   const { at, t } = await getServerTranslations();
   
   const fallback = [
@@ -58,12 +72,20 @@ export default async function PrestationsPage() {
   ];
 
   const activities = sanityActivities?.length > 0 ? sanityActivities : fallback;
+  
+  const displayTitle = settingsData?.activitiesPageTitle
+    ? at(settingsData.activitiesPageTitle)
+    : at('NOS ACTIVITÉS');
+  const displayDescription = settingsData?.activitiesPageDescription
+    ? at(settingsData.activitiesPageDescription)
+    : at('Découvrez toutes les activités que je propose. Chaque sortie est encadrée avec passion et une sécurité absolue.');
+
   return (
     <main className="relative pt-32 min-h-screen">
       <div className="container mx-auto px-6 py-20">
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4 text-gradient">{at('NOS PRESTATIONS')}</h1>
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4 text-gradient uppercase">{displayTitle}</h1>
         <p className="text-foreground/60 text-lg mb-16 max-w-2xl">
-          {at('Découvrez toutes les activités que je propose. Chaque sortie est encadrée avec passion et une sécurité absolue.')}
+          {displayDescription}
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

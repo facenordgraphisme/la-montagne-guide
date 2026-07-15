@@ -14,6 +14,7 @@ export const settingsType = defineType({
     { name: 'contact', title: 'Contact & WhatsApp' },
     { name: 'footer', title: 'Footer (Pied de page)' },
     { name: 'seo', title: 'Référencement (SEO)' },
+    { name: 'activities', title: 'Page Activités' },
   ],
   fields: [
     // GENERAL & LOGO
@@ -172,7 +173,7 @@ export const settingsType = defineType({
       name: 'phone',
       title: 'Numéro de téléphone',
       type: 'string',
-      initialValue: '06 75 07 97 08',
+      initialValue: '+33 (0)6 75 07 97 08',
       group: 'contact',
     }),
     defineField({
@@ -242,6 +243,36 @@ export const settingsType = defineType({
       type: 'image',
       description: 'L\'image affichée lors du partage du lien sur les réseaux sociaux (Facebook, LinkedIn, Twitter). Dimension idéale : 1200x630px.',
       group: 'seo',
+    }),
+    defineField({
+      name: 'activitiesPageTitle',
+      title: 'Titre de la page Activités (Français)',
+      type: 'string',
+      initialValue: 'NOS ACTIVITÉS',
+      group: 'activities',
+    }),
+    defineField({
+      name: 'activitiesPageTitleEn',
+      title: 'Titre de la page Activités (Anglais)',
+      type: 'string',
+      initialValue: 'OUR ACTIVITIES',
+      group: 'activities',
+    }),
+    defineField({
+      name: 'activitiesPageDescription',
+      title: 'Description de la page Activités (Français)',
+      type: 'text',
+      rows: 3,
+      initialValue: 'Découvrez toutes les activités que je propose. Chaque sortie est encadrée avec passion et une sécurité absolue.',
+      group: 'activities',
+    }),
+    defineField({
+      name: 'activitiesPageDescriptionEn',
+      title: 'Description de la page Activités (Anglais)',
+      type: 'text',
+      rows: 3,
+      initialValue: 'Discover all the activities I offer. Each outing is guided with passion and absolute safety.',
+      group: 'activities',
     }),
   ],
 })

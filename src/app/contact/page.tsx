@@ -5,6 +5,7 @@ import { client } from "@/sanity/lib/client";
 import { contactQuery, faqsQuery } from "@/sanity/lib/queries";
 import ContactForm from "@/components/ContactForm";
 import FAQAccordion from "@/components/FAQAccordion";
+import ObfuscatedContact from "@/components/ObfuscatedContact";
 
 import { getServerTranslations } from '@/i18n/server';
 
@@ -34,7 +35,7 @@ export default async function ContactPage() {
     title: at("CONTACT"),
     description: at("Une question ? Un projet de sommet ? Envoyez-moi un message et je vous répondrai dans les plus brefs délais."),
     email: "draperinicolas@hotmail.com",
-    phone: "06 75 07 97 08",
+    phone: "+33 (0)6 75 07 97 08",
     location: at("Champcella, Hautes-Alpes")
   };
 
@@ -55,11 +56,15 @@ export default async function ContactPage() {
             <div className="flex flex-col justify-center space-y-12">
               <div>
                 <h4 className="font-bold text-accent mb-2 uppercase tracking-widest text-xs">{at('Email')}</h4>
-                <p className="text-2xl font-bold text-foreground">{contact.email}</p>
+                <p className="text-2xl font-bold text-foreground">
+                  <ObfuscatedContact type="email" value={contact.email} />
+                </p>
               </div>
               <div>
                 <h4 className="font-bold text-accent mb-2 uppercase tracking-widest text-xs">{at('Téléphone')}</h4>
-                <p className="text-2xl font-bold text-foreground">{contact.phone}</p>
+                <p className="text-2xl font-bold text-foreground">
+                  <ObfuscatedContact type="phone" value={contact.phone} />
+                </p>
               </div>
               <div>
                 <h4 className="font-bold text-accent mb-2 uppercase tracking-widest text-xs">{at('Localisation')}</h4>

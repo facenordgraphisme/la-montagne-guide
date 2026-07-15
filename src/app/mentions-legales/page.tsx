@@ -39,7 +39,7 @@ export default async function MentionsLegalesPage() {
               <li><strong>{at('Propriétaire & Éditeur :')}</strong> Nicolas Draperi – Guide de Haute Montagne – Champcella, Hautes-Alpes</li>
               <li><strong>{at('SIRET :')}</strong> 800 248 107 00021</li>
               <li><strong>{at('Directeur de la publication :')}</strong> Nicolas Draperi</li>
-              <li><strong>{at('Contact :')}</strong> draperinicolas@hotmail.com | 06 75 07 97 08</li>
+              <li><strong>{at('Contact :')}</strong> draperinicolas@hotmail.com | +33 (0)6 75 07 97 08</li>
             </ul>
           </section>
 

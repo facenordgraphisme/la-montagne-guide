@@ -58,6 +58,11 @@ export default async function Home() {
         subtitle={homeData?.heroSubtitle}
         description={homeData?.heroDescription}
         images={homeData?.heroImages}
+        textAlign={homeData?.heroTextAlign}
+        btnDiscoverText={homeData?.heroBtnDiscoverText}
+        btnDiscoverTextEn={homeData?.heroBtnDiscoverTextEn}
+        btnDeparturesText={homeData?.heroBtnDeparturesText}
+        btnDeparturesTextEn={homeData?.heroBtnDeparturesTextEn}
       />
       <div className="space-y-0">
         <AboutSection 
@@ -76,22 +81,26 @@ export default async function Home() {
           data={activitiesData}
           className="bg-surface"
         />
-        <UpcomingSorties 
-          data={sortiesData} 
-          badge={homeData?.sortiesBadge}
-          title={homeData?.sortiesTitle}
-          titleAccent={homeData?.sortiesTitleAccent}
-          className="bg-background"
-        />
-        <AdventureStart 
-          badge={homeData?.adventureBadge}
-          title={homeData?.adventureTitle}
-          titleAccent={homeData?.adventureTitleAccent}
-          description={homeData?.adventureDescription}
-          features={homeData?.adventureFeatures}
-          image={homeData?.adventureImage}
-          className="bg-surface"
-        />
+        {!homeData?.hideSorties && (
+          <UpcomingSorties 
+            data={sortiesData} 
+            badge={homeData?.sortiesBadge}
+            title={homeData?.sortiesTitle}
+            titleAccent={homeData?.sortiesTitleAccent}
+            className="bg-background"
+          />
+        )}
+        {!homeData?.hideAdventure && (
+          <AdventureStart 
+            badge={homeData?.adventureBadge}
+            title={homeData?.adventureTitle}
+            titleAccent={homeData?.adventureTitleAccent}
+            description={homeData?.adventureDescription}
+            features={homeData?.adventureFeatures}
+            image={homeData?.adventureImage}
+            className="bg-surface"
+          />
+        )}
         <ContactHome 
           badge={homeData?.contactBadge}
           title={homeData?.contactTitle}

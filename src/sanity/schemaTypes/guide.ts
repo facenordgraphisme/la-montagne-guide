@@ -137,5 +137,24 @@ export const guideType = defineType({
         }
       ]
     }),
+    defineField({
+      name: 'hideStats',
+      title: 'Masquer les encarts statistiques (UIAGM / Expérience)',
+      type: 'boolean',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'hideValues',
+      title: 'Masquer la section "Mes Valeurs"',
+      type: 'boolean',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'faqs',
+      title: 'Questions fréquentes (FAQ)',
+      description: 'Sélectionnez des FAQ spécifiques à afficher sur la page À Propos.',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'faq' }] }],
+    }),
   ],
 })

@@ -58,5 +58,12 @@ export const universType = defineType({
       type: 'string',
       description: 'Optionnel. Par défaut: "Catalogue Séjours".',
     }),
+    defineField({
+      name: 'faqs',
+      title: 'Questions fréquentes (FAQ)',
+      description: 'Sélectionnez des FAQ spécifiques à afficher sur la page de cet univers.',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'faq' }] }],
+    }),
   ],
 })

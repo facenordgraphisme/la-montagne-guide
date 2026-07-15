@@ -42,7 +42,14 @@ export const homeQuery = groq`*[_type == "home"][0]{
   blogTitleAccent,
   hideTestimonials,
   hideBlog,
-  featuredPostsLimit
+  hideSorties,
+  hideAdventure,
+  featuredPostsLimit,
+  heroTextAlign,
+  heroBtnDiscoverText,
+  heroBtnDiscoverTextEn,
+  heroBtnDeparturesText,
+  heroBtnDeparturesTextEn
 }`
 
 export const testimonialsQuery = groq`*[_type == "testimonial"] | order(_createdAt desc) {
@@ -131,7 +138,8 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
     date,
     availableSpots,
     isFull
-  }
+  },
+  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, category, order}
 }`
 
 export const postsBySejourQuery = groq`*[_type == "post" && relatedSejour._ref == $sejourId] | order(publishedAt desc)[0...6] {
@@ -212,13 +220,15 @@ export const activityBySlugQuery = groq`*[_type == "activity" && slug.current ==
     "slug": slug.current,
     description,
     "image": image.asset->url,
-    catalogTitle
+    catalogTitle,
+    "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, category, order}
   },
   price,
   period,
   location,
   showUpcomingSorties,
-  type
+  type,
+  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, category, order}
 }`
 
 export const blogTeaserQuery = groq`*[_type == "post"] | order(publishedAt desc)[0...$limit] {
@@ -249,7 +259,10 @@ export const guideQuery = groq`*[_type == "guide"][0] {
     content,
     image,
     imagePosition
-  }
+  },
+  hideStats,
+  hideValues,
+  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, category, order}
 }`
 
 export const contactQuery = groq`*[_type == "contact"][0] {
@@ -276,7 +289,7 @@ export const postSlugsQuery = groq`*[_type == "post"]{ "slug": slug.current }`
 
 export const postsPageQuery = groq`{
   "posts": *[_type == "post"
-    && (!defined($category) || $category in tags[]->slug.current)
+    && (!defined($category) || $category in tags[]->slug.current || activityType->slug.current == $category)
     && (!defined($massif) || $massif in tags[]->slug.current)
   ] | order(publishedAt desc) [$start...$end] {
     title,
@@ -288,7 +301,7 @@ export const postsPageQuery = groq`{
     excerpt
   },
   "total": count(*[_type == "post"
-    && (!defined($category) || $category in tags[]->slug.current)
+    && (!defined($category) || $category in tags[]->slug.current || activityType->slug.current == $category)
     && (!defined($massif) || $massif in tags[]->slug.current)
   ])
 }`
@@ -307,7 +320,9 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
   excerpt,
   body,
   "gallery": gallery[]{caption, "url": asset->url},
-  "tags": tags[]->{ name, "slug": slug.current, tagType },
+  "tags": array::compact([
+    activityType->{ "name": title, "slug": slug.current, "tagType": "category" }
+  ] + tags[]->{ name, "slug": slug.current, tagType }),
   "prevPost": *[_type == "post" && (publishedAt < ^.publishedAt || (publishedAt == ^.publishedAt && _createdAt < ^._createdAt))] | order(publishedAt desc, _createdAt desc)[0] {
     title,
     "slug": slug.current
@@ -349,7 +364,11 @@ export const settingsQuery = groq`*[_type == "settings"][0]{
     name,
     "logo": logo.asset->url,
     link
-  }
+  },
+  activitiesPageTitle,
+  activitiesPageTitleEn,
+  activitiesPageDescription,
+  activitiesPageDescriptionEn
 }`
 
 export const faqsQuery = groq`*[_type == "faq"] | order(order asc, _createdAt desc) {
@@ -359,5 +378,45 @@ export const faqsQuery = groq`*[_type == "faq"] | order(order asc, _createdAt de
   answer,
   answerEn,
   category
+}`
+
+export const resourcesQuery = groq`*[_type == "resource"] | order(_createdAt desc) {
+  _id,
+  title,
+  titleEn,
+  "slug": slug.current,
+  category,
+  intro,
+  introEn,
+  "image": image.asset->url,
+  "relatedActivities": relatedActivities[]-> {
+    title,
+    "slug": slug.current
+  }
+}`
+
+export const resourceBySlugQuery = groq`*[_type == "resource" && slug.current == $slug][0] {
+  _id,
+  title,
+  titleEn,
+  "slug": slug.current,
+  category,
+  intro,
+  introEn,
+  "image": image.asset->url,
+  content,
+  contentEn,
+  "relatedActivities": relatedActivities[]-> {
+    title,
+    "slug": slug.current,
+    "image": image.asset->url,
+    basePrice,
+    duration,
+    level,
+    subCategory-> {
+      slug
+    }
+  },
+  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, category, order}
 }`
 

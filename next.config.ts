@@ -16,6 +16,26 @@ const nextConfig: NextConfig = {
         destination: '/:slug',
         permanent: true,
       },
+      {
+        source: '/prestations',
+        destination: '/activites',
+        permanent: true,
+      },
+      {
+        source: '/activite',
+        destination: '/activites',
+        permanent: true,
+      },
+      {
+        source: '/activites/:slug',
+        destination: '/:slug',
+        permanent: true,
+      },
+      {
+        source: '/blog/:slug',
+        destination: '/:slug',
+        permanent: true,
+      },
     ]
   },
 };

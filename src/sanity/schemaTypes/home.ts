@@ -48,6 +48,49 @@ export const homeType = defineType({
       of: [{ type: 'image', options: { hotspot: true } }],
       group: 'hero',
     }),
+    defineField({
+      name: 'heroTextAlign',
+      title: 'Alignement du texte du Hero',
+      type: 'string',
+      initialValue: 'center',
+      options: {
+        list: [
+          { title: 'Centré', value: 'center' },
+          { title: 'Gauche', value: 'left' },
+          { title: 'Droite', value: 'right' }
+        ],
+        layout: 'radio'
+      },
+      group: 'hero',
+    }),
+    defineField({
+      name: 'heroBtnDiscoverText',
+      title: 'Texte du bouton "Découvrir" (Français)',
+      type: 'string',
+      initialValue: 'Découvrir',
+      group: 'hero',
+    }),
+    defineField({
+      name: 'heroBtnDiscoverTextEn',
+      title: 'Texte du bouton "Découvrir" (Anglais)',
+      type: 'string',
+      initialValue: 'Discover',
+      group: 'hero',
+    }),
+    defineField({
+      name: 'heroBtnDeparturesText',
+      title: 'Texte du bouton "Sorties" (Français)',
+      type: 'string',
+      initialValue: 'Prochaines sorties',
+      group: 'hero',
+    }),
+    defineField({
+      name: 'heroBtnDeparturesTextEn',
+      title: 'Texte du bouton "Sorties" (Anglais)',
+      type: 'string',
+      initialValue: 'Upcoming departures',
+      group: 'hero',
+    }),
 
     // ABOUT SECTION
     defineField({
@@ -268,6 +311,22 @@ export const homeType = defineType({
       initialValue: false,
       group: 'layout',
       description: "Masque le bloc de carnet de voyage sur la page d'accueil.",
+    }),
+    defineField({
+      name: 'hideSorties',
+      title: 'Masquer la section Prochaines Sorties',
+      type: 'boolean',
+      initialValue: false,
+      group: 'layout',
+      description: "Masque le bloc des dates de départ planifiées sur la page d'accueil.",
+    }),
+    defineField({
+      name: 'hideAdventure',
+      title: 'Masquer la section Accompagnement Personnalisé',
+      type: 'boolean',
+      initialValue: false,
+      group: 'layout',
+      description: "Masque la section détaillant la philosophie et l'engagement du guide sur la page d'accueil.",
     }),
     defineField({
       name: 'featuredPostsLimit',

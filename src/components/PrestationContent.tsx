@@ -25,6 +25,11 @@ const blockAlignComponents = {
       const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
       return <p style={{ textAlign: 'justify', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
     },
+    blockquote: ({ children }: any) => (
+      <blockquote className="border-l-4 border-accent pl-6 py-4 my-8 italic text-xl text-foreground/80 bg-accent/5 rounded-r-2xl text-justify">
+        {children}
+      </blockquote>
+    ),
   }
 }
 

@@ -11,6 +11,7 @@ import { sortieType } from './sortie'
 import { settingsType } from './settings'
 import { faqType } from './faq'
 import { tagType } from './tag'
+import { resourceType } from './resource'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -26,5 +27,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     universType,
     sortieType,
     faqType,
+    resourceType,
   ],
 }

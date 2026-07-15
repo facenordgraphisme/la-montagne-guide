@@ -232,5 +232,12 @@ export const sejourType = defineType({
       type: 'url',
       description: 'Optionnel. Si défini, le bouton de réservation principal renverra vers ce lien plutôt que vers le formulaire de contact.',
     }),
+    defineField({
+      name: 'faqs',
+      title: 'Questions fréquentes (FAQ)',
+      description: 'Sélectionnez des FAQ spécifiques à afficher sur la page de ce séjour.',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'faq' }] }],
+    }),
   ],
 })

@@ -89,7 +89,7 @@ const BlogTeaser = ({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {list.map((post, i) => (
-            <Link key={i} href={`/blog/${post.slug}`} className="group block">
+            <Link key={i} href={`/${post.slug}`} className="group block">
               <div className="relative aspect-[16/10] rounded-[32px] overflow-hidden mb-6 shadow-lg">
                 {post.image && (
                   <Image

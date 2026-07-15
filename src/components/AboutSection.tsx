@@ -27,6 +27,11 @@ const blockAlignComponents = {
       const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
       return <p style={{ textAlign: 'justify', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
     },
+    blockquote: ({ children }: any) => (
+      <blockquote className="border-l-4 border-accent pl-6 py-4 my-8 italic text-xl text-foreground/80 bg-accent/5 rounded-r-2xl text-justify">
+        {children}
+      </blockquote>
+    ),
   }
 }
 
@@ -98,11 +103,7 @@ const AboutSection = ({
               )}
             </div>
             
-            <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-              <Link href="/le-guide" className="btn-primary inline-block shrink-0 text-center">
-                {t('about.learnMore')}
-              </Link>
-              
+            <div className="space-y-8">
               <div className="flex items-center gap-6 flex-wrap">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-accent/15 border border-accent/30 text-accent rounded-full flex items-center justify-center font-bold text-lg shrink-0">
@@ -129,6 +130,12 @@ const AboutSection = ({
                     <span className="text-accent">UIAGM / IFMGA</span>
                   </div>
                 </div>
+              </div>
+
+              <div>
+                <Link href="/le-guide" className="btn-primary inline-block text-center">
+                  {t('about.learnMore')}
+                </Link>
               </div>
             </div>
 

@@ -37,6 +37,11 @@ const portableTextComponents: PortableTextComponents = {
     },
     h2: ({ children }) => <h2>{children}</h2>,
     h3: ({ children }) => <h3>{children}</h3>,
+    blockquote: ({ children }) => (
+      <blockquote className="border-l-4 border-accent pl-6 py-4 my-8 italic text-xl text-foreground/80 bg-accent/5 rounded-r-2xl text-justify">
+        {children}
+      </blockquote>
+    ),
   },
   types: {
     image: ({ value }) =>

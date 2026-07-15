@@ -12,6 +12,7 @@ interface FooterProps {
 }
 
 import { useLanguage } from '@/context/LanguageContext'
+import ObfuscatedContact from './ObfuscatedContact'
 
 const Footer = ({ contactData, settingsData }: FooterProps) => {
   const { at, t, language } = useLanguage()
@@ -83,10 +84,11 @@ const Footer = ({ contactData, settingsData }: FooterProps) => {
           <div>
             <h4 className="font-bold mb-6 uppercase tracking-widest text-xs text-foreground/40">{t('footer.navigation') || t('nav.navigation')}</h4>
             <ul className="space-y-4 text-foreground/70 font-medium">
-              <li><Link href="/prestations" className="hover:text-accent transition-colors">{t('nav.activities')}</Link></li>
+              <li><Link href="/activites" className="hover:text-accent transition-colors">{t('nav.activities')}</Link></li>
               <li><Link href="/prochaines-sorties" className="hover:text-accent transition-colors">{t('nav.sorties')}</Link></li>
               <li><Link href="/le-guide" className="hover:text-accent transition-colors">{t('nav.guide')}</Link></li>
               <li><Link href="/blog" className="hover:text-accent transition-colors">{t('nav.blog')}</Link></li>
+              <li><Link href="/ressources" className="hover:text-accent transition-colors">{t('nav.resources')}</Link></li>
               <li><Link href="/contact" className="hover:text-accent transition-colors">{t('nav.contact')}</Link></li>
             </ul>
           </div>
@@ -94,8 +96,18 @@ const Footer = ({ contactData, settingsData }: FooterProps) => {
           <div>
             <h4 className="font-bold mb-6 uppercase tracking-widest text-xs text-foreground/40">{t('nav.contact')}</h4>
             <ul className="space-y-4 text-foreground/70 font-medium">
-              <li>{settingsData?.email || contactData?.email || 'draperinicolas@hotmail.com'}</li>
-              <li>{settingsData?.phone || contactData?.phone || '06 75 07 97 08'}</li>
+              <li>
+                <ObfuscatedContact 
+                  type="email" 
+                  value={settingsData?.email || contactData?.email || 'draperinicolas@hotmail.com'} 
+                />
+              </li>
+              <li>
+                <ObfuscatedContact 
+                  type="phone" 
+                  value={settingsData?.phone || contactData?.phone || '+33 (0)6 75 07 97 08'} 
+                />
+              </li>
               <li>{at(settingsData?.address || contactData?.address || 'Champcella, Hautes-Alpes')}</li>
             </ul>
           </div>

@@ -147,5 +147,12 @@ export const activityType = defineType({
       type: 'string',
       description: 'Texte du bouton dans l\'encart en bas des pages d\'univers.',
     }),
+    defineField({
+      name: 'faqs',
+      title: 'Questions fréquentes (FAQ)',
+      description: 'Sélectionnez des FAQ spécifiques à afficher sur cette page d\'activité.',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'faq' }] }],
+    }),
   ],
 })

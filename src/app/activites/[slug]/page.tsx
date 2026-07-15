@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation';
 import { getServerTranslations } from '@/i18n/server';
 
 import UpcomingSorties from "@/components/UpcomingSorties";
+import FAQAccordion from "@/components/FAQAccordion";
 import { PortableText } from '@portabletext/react';
 
 const blockAlignComponents = {
@@ -27,6 +28,11 @@ const blockAlignComponents = {
       const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
       return <p style={{ textAlign: 'justify', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
     },
+    blockquote: ({ children }: any) => (
+      <blockquote className="border-l-4 border-accent pl-6 py-4 my-8 italic text-xl text-foreground/80 bg-accent/5 rounded-r-2xl text-justify">
+        {children}
+      </blockquote>
+    ),
   }
 };
 
@@ -232,6 +238,14 @@ export default async function PrestationDetail({ params }: { params: Promise<{ s
           initialFilter={data.title} 
           showFilters={false} 
         />
+      )}
+
+      {data.faqs && data.faqs.length > 0 && (
+        <section className="py-20 border-t border-border/10 bg-background">
+          <div className="container mx-auto px-6 max-w-4xl">
+            <FAQAccordion faqs={data.faqs} />
+          </div>
+        </section>
       )}
 
     </main>

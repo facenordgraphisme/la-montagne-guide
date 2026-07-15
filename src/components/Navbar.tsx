@@ -67,7 +67,7 @@ const Navbar = ({ sanityActivities }: { sanityActivities?: any[] }) => {
           <div className="flex items-center gap-8 text-foreground/80">
             {/* Prestations with Submenu */}
             <div className="relative group/menu py-4">
-              <Link href="/prestations" className="hover:text-accent transition-colors flex items-center gap-1">
+              <Link href="/activites" className="hover:text-accent transition-colors flex items-center gap-1">
                 {t('nav.activities')}
                 <ChevronDown className="w-3 h-3 group-hover/menu:rotate-180 transition-transform" />
               </Link>
@@ -102,6 +102,7 @@ const Navbar = ({ sanityActivities }: { sanityActivities?: any[] }) => {
             <Link href="/prochaines-sorties" className="hover:text-accent transition-colors">{t('nav.sorties')}</Link>
             <Link href="/le-guide" className="hover:text-accent transition-colors">{t('nav.guide')}</Link>
             <Link href="/blog" className="hover:text-accent transition-colors">{t('nav.blog')}</Link>
+            <Link href="/ressources" className="hover:text-accent transition-colors">{t('nav.resources')}</Link>
           </div>
         </div>
 
@@ -201,6 +202,7 @@ const Navbar = ({ sanityActivities }: { sanityActivities?: any[] }) => {
                 { name: t('nav.sorties'), href: "/prochaines-sorties" },
                 { name: t('nav.guide'), href: "/le-guide" },
                 { name: t('nav.blog'), href: "/blog" },
+                { name: t('nav.resources'), href: "/ressources" },
                 { name: t('nav.contact'), href: "/contact" },
               ].map((link) => (
                 <Link

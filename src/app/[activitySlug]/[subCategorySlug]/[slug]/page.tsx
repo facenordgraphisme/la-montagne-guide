@@ -11,6 +11,7 @@ import { getServerTranslations } from '@/i18n/server';
 import SejourTabs from '@/components/SejourTabs';
 import RichContent from '@/components/RichContent';
 import BlogCard from '@/components/BlogCard';
+import FAQAccordion from '@/components/FAQAccordion';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -322,6 +323,14 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                 <BlogCard key={post.slug} post={post} />
               ))}
             </div>
+          </div>
+        </section>
+      )}
+
+      {sejour.faqs && sejour.faqs.length > 0 && (
+        <section className="py-20 border-t border-border/10 bg-background">
+          <div className="container mx-auto px-6 max-w-4xl">
+            <FAQAccordion faqs={sejour.faqs} />
           </div>
         </section>
       )}
