@@ -278,10 +278,23 @@ export const postsQuery = groq`*[_type == "post"] | order(publishedAt desc) {
   "slug": slug.current,
   "date": publishedAt,
   "image": mainImage.asset->url,
-  "imageAlt": mainImage.alt,
+  "imageAlt": coalesce(mainImage.alt, mainImage.asset->altText),
   "imageName": mainImage.imageName,
   excerpt,
-  "body": body,
+  "body": body[] {
+    ...,
+    _type == "image" => {
+      ...,
+      "alt": coalesce(alt, asset->altText)
+    },
+    _type == "gallery" => {
+      ...,
+      images[] {
+        ...,
+        "alt": coalesce(alt, asset->altText)
+      }
+    }
+  },
   "tags": tags[]->name
 }`
 
@@ -296,7 +309,7 @@ export const postsPageQuery = groq`{
     "slug": slug.current,
     "date": publishedAt,
     "image": mainImage.asset->url,
-    "imageAlt": mainImage.alt,
+    "imageAlt": coalesce(mainImage.alt, mainImage.asset->altText),
     "imageName": mainImage.imageName,
     excerpt
   },
@@ -315,11 +328,28 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
   "slug": slug.current,
   "date": publishedAt,
   "image": mainImage.asset->url,
-  "imageAlt": mainImage.alt,
+  "imageAlt": coalesce(mainImage.alt, mainImage.asset->altText),
   "imageName": mainImage.imageName,
   excerpt,
-  body,
-  "gallery": gallery[]{caption, "url": asset->url},
+  "body": body[] {
+    ...,
+    _type == "image" => {
+      ...,
+      "alt": coalesce(alt, asset->altText)
+    },
+    _type == "gallery" => {
+      ...,
+      images[] {
+        ...,
+        "alt": coalesce(alt, asset->altText)
+      }
+    }
+  },
+  "gallery": gallery[]{
+    caption,
+    "alt": coalesce(alt, asset->altText),
+    "url": asset->url
+  },
   "tags": array::compact([
     activityType->{ "name": title, "slug": slug.current, "tagType": "category" }
   ] + tags[]->{ name, "slug": slug.current, tagType }),

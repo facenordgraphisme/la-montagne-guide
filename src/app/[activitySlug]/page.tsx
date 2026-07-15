@@ -118,9 +118,14 @@ const blogBlockComponents = {
     },
     gallery: ({ value }: any) => {
       if (!value || !value.images) return null;
+      const formattedImages = value.images.map((img: any) => ({
+        src: urlFor(img).url(),
+        alt: img.alt || img.caption || 'Image galerie',
+        caption: img.caption
+      }));
       return (
         <div className="my-12">
-          <ImageGallery images={value.images} />
+          <ImageGallery images={formattedImages} />
         </div>
       );
     },
