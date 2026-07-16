@@ -82,15 +82,18 @@ const Hero = ({
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-[#ffffff] w-full max-w-4xl"
+          className={`text-[#ffffff] w-full max-w-4xl flex flex-col ${alignClass}`}
         >
-          <span className="text-[#f97316] font-black tracking-widest uppercase text-sm mb-4 block">
+          <span className={`text-[#f97316] font-black tracking-widest uppercase text-sm mb-4 block ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}>
             {at(subtitle)}
           </span>
-          <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 uppercase whitespace-pre-line">
+          <h1 className={`text-5xl md:text-8xl font-black tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 uppercase whitespace-pre-line ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}>
             {at(title)}
           </h1>
-          <p className={`max-w-2xl text-lg text-white/80 mb-10 leading-relaxed whitespace-pre-line ${descAlignClass}`}>
+          <p 
+            className={`max-w-2xl text-lg text-white/80 mb-10 leading-relaxed whitespace-pre-line ${descAlignClass} ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}
+            style={{ textAlign: (textAlign === 'left' || textAlign === 'right') ? textAlign : 'center' }}
+          >
             {at(description)}
           </p>
           <div className={`flex flex-col sm:flex-row items-center gap-4 ${btnAlignClass}`}>

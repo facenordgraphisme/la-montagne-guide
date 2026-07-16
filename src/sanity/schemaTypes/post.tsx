@@ -167,7 +167,7 @@ export const postType = defineType({
 
 // Custom React component to manage and edit ALT texts/captions of all images inside the post
 import { Card, Stack, Text, TextInput, Label, Flex } from '@sanity/ui'
-import { useFormValue, set, useClient } from 'sanity'
+import { useFormValue, set, useClient, PatchEvent } from 'sanity'
 import { useEffect, useState } from 'react'
 import { urlFor } from '@/sanity/lib/image'
 
@@ -231,7 +231,7 @@ function PostMediaManagerInput(props: any) {
 
   // Helper to dispatch a patch update back to Sanity
   const handleUpdate = (value: string, path: any[]) => {
-    props.onChange(set(value, path))
+    props.onChange(PatchEvent.from(set(value, path)))
   }
 
   return (
