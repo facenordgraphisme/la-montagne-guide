@@ -139,7 +139,7 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
     availableSpots,
     isFull
   },
-  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, category, order}
+  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, category, order}[defined(_id)]
 }`
 
 export const postsBySejourQuery = groq`*[_type == "post" && relatedSejour._ref == $sejourId] | order(publishedAt desc)[0...6] {
@@ -176,6 +176,7 @@ export const sortieBySlugQuery = groq`*[_type == "sortie" && slug.current == $sl
 }`
 
 export const activitiesQuery = groq`*[_type == "activity"] | order(title asc) {
+  _id,
   title,
   "slug": slug.current,
   subtitle,
@@ -398,7 +399,10 @@ export const settingsQuery = groq`*[_type == "settings"][0]{
   activitiesPageTitle,
   activitiesPageTitleEn,
   activitiesPageDescription,
-  activitiesPageDescriptionEn
+  activitiesPageDescriptionEn,
+  "activitiesOrder": activitiesOrder[]->{
+    _id
+  }
 }`
 
 export const faqsQuery = groq`*[_type == "faq"] | order(order asc, _createdAt desc) {

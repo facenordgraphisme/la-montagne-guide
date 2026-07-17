@@ -1,6 +1,25 @@
 import { defineField, defineType } from 'sanity'
 import { Compass } from 'lucide-react'
 
+const descriptionBlocks = [
+  {
+    type: 'block',
+    styles: [
+      { title: 'Normal', value: 'normal' },
+      { title: 'Centré', value: 'blockCenter' },
+      { title: 'Justifié', value: 'blockJustify' },
+      { title: 'Droite', value: 'blockRight' },
+    ],
+    lists: [],
+    marks: {
+      decorators: [
+        { title: 'Gras', value: 'strong' },
+        { title: 'Italique', value: 'em' },
+      ]
+    }
+  }
+]
+
 export const activityType = defineType({
   name: 'activity',
   title: 'Activités',
@@ -35,7 +54,8 @@ export const activityType = defineType({
     defineField({
       name: 'description',
       title: 'Description courte',
-      type: 'text',
+      type: 'array',
+      of: descriptionBlocks,
     }),
     defineField({
       name: 'image',
@@ -80,8 +100,8 @@ export const activityType = defineType({
     defineField({
       name: 'universDescription',
       title: 'Description Section Univers',
-      type: 'text',
-      rows: 3,
+      type: 'array',
+      of: descriptionBlocks,
     }),
     defineField({
       name: 'univers',
@@ -92,7 +112,7 @@ export const activityType = defineType({
           type: 'object',
           fields: [
             { name: 'title', type: 'string', title: 'Titre' },
-            { name: 'description', type: 'text', title: 'Description' },
+            { name: 'description', type: 'array', title: 'Description', of: descriptionBlocks },
           ],
         },
       ],
@@ -152,7 +172,7 @@ export const activityType = defineType({
       title: 'Questions fréquentes (FAQ)',
       description: 'Sélectionnez des FAQ spécifiques à afficher sur cette page d\'activité.',
       type: 'array',
-      of: [{ type: 'reference', to: [{ type: 'faq' }] }],
+      of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
     }),
   ],
 })

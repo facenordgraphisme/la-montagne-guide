@@ -6,11 +6,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 import { useLanguage } from '@/context/LanguageContext'
+import { renderRichText } from '@/utils/richText'
 
 interface HeroProps {
   title?: string
   subtitle?: string
-  description?: string
+  description?: any
   images?: string[]
   textAlign?: string
   btnDiscoverText?: string
@@ -35,7 +36,7 @@ const Hero = ({
   btnDeparturesText,
   btnDeparturesTextEn
 }: HeroProps) => {
-  const { at, t, language } = useLanguage()
+  const { at, t, language, translatePortableText } = useLanguage()
   const [currentBg, setCurrentBg] = React.useState(0)
   const backgrounds = (images && images.length > 0) ? images : ['/images/hero.jpg']
 
@@ -90,12 +91,12 @@ const Hero = ({
           <h1 className={`text-5xl md:text-8xl font-black tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 uppercase whitespace-pre-line ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}>
             {at(title)}
           </h1>
-          <p 
-            className={`max-w-2xl text-lg text-white/80 mb-10 leading-relaxed whitespace-pre-line ${descAlignClass} ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}
+          <div 
+            className={`max-w-2xl text-lg text-white/80 mb-10 leading-relaxed ${descAlignClass} ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}
             style={{ textAlign: (textAlign === 'left' || textAlign === 'right') ? textAlign : 'center' }}
           >
-            {at(description)}
-          </p>
+            {renderRichText(translatePortableText(description) || at(description))}
+          </div>
           <div className={`flex flex-col sm:flex-row items-center gap-4 ${btnAlignClass}`}>
             <Link href="/activites" className="btn-primary !text-white">
               {language === 'en' 

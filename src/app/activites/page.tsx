@@ -6,6 +6,7 @@ import { activitiesQuery, settingsQuery } from "@/sanity/lib/queries";
 import Image from 'next/image';
 
 import { getServerTranslations } from '@/i18n/server';
+import { renderRichText, toPlainText } from '@/utils/richText';
 
 export async function generateMetadata(): Promise<Metadata> {
   const [settingsData] = await Promise.all([
@@ -16,8 +17,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = settingsData?.activitiesPageTitle 
     ? `${at(settingsData.activitiesPageTitle)} | La Montagne Guide` 
     : `${at('Activités')} | La Montagne Guide`;
-  const description = settingsData?.activitiesPageDescription
-    ? at(settingsData.activitiesPageDescription)
+  const rawDesc = settingsData?.activitiesPageDescription;
+  const description = rawDesc
+    ? toPlainText(at(rawDesc))
     : at('Découvrez toutes les activités de montagne proposées : Alpinisme, Ski de Randonnée, Escalade, Cascade de Glace, Voyages lointains. Encadrement professionnel.');
 
   return {
@@ -26,12 +28,14 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+import { sortActivities } from "@/utils/activity";
+
 export default async function ActivitesPage() {
   const [sanityActivities, settingsData] = await Promise.all([
     client.fetch(activitiesQuery),
     client.fetch(settingsQuery)
   ]);
-  const { at, t } = await getServerTranslations();
+  const { at, t, translatePortableText } = await getServerTranslations();
   
   const fallback = [
     {
@@ -51,7 +55,7 @@ export default async function ActivitesPage() {
     {
       title: at('Escalade'),
       slug: 'escalade',
-      description: at('Grandes voies, falaises ou initiation, grimpez en toute sérénité.'),
+      description: at('Grandes voies, falaises ou initiation, grimpez en toute serrénité.'),
       price: at('À partir de 420€/jour'),
       image: '/images/escalade.jpg'
     },
@@ -71,22 +75,23 @@ export default async function ActivitesPage() {
     }
   ];
 
-  const activities = sanityActivities?.length > 0 ? sanityActivities : fallback;
+  const sortedSanityActivities = sortActivities(sanityActivities, settingsData?.activitiesOrder);
+  const activities = sortedSanityActivities?.length > 0 ? sortedSanityActivities : fallback;
   
   const displayTitle = settingsData?.activitiesPageTitle
     ? at(settingsData.activitiesPageTitle)
     : at('NOS ACTIVITÉS');
   const displayDescription = settingsData?.activitiesPageDescription
-    ? at(settingsData.activitiesPageDescription)
+    ? translatePortableText(settingsData.activitiesPageDescription)
     : at('Découvrez toutes les activités que je propose. Chaque sortie est encadrée avec passion et une sécurité absolue.');
 
   return (
     <main className="relative pt-32 min-h-screen">
       <div className="container mx-auto px-6 py-20">
         <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4 text-gradient uppercase">{displayTitle}</h1>
-        <p className="text-foreground/60 text-lg mb-16 max-w-2xl">
-          {displayDescription}
-        </p>
+        <div className="text-foreground/60 text-lg mb-16 max-w-2xl">
+          {renderRichText(displayDescription)}
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {activities.map((p: any) => (
@@ -106,7 +111,7 @@ export default async function ActivitesPage() {
                   {at(p.title)}
                 </h3>
                 <p className="text-foreground/70 mb-8 flex-1 leading-relaxed line-clamp-3">
-                  {at(p.description)}
+                  {toPlainText(translatePortableText(p.description) || at(p.description))}
                 </p>
 
                 <div className="flex items-center justify-between mt-auto">

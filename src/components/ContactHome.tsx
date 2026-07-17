@@ -4,12 +4,13 @@ import React from 'react'
 import Link from 'next/link'
 import { useLanguage } from '@/context/LanguageContext'
 import ObfuscatedContact from "./ObfuscatedContact"
+import { renderRichText } from '@/utils/richText'
 
 interface ContactHomeProps {
   badge?: string
   title?: string
   titleAccent?: string
-  description?: string
+  description?: any
 }
 
 const ContactHome = ({
@@ -18,7 +19,7 @@ const ContactHome = ({
   titleAccent = "D'EN DISCUTER",
   description = "Que ce soit pour un sommet précis, une formation technique ou simplement pour échanger sur vos envies de montagne, n'hésitez pas à me contacter.",
 }: ContactHomeProps) => {
-  const { at, t } = useLanguage()
+  const { at, t, translatePortableText } = useLanguage()
   return (
     <section className="py-24 bg-card/5 border-t border-border/20">
       <div className="container mx-auto px-6">
@@ -29,9 +30,9 @@ const ContactHome = ({
             <h2 className="text-4xl md:text-8xl font-black tracking-tighter mb-10 leading-none uppercase whitespace-pre-line">
               {at(title)} <br /> <span className="text-accent italic">{at(titleAccent)}</span>
             </h2>
-            <p className="text-foreground/60 text-lg md:text-xl mb-12 max-w-2xl mx-auto leading-relaxed">
-              {at(description)}
-            </p>
+            <div className="text-foreground/60 text-lg md:text-xl mb-12 max-w-2xl mx-auto leading-relaxed">
+              {renderRichText(translatePortableText(description) || at(description))}
+            </div>
             
             <div className="flex flex-col md:flex-row items-center justify-center gap-8">
               <Link href="/contact" className="btn-primary px-12 py-5 text-lg shadow-2xl hover:scale-105 transition-transform">

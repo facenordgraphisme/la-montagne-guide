@@ -49,12 +49,13 @@ const activities = [
 interface ActivitySectionProps {
   title?: string
   titleAccent?: string
-  description?: string
+  description?: any
   data?: any[]
   className?: string
 }
 
 import { useLanguage } from '@/context/LanguageContext'
+import { renderRichText, toPlainText } from '@/utils/richText'
 
 const ActivitySection = ({
   title = "VOS PROCHAINES",
@@ -63,7 +64,7 @@ const ActivitySection = ({
   data = [],
   className = "bg-background"
 }: ActivitySectionProps) => {
-  const { at, t } = useLanguage()
+  const { at, t, translatePortableText } = useLanguage()
   
   const activities = [
     {
@@ -114,9 +115,9 @@ const ActivitySection = ({
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 uppercase">
               {at(title)} <br /> <span className="text-accent italic">{at(titleAccent)}</span>
             </h2>
-            <p className="text-foreground/60 text-lg">
-              {at(description)}
-            </p>
+            <div className="text-foreground/60 text-lg">
+              {renderRichText(translatePortableText(description) || at(description))}
+            </div>
           </div>
           <button className="text-sm font-bold tracking-widest uppercase border-b border-accent pb-1 text-foreground/60 hover:text-accent transition-colors">
             {t('common.viewAll')}
@@ -151,7 +152,7 @@ const ActivitySection = ({
                     {at(activity.title)}
                   </h3>
                   <p className="text-sm text-white/80 line-clamp-2 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    {at(activity.description)}
+                    {toPlainText(translatePortableText(activity.description) || at(activity.description))}
                   </p>
                   <div className="mt-6 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-accent transition-colors text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">

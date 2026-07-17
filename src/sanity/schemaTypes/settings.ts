@@ -1,6 +1,25 @@
 import { defineField, defineType } from 'sanity'
 import { Settings } from 'lucide-react'
 
+const descriptionBlocks = [
+  {
+    type: 'block',
+    styles: [
+      { title: 'Normal', value: 'normal' },
+      { title: 'Centré', value: 'blockCenter' },
+      { title: 'Justifié', value: 'blockJustify' },
+      { title: 'Droite', value: 'blockRight' },
+    ],
+    lists: [],
+    marks: {
+      decorators: [
+        { title: 'Gras', value: 'strong' },
+        { title: 'Italique', value: 'em' },
+      ]
+    }
+  }
+]
+
 export const settingsType = defineType({
   name: 'settings',
   title: 'Paramètres Globaux',
@@ -261,17 +280,23 @@ export const settingsType = defineType({
     defineField({
       name: 'activitiesPageDescription',
       title: 'Description de la page Activités (Français)',
-      type: 'text',
-      rows: 3,
-      initialValue: 'Découvrez toutes les activités que je propose. Chaque sortie est encadrée avec passion et une sécurité absolue.',
+      type: 'array',
+      of: descriptionBlocks,
       group: 'activities',
     }),
     defineField({
       name: 'activitiesPageDescriptionEn',
       title: 'Description de la page Activités (Anglais)',
-      type: 'text',
-      rows: 3,
-      initialValue: 'Discover all the activities I offer. Each outing is guided with passion and absolute safety.',
+      type: 'array',
+      of: descriptionBlocks,
+      group: 'activities',
+    }),
+    defineField({
+      name: 'activitiesOrder',
+      title: 'Ordre d\'affichage des activités',
+      description: 'Glissez-déposez les activités ci-dessous pour choisir l\'ordre d\'affichage global (sur la page d\'accueil, la page activités et la barre de navigation).',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'activity' }] }],
       group: 'activities',
     }),
   ],

@@ -1,6 +1,25 @@
 import { defineField, defineType } from 'sanity'
 import { Home } from 'lucide-react'
 
+const descriptionBlocks = [
+  {
+    type: 'block',
+    styles: [
+      { title: 'Normal', value: 'normal' },
+      { title: 'Centré', value: 'blockCenter' },
+      { title: 'Justifié', value: 'blockJustify' },
+      { title: 'Droite', value: 'blockRight' },
+    ],
+    lists: [],
+    marks: {
+      decorators: [
+        { title: 'Gras', value: 'strong' },
+        { title: 'Italique', value: 'em' },
+      ]
+    }
+  }
+]
+
 export const homeType = defineType({
   name: 'home',
   title: 'Page d\'accueil',
@@ -36,9 +55,8 @@ export const homeType = defineType({
     defineField({
       name: 'heroDescription',
       title: 'Description Hero',
-      type: 'text',
-      description: 'Utilisez la touche Entrée pour passer à la ligne.',
-      rows: 4,
+      type: 'array',
+      of: descriptionBlocks,
       group: 'hero',
     }),
     defineField({
@@ -160,7 +178,8 @@ export const homeType = defineType({
     defineField({
       name: 'activitiesDescription',
       title: 'Description Activités',
-      type: 'text',
+      type: 'array',
+      of: descriptionBlocks,
       group: 'activities',
     }),
 
@@ -208,7 +227,8 @@ export const homeType = defineType({
     defineField({
       name: 'adventureDescription',
       title: 'Description Aventure',
-      type: 'text',
+      type: 'array',
+      of: descriptionBlocks,
       group: 'adventure',
     }),
     defineField({
@@ -249,7 +269,8 @@ export const homeType = defineType({
     defineField({
       name: 'contactDescription',
       title: 'Description Contact',
-      type: 'text',
+      type: 'array',
+      of: descriptionBlocks,
       group: 'contact',
     }),
 

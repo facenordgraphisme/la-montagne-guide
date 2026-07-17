@@ -14,6 +14,7 @@ import PartnersSlider from "@/components/PartnersSlider";
 import { client } from "@/sanity/lib/client";
 import { homeQuery, sortiesQuery, testimonialsQuery, blogTeaserQuery, activitiesQuery, settingsQuery, faqsQuery } from "@/sanity/lib/queries";
 import { getServerTranslations } from '@/i18n/server';
+import { sortActivities } from "@/utils/activity";
 
 export default async function Home() {
   const homeData = await client.fetch(homeQuery);
@@ -27,6 +28,8 @@ export default async function Home() {
     client.fetch(settingsQuery),
     client.fetch(faqsQuery)
   ]);
+
+  const sortedActivities = sortActivities(activitiesData, settingsData?.activitiesOrder);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -78,7 +81,7 @@ export default async function Home() {
           title={homeData?.activitiesTitle}
           titleAccent={homeData?.activitiesTitleAccent}
           description={homeData?.activitiesDescription}
-          data={activitiesData}
+          data={sortedActivities}
           className="bg-surface"
         />
         {!homeData?.hideSorties && (

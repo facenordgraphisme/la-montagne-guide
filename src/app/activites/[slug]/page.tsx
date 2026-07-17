@@ -9,6 +9,7 @@ import { getServerTranslations } from '@/i18n/server';
 import UpcomingSorties from "@/components/UpcomingSorties";
 import FAQAccordion from "@/components/FAQAccordion";
 import { PortableText } from '@portabletext/react';
+import { renderRichText } from '@/utils/richText';
 
 const blockAlignComponents = {
   block: {
@@ -111,7 +112,7 @@ export default async function PrestationDetail({ params }: { params: Promise<{ s
   const { slug } = await params;
   const sanityData = await client.fetch(activityBySlugQuery, { slug });
   const data = sanityData || prestationsFallback[slug];
-  const { at, t } = await getServerTranslations();
+  const { at, t, translatePortableText } = await getServerTranslations();
 
   if (!data) notFound();
 
@@ -164,7 +165,9 @@ export default async function PrestationDetail({ params }: { params: Promise<{ s
             <div className="lg:col-span-2 space-y-12">
               <div>
                 <h2 className="text-3xl font-bold mb-6">Présentation</h2>
-                <p className="text-xl text-foreground/70 leading-relaxed whitespace-pre-line">{data.description}</p>
+                <div className="text-xl text-foreground/70 leading-relaxed">
+                  {renderRichText(translatePortableText(data.description) || at(data.description))}
+                </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

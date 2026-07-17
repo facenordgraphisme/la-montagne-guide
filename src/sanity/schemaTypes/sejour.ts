@@ -1,6 +1,25 @@
 import { defineField, defineType } from 'sanity'
 import { Mountain } from 'lucide-react'
 
+const descriptionBlocks = [
+  {
+    type: 'block',
+    styles: [
+      { title: 'Normal', value: 'normal' },
+      { title: 'Centré', value: 'blockCenter' },
+      { title: 'Justifié', value: 'blockJustify' },
+      { title: 'Droite', value: 'blockRight' },
+    ],
+    lists: [],
+    marks: {
+      decorators: [
+        { title: 'Gras', value: 'strong' },
+        { title: 'Italique', value: 'em' },
+      ]
+    }
+  }
+]
+
 export const sejourType = defineType({
   name: 'sejour',
   title: 'Catalogue des Séjours',
@@ -113,7 +132,8 @@ export const sejourType = defineType({
     defineField({
       name: 'description',
       title: 'Description détaillée',
-      type: 'text',
+      type: 'array',
+      of: descriptionBlocks,
     }),
     defineField({
       name: 'content',

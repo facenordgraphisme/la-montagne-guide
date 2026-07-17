@@ -76,6 +76,7 @@ export const postType = defineType({
           type: 'image',
           options: { hotspot: true },
           fields: [
+            { name: 'imageName', type: 'string', title: 'Nom personnalisé / Titre de l\'image', description: 'Pour organiser ou nommer l\'image.' },
             { name: 'caption', type: 'string', title: 'Légende' },
             { name: 'alt', type: 'string', title: 'Texte alternatif (ALT)' },
           ],
@@ -92,7 +93,8 @@ export const postType = defineType({
               of: [{
                 type: 'image',
                 options: { hotspot: true },
-                fields: [
+                 fields: [
+                  { name: 'imageName', type: 'string', title: 'Nom personnalisé / Titre de l\'image', description: 'Pour organiser ou nommer l\'image.' },
                   { name: 'caption', type: 'string', title: 'Légende' },
                   { name: 'alt', type: 'string', title: 'Texte alternatif (ALT)' },
                 ],
@@ -147,6 +149,7 @@ export const postType = defineType({
           type: 'image',
           options: { hotspot: true },
           fields: [
+            { name: 'imageName', type: 'string', title: 'Nom personnalisé / Titre de l\'image', description: 'Pour organiser ou nommer l\'image.' },
             { name: 'caption', type: 'string', title: 'Légende' },
             { name: 'alt', type: 'string', title: 'Texte alternatif (ALT)' },
           ],
@@ -157,7 +160,16 @@ export const postType = defineType({
     defineField({
       name: 'mediaManager',
       title: 'Gestion des textes ALT & Légendes',
-      type: 'string',
+      type: 'object',
+      fields: [
+        defineField({
+          name: 'info',
+          title: 'Notice',
+          type: 'string',
+          readOnly: true,
+          description: 'Module d\'administration des médias'
+        })
+      ],
       components: {
         input: PostMediaManagerInput
       }
@@ -167,16 +179,16 @@ export const postType = defineType({
 
 // Custom React component to manage and edit ALT texts/captions of all images inside the post
 import { Card, Stack, Text, TextInput, Label, Flex } from '@sanity/ui'
-import { useFormValue, set, useClient, PatchEvent } from 'sanity'
+import { useFormValue, set, unset, useClient, PatchEvent } from 'sanity'
 import { useEffect, useState } from 'react'
 import { urlFor } from '@/sanity/lib/image'
 
 function PostMediaManagerInput(props: any) {
   const client = useClient({ apiVersion: '2023-01-01' })
   const [assetAlts, setAssetAlts] = useState<Record<string, string>>({})
+  const [assetNames, setAssetNames] = useState<Record<string, string>>({})
 
   // Read fields from the form values
-  const mainImage = useFormValue(['mainImage']) as any
   const body = useFormValue(['body']) as any[] | undefined
   const gallery = useFormValue(['gallery']) as any[] | undefined
 
@@ -203,7 +215,6 @@ function PostMediaManagerInput(props: any) {
   // Fetch alt texts from Sanity Media Library on mount or updates
   useEffect(() => {
     const ids: string[] = []
-    if (mainImage?.asset?._ref) ids.push(mainImage.asset._ref)
     bodyImages.forEach(img => {
       if (img.asset?._ref) ids.push(img.asset._ref)
     })
@@ -216,18 +227,23 @@ function PostMediaManagerInput(props: any) {
 
     if (ids.length === 0) return
 
-    client.fetch(`*[_id in $ids]{_id, altText}`, { ids })
+    client.fetch(`*[_id in $ids]{_id, altText, originalFilename}`, { ids })
       .then((results: any[]) => {
         const alts: Record<string, string> = {}
+        const names: Record<string, string> = {}
         results.forEach(res => {
           if (res.altText) {
             alts[res._id] = res.altText
           }
+          if (res.originalFilename) {
+            names[res._id] = res.originalFilename
+          }
         })
         setAssetAlts(alts)
+        setAssetNames(names)
       })
       .catch(console.error)
-  }, [mainImage?.asset?._ref, body, gallery, client])
+  }, [body, gallery, client])
 
   // Helper to dispatch a patch update back to Sanity
   const handleUpdate = (value: string, path: any[]) => {
@@ -239,43 +255,6 @@ function PostMediaManagerInput(props: any) {
       <Stack space={4}>
         <Text size={2} weight="bold">📸 Gestion des Textes Alternatifs & Légendes de l'Article</Text>
         <Text size={1} muted>Modifiez rapidement les textes descriptifs (ALT) et légendes de toutes les images utilisées dans cet article pour optimiser votre SEO.</Text>
-        
-        {/* 1. Image principale */}
-        <Card border padding={3} radius={2}>
-          <Stack space={3}>
-            <Text size={1} weight="bold">🖼️ Image Principale</Text>
-            {mainImage?.asset ? (
-              <Flex gap={3} align="center">
-                <div style={{ width: '80px', height: '60px', position: 'relative', overflow: 'hidden', borderRadius: '4px', background: '#000' }}>
-                  <img 
-                    src={urlFor(mainImage.asset).width(160).height(120).url()} 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                  />
-                </div>
-                <Stack space={3} flex={1}>
-                  <div>
-                    <Label size={0}>Nom / Titre de l'image principale :</Label>
-                    <TextInput 
-                      value={mainImage.imageName || ''} 
-                      onChange={(e: any) => handleUpdate(e.target.value, ['mainImage', 'imageName'])}
-                      placeholder="Ex: nicolas-draperi-guide-alpinisme"
-                    />
-                  </div>
-                  <div>
-                    <Label size={0}>Texte alternatif (ALT) :</Label>
-                    <TextInput 
-                      value={mainImage.alt || ''} 
-                      onChange={(e: any) => handleUpdate(e.target.value, ['mainImage', 'alt'])}
-                      placeholder={assetAlts[mainImage.asset._ref] || "Description SEO de l'image..."}
-                    />
-                  </div>
-                </Stack>
-              </Flex>
-            ) : (
-              <Text size={1} muted>Aucune image principale configurée.</Text>
-            )}
-          </Stack>
-        </Card>
 
         {/* 2. Images du corps de l'article */}
         <Card border padding={3} radius={2}>
@@ -288,12 +267,22 @@ function PostMediaManagerInput(props: any) {
                 {bodyImages.map((img: any, idx: number) => (
                   <Flex key={img._key || idx} gap={3} align="center" style={{ borderBottom: '1px solid var(--card-border-color)', paddingBottom: '12px' }}>
                     <div style={{ width: '80px', height: '60px', position: 'relative', overflow: 'hidden', borderRadius: '4px', background: '#000' }}>
-                      <img 
-                        src={urlFor(img.asset).width(160).height(120).url()} 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                      />
+                      {img.asset && (
+                        <img 
+                          src={urlFor(img.asset).width(160).height(120).url()} 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        />
+                      )}
                     </div>
                     <Stack space={3} flex={1}>
+                      <div>
+                        <Label size={0}>Nom / Titre de l'image :</Label>
+                        <TextInput 
+                          value={img.imageName || ''} 
+                          onChange={(e: any) => handleUpdate(e.target.value, ['body', { _key: img._key }, 'imageName'])}
+                          placeholder={img.asset?._ref && assetNames[img.asset._ref] ? assetNames[img.asset._ref].replace(/\.[^/.]+$/, "") : "Nom de l'image..."}
+                        />
+                      </div>
                       <div>
                         <Label size={0}>Légende :</Label>
                         <TextInput 
@@ -331,12 +320,22 @@ function PostMediaManagerInput(props: any) {
                   return (
                     <Flex key={img._key || idx} gap={3} align="center" style={{ borderBottom: '1px solid var(--card-border-color)', paddingBottom: '12px' }}>
                       <div style={{ width: '80px', height: '60px', position: 'relative', overflow: 'hidden', borderRadius: '4px', background: '#000' }}>
-                        <img 
-                          src={urlFor(img.asset).width(160).height(120).url()} 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                        />
+                        {img.asset && (
+                          <img 
+                            src={urlFor(img.asset).width(160).height(120).url()} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                          />
+                        )}
                       </div>
-                      <Stack space={3} flex={1}>
+                       <Stack space={3} flex={1}>
+                        <div>
+                          <Label size={0}>Nom / Titre de l'image :</Label>
+                          <TextInput 
+                            value={img.imageName || ''} 
+                            onChange={(e: any) => handleUpdate(e.target.value, [...imagePath, 'imageName'])}
+                            placeholder={img.asset?._ref && assetNames[img.asset._ref] ? assetNames[img.asset._ref].replace(/\.[^/.]+$/, "") : "Nom de l'image..."}
+                          />
+                        </div>
                         <div>
                           <Label size={0}>Légende :</Label>
                           <TextInput 
@@ -380,7 +379,15 @@ function PostMediaManagerInput(props: any) {
                         />
                       )}
                     </div>
-                    <Stack space={3} flex={1}>
+                     <Stack space={3} flex={1}>
+                      <div>
+                        <Label size={0}>Nom / Titre de l'image :</Label>
+                        <TextInput 
+                          value={img.imageName || ''} 
+                          onChange={(e: any) => handleUpdate(e.target.value, ['gallery', { _key: img._key }, 'imageName'])}
+                          placeholder={img.asset?._ref && assetNames[img.asset._ref] ? assetNames[img.asset._ref].replace(/\.[^/.]+$/, "") : "Nom de l'image..."}
+                        />
+                      </div>
                       <div>
                         <Label size={0}>Légende :</Label>
                         <TextInput 

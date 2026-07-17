@@ -8,6 +8,8 @@ import { client } from "@/sanity/lib/client";
 import { contactQuery, activitiesQuery, settingsQuery } from "@/sanity/lib/queries";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
+import { sortActivities } from "@/utils/activity";
+
 const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
@@ -19,28 +21,30 @@ export async function generateMetadata(): Promise<Metadata> {
       client.fetch(settingsQuery),
       cookies(),
     ]);
-    const lang = cookieStore.get('language')?.value || 'fr';
-    
-    const title = lang === 'en' && settingsData?.seoTitleEn 
-      ? settingsData.seoTitleEn 
-      : (settingsData?.seoTitle || "La Montagne Guide | Nicolas Draperi");
-      
-    const description = lang === 'en' && settingsData?.seoDescriptionEn 
-      ? settingsData.seoDescriptionEn 
-      : (settingsData?.seoDescription || "Guide de Haute Montagne Nicolas Draperi. Alpinisme, ski de randonnée, escalade et voyages.");
+
+    const activeLanguage = cookieStore.get('NEXT_LOCALE')?.value || 'fr';
 
     return {
-      title,
-      description,
-      openGraph: settingsData?.seoImage ? {
-        images: [{ url: settingsData.seoImage }],
-      } : undefined,
+      title: activeLanguage === 'en' ? settingsData?.seoTitleEn : settingsData?.seoTitle,
+      description: activeLanguage === 'en' ? settingsData?.seoDescriptionEn : settingsData?.seoDescription,
+      icons: {
+        icon: [
+          { url: '/favicon.svg', type: 'image/svg+xml' }
+        ]
+      },
+      openGraph: {
+        images: settingsData?.seoImage ? [{ url: settingsData.seoImage }] : [],
+      },
     };
-  } catch (error) {
-    console.error("Error generating metadata:", error);
+  } catch {
     return {
-      title: "La Montagne Guide | Nicolas Draperi",
-      description: "Guide de Haute Montagne Nicolas Draperi. Alpinisme, ski de randonnée, escalade et voyages.",
+      title: "La Montagne Guide",
+      description: "Nicolas Draperi - Guide de Haute Montagne",
+      icons: {
+        icon: [
+          { url: '/favicon.svg', type: 'image/svg+xml' }
+        ]
+      }
     };
   }
 }
@@ -64,6 +68,7 @@ export default async function RootLayout({
   const phoneNumber = contactData?.phone;
   const whatsappNumber = settingsData?.whatsappNumber;
   const whatsappText = settingsData?.whatsappText;
+  const sortedActivities = sortActivities(activitiesData, settingsData?.activitiesOrder);
 
   return (
     <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth" className={`${outfit.variable} antialiased scroll-smooth`}>
@@ -76,7 +81,7 @@ export default async function RootLayout({
         >
           <LanguageProvider>
             <AnnouncementBanner settings={settingsData} />
-            <Navbar sanityActivities={activitiesData} />
+            <Navbar sanityActivities={sortedActivities} />
             {children}
             <Footer contactData={contactData} settingsData={settingsData} />
             <WhatsAppButton

@@ -118,11 +118,14 @@ const blogBlockComponents = {
     },
     gallery: ({ value }: any) => {
       if (!value || !value.images) return null;
-      const formattedImages = value.images.map((img: any) => ({
-        src: urlFor(img).url(),
-        alt: img.alt || img.caption || 'Image galerie',
-        caption: img.caption
-      }));
+      const formattedImages = value.images
+        .filter((img: any) => img && img.asset)
+        .map((img: any) => ({
+          src: urlFor(img).url(),
+          alt: img.alt || img.caption || 'Image galerie',
+          caption: img.caption
+        }));
+      if (formattedImages.length === 0) return null;
       return (
         <div className="my-12">
           <ImageGallery images={formattedImages} />
@@ -422,7 +425,15 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
               {post.gallery && post.gallery.length > 0 && (
                 <div className="mt-16 pt-16 border-t border-border/40">
                   <h3 className="text-xl font-bold uppercase tracking-widest text-accent mb-8">{at('Galerie Photos')}</h3>
-                  <ImageGallery images={post.gallery} />
+                  <ImageGallery 
+                    images={post.gallery
+                      .filter((img: any) => img && img.url)
+                      .map((img: any) => ({
+                        src: img.url,
+                        alt: img.alt || 'Image galerie',
+                        caption: img.caption
+                      }))} 
+                  />
                 </div>
               )}
 

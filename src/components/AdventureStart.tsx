@@ -3,12 +3,13 @@
 import React from 'react'
 import Image from 'next/image'
 import { useLanguage } from '@/context/LanguageContext'
+import { renderRichText } from '@/utils/richText'
 
 interface AdventureProps {
   badge?: string
   title?: string
   titleAccent?: string
-  description?: string
+  description?: any
   image?: string
   features?: string[]
   className?: string
@@ -30,7 +31,7 @@ const AdventureStart = ({
   image = "/photos/DSC_6758.jpg",
   className = "bg-surface"
 }: AdventureProps) => {
-  const { at } = useLanguage()
+  const { at, translatePortableText } = useLanguage()
   return (
     <section className={`py-24 px-6 overflow-hidden transition-colors duration-300 ${className}`}>
       <div className="container mx-auto">
@@ -42,9 +43,9 @@ const AdventureStart = ({
             <h2 className="text-4xl md:text-6xl font-bold tracking-tighter mb-8 leading-tight uppercase whitespace-pre-line">
               {at(title)} <br /> <span className="text-accent italic">{at(titleAccent)}</span>
             </h2>
-            <p className="text-lg text-foreground/60 mb-12 max-w-xl leading-relaxed">
-              {at(description)}
-            </p>
+            <div className="text-lg text-foreground/60 mb-12 max-w-xl leading-relaxed">
+              {renderRichText(translatePortableText(description) || at(description))}
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {(features || []).map((f, i) => (

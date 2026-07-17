@@ -1,6 +1,25 @@
 import { defineField, defineType } from 'sanity'
 import { UserRound } from 'lucide-react'
 
+const descriptionBlocks = [
+  {
+    type: 'block',
+    styles: [
+      { title: 'Normal', value: 'normal' },
+      { title: 'Centré', value: 'blockCenter' },
+      { title: 'Justifié', value: 'blockJustify' },
+      { title: 'Droite', value: 'blockRight' },
+    ],
+    lists: [],
+    marks: {
+      decorators: [
+        { title: 'Gras', value: 'strong' },
+        { title: 'Italique', value: 'em' },
+      ]
+    }
+  }
+]
+
 export const guideType = defineType({
   name: 'guide',
   title: 'Le Guide',
@@ -85,7 +104,7 @@ export const guideType = defineType({
           type: 'object',
           fields: [
             defineField({ name: 'title', title: 'Titre', type: 'string' }),
-            defineField({ name: 'description', title: 'Description', type: 'text' }),
+            defineField({ name: 'description', title: 'Description', type: 'array', of: descriptionBlocks }),
           ],
         },
       ],
