@@ -9,7 +9,7 @@ import { Moon, Sun, Menu, X, ChevronDown } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 import { usePathname } from 'next/navigation'
 
-const Navbar = ({ sanityActivities }: { sanityActivities?: any[] }) => {
+const Navbar = ({ sanityActivities, settingsData }: { sanityActivities?: any[], settingsData?: any }) => {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
   const { language, setLanguage, t, at } = useLanguage()
@@ -41,6 +41,27 @@ const Navbar = ({ sanityActivities }: { sanityActivities?: any[] }) => {
       })
     : defaultActivities;
 
+  // Dynamic labels for main pages
+  const labelActivities = settingsData?.menuActivities ? at(settingsData.menuActivities) : t('nav.activities')
+  const labelSorties = settingsData?.menuSorties ? at(settingsData.menuSorties) : t('nav.sorties')
+  const labelGuide = settingsData?.menuGuide ? at(settingsData.menuGuide) : t('nav.guide')
+  const labelBlog = settingsData?.menuBlog ? at(settingsData.menuBlog) : t('nav.blog')
+  
+  // Custom menu titles for dynamic visibility pages
+  const labelRessources = settingsData?.ressourcesMenuTitle ? at(settingsData.ressourcesMenuTitle) : t('nav.resources')
+  
+  const labelTarifsFallback = language === 'en' ? 'Rates' : 'Tarifs'
+  const finalLabelTarifs = settingsData?.tarifsMenuTitle ? at(settingsData.tarifsMenuTitle) : labelTarifsFallback
+
+  // Filtered menu items based on visibility settings
+  const menuLinks = [
+    { name: labelSorties, href: "/prochaines-sorties", show: true },
+    { name: labelGuide, href: "/le-guide", show: true },
+    { name: labelBlog, href: "/blog", show: true },
+    { name: labelRessources, href: "/ressources", show: !settingsData?.hideRessourcesPage },
+    { name: finalLabelTarifs, href: "/tarifs", show: !settingsData?.hideTarifsPage },
+  ].filter(l => l.show)
+
   return (
     <>
       <motion.nav
@@ -68,7 +89,7 @@ const Navbar = ({ sanityActivities }: { sanityActivities?: any[] }) => {
             {/* Prestations with Submenu */}
             <div className="relative group/menu py-4">
               <Link href="/activites" className="hover:text-accent transition-colors flex items-center gap-1">
-                {t('nav.activities')}
+                {labelActivities}
                 <ChevronDown className="w-3 h-3 group-hover/menu:rotate-180 transition-transform" />
               </Link>
 
@@ -99,10 +120,11 @@ const Navbar = ({ sanityActivities }: { sanityActivities?: any[] }) => {
               </div>
             </div>
 
-            <Link href="/prochaines-sorties" className="hover:text-accent transition-colors">{t('nav.sorties')}</Link>
-            <Link href="/le-guide" className="hover:text-accent transition-colors">{t('nav.guide')}</Link>
-            <Link href="/blog" className="hover:text-accent transition-colors">{t('nav.blog')}</Link>
-            <Link href="/ressources" className="hover:text-accent transition-colors">{t('nav.resources')}</Link>
+            {menuLinks.map((link) => (
+              <Link key={link.href} href={link.href} className="hover:text-accent transition-colors">
+                {link.name}
+              </Link>
+            ))}
           </div>
         </div>
 
@@ -163,7 +185,7 @@ const Navbar = ({ sanityActivities }: { sanityActivities?: any[] }) => {
                   onClick={() => setIsActivitiesOpen(!isActivitiesOpen)}
                   className="w-full flex items-center justify-between py-4 text-xl font-semibold border-b border-foreground/10"
                 >
-                  {t('nav.activities')}
+                  {labelActivities}
                   <ChevronDown className={`w-5 h-5 transition-transform ${isActivitiesOpen ? 'rotate-180' : ''}`} />
                 </button>
                 <AnimatePresence>
@@ -199,10 +221,7 @@ const Navbar = ({ sanityActivities }: { sanityActivities?: any[] }) => {
               </div>
 
               {[
-                { name: t('nav.sorties'), href: "/prochaines-sorties" },
-                { name: t('nav.guide'), href: "/le-guide" },
-                { name: t('nav.blog'), href: "/blog" },
-                { name: t('nav.resources'), href: "/ressources" },
+                ...menuLinks,
                 { name: t('nav.contact'), href: "/contact" },
               ].map((link) => (
                 <Link

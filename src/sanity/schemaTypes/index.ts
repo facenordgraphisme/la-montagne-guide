@@ -10,6 +10,8 @@ import { universType } from './univers'
 import { sortieType } from './sortie'
 import { settingsType } from './settings'
 import { faqType } from './faq'
+import { faqCategoryType } from './faqCategory'
+import { commentType } from './comment'
 import { tagType } from './tag'
 import { resourceType } from './resource'
 
@@ -27,6 +29,8 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     universType,
     sortieType,
     faqType,
+    faqCategoryType,
+    commentType,
     resourceType,
   ],
 }

@@ -1,30 +1,62 @@
 import type { Metadata } from 'next';
 import React from 'react'
-import Link from 'next/link';
-import Image from 'next/image';
 import { client } from "@/sanity/lib/client";
-import { resourcesQuery, faqsQuery } from "@/sanity/lib/queries";
+import { resourcesQuery, faqsQuery, settingsQuery } from "@/sanity/lib/queries";
 import { getServerTranslations } from '@/i18n/server';
 import ResourcesListClient from './ResourcesListClient';
+import { notFound } from 'next/navigation';
+import { renderRichText, toPlainText } from '@/utils/richText';
 
 export async function generateMetadata(): Promise<Metadata> {
+  const [settingsData] = await Promise.all([
+    client.fetch(settingsQuery)
+  ]);
   const { at } = await getServerTranslations();
+
+  if (settingsData?.hideRessourcesPage) {
+    return {};
+  }
+
+  const title = settingsData?.ressourcesPageTitle 
+    ? `${at(settingsData.ressourcesPageTitle)} | La Montagne Guide` 
+    : `${at('Ressources & Guides')} | La Montagne Guide`;
+
+  const rawDesc = settingsData?.ressourcesPageDescription;
+  const description = rawDesc
+    ? toPlainText(at(rawDesc))
+    : at('Découvrez nos guides pratiques, conseils et ressources pour préparer vos sorties en haute montagne : alpinisme, ski de randonnée, escalade, cascade de glace, entraînement et matériel.');
+
   return {
-    title: `${at('Ressources & Guides')} | La Montagne Guide`,
-    description: at('Découvrez nos guides pratiques, conseils et ressources pour préparer vos sorties en haute montagne : alpinisme, ski de randonnée, escalade, cascade de glace, entraînement et matériel.'),
+    title,
+    description,
+    alternates: {
+      canonical: '/ressources',
+    },
   };
 }
 
 export default async function RessourcesPage() {
-  const [resources, allFaqs] = await Promise.all([
+  const [resources, allFaqs, settingsData] = await Promise.all([
     client.fetch(resourcesQuery),
-    client.fetch(faqsQuery)
+    client.fetch(faqsQuery),
+    client.fetch(settingsQuery)
   ]);
 
-  const { at } = await getServerTranslations();
+  if (settingsData?.hideRessourcesPage) {
+    notFound();
+  }
+
+  const { at, translatePortableText } = await getServerTranslations();
 
   // Filtrer les FAQ pour ne garder que les FAQ générales de niveau global (ex: category === 'general' ou non rattachées à un guide particulier)
   const generalFaqs = allFaqs.filter((faq: any) => faq.category === 'general');
+
+  const displayTitle = settingsData?.ressourcesPageTitle 
+    ? at(settingsData.ressourcesPageTitle) 
+    : at('Guides & Préparation');
+  const displayDescription = settingsData?.ressourcesPageDescription
+    ? translatePortableText(settingsData.ressourcesPageDescription)
+    : at('Pour partir sereinement en altitude, la préparation est la clé. Retrouvez ici nos articles conseils, dossiers techniques sur le matériel et fiches pratiques classés par activités.');
 
   return (
     <main className="relative pt-32 min-h-screen">
@@ -38,11 +70,11 @@ export default async function RessourcesPage() {
             {at('RESSOURCES & CONSEILS')}
           </span>
           <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-6 text-gradient uppercase">
-            {at('Guides &')} <br /> <span className="text-accent italic">{at('Préparation')}</span>
+            {displayTitle}
           </h1>
-          <p className="text-foreground/60 text-lg md:text-xl leading-relaxed">
-            {at('Pour partir sereinement en altitude, la préparation est la clé. Retrouvez ici nos articles conseils, dossiers techniques sur le matériel et fiches pratiques classés par activités.')}
-          </p>
+          <div className="text-foreground/60 text-lg md:text-xl leading-relaxed">
+            {renderRichText(displayDescription)}
+          </div>
         </div>
 
         {/* Client component for searching and interactive filtering */}

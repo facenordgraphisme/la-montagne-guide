@@ -7,6 +7,7 @@ import { cookies } from 'next/headers';
 import { client } from "@/sanity/lib/client";
 import { contactQuery, activitiesQuery, settingsQuery } from "@/sanity/lib/queries";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import CanonicalHeader from "@/components/CanonicalHeader";
 
 import { sortActivities } from "@/utils/activity";
 
@@ -25,6 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const activeLanguage = cookieStore.get('NEXT_LOCALE')?.value || 'fr';
 
     return {
+      metadataBase: new URL('https://la-montagne.guide'),
       title: activeLanguage === 'en' ? settingsData?.seoTitleEn : settingsData?.seoTitle,
       description: activeLanguage === 'en' ? settingsData?.seoDescriptionEn : settingsData?.seoDescription,
       icons: {
@@ -80,8 +82,24 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <LanguageProvider>
+            {settingsData && (
+              <style dangerouslySetInnerHTML={{ __html: `
+                :root {
+                  ${settingsData.accentColor ? `--accent: ${settingsData.accentColor} !important;` : ''}
+                  ${settingsData.highlightColor ? `--highlight: ${settingsData.highlightColor} !important;` : ''}
+                  ${settingsData.btnHoverColor ? `--btn-hover: ${settingsData.btnHoverColor} !important;` : ''}
+                  ${settingsData.textColorLight ? `--foreground: ${settingsData.textColorLight} !important;` : ''}
+                  ${settingsData.titleColorLight ? `--title-color: ${settingsData.titleColorLight} !important;` : ''}
+                }
+                [data-theme='dark'] {
+                  ${settingsData.textColorDark ? `--foreground: ${settingsData.textColorDark} !important;` : ''}
+                  ${settingsData.titleColorDark ? `--title-color: ${settingsData.titleColorDark} !important;` : ''}
+                }
+              ` }} />
+            )}
+            <CanonicalHeader />
             <AnnouncementBanner settings={settingsData} />
-            <Navbar sanityActivities={sortedActivities} />
+            <Navbar sanityActivities={sortedActivities} settingsData={settingsData} />
             {children}
             <Footer contactData={contactData} settingsData={settingsData} />
             <WhatsAppButton

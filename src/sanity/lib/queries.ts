@@ -139,10 +139,30 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
     availableSpots,
     isFull
   },
-  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, category, order}[defined(_id)]
+  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), order}[defined(_id)],
+  tabs[]{
+    title,
+    titleEn,
+    content[]{
+      ...,
+      _type == "image" => { ..., "asset": asset-> }
+    }
+  },
+  "relatedTags": relatedTags[]->slug.current,
+  "relatedTagIds": relatedTags[]._ref
 }`
 
 export const postsBySejourQuery = groq`*[_type == "post" && relatedSejour._ref == $sejourId] | order(publishedAt desc)[0...6] {
+  title,
+  "slug": slug.current,
+  "date": publishedAt,
+  "image": mainImage.asset->url,
+  "imageAlt": mainImage.alt,
+  "imageName": mainImage.imageName,
+  excerpt
+}`
+
+export const postsByTagsQuery = groq`*[_type == "post" && count(tags[@._ref in $tagIds]) > 0] | order(publishedAt desc)[0...6] {
   title,
   "slug": slug.current,
   "date": publishedAt,
@@ -325,6 +345,7 @@ export const categoryTagsQuery = groq`*[_type == "tag" && tagType == "category"]
 export const massifTagsQuery = groq`*[_type == "tag" && tagType == "massif"] | order(name asc) { name, "slug": slug.current }`
 
 export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][0] {
+  _id,
   title,
   "slug": slug.current,
   "date": publishedAt,
@@ -361,11 +382,27 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
   "nextPost": *[_type == "post" && (publishedAt > ^.publishedAt || (publishedAt == ^.publishedAt && _createdAt > ^._createdAt))] | order(publishedAt asc, _createdAt asc)[0] {
     title,
     "slug": slug.current
+  },
+  ctaText,
+  ctaTextEn,
+  ctaLink,
+  topo[]{
+    ...,
+    _type == "image" => { ..., "asset": asset-> }
+  },
+  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), order}[defined(_id)],
+  "comments": *[_type == "comment" && post._ref == ^._id && approved == true] | order(_createdAt asc) {
+    _id,
+    name,
+    rating,
+    content,
+    _createdAt
   }
 }`
 
 export const settingsQuery = groq`*[_type == "settings"][0]{
   siteName,
+  clientPasscode,
   "logoLight": logoLight.asset->url,
   "logoDark": logoDark.asset->url,
   instagram,
@@ -402,7 +439,43 @@ export const settingsQuery = groq`*[_type == "settings"][0]{
   activitiesPageDescriptionEn,
   "activitiesOrder": activitiesOrder[]->{
     _id
-  }
+  },
+  sortiesPageTitle,
+  sortiesPageTitleEn,
+  sortiesPageDescription,
+  sortiesPageDescriptionEn,
+  hideRessourcesPage,
+  ressourcesMenuTitle,
+  ressourcesMenuTitleEn,
+  ressourcesPageTitle,
+  ressourcesPageTitleEn,
+  ressourcesPageDescription,
+  ressourcesPageDescriptionEn,
+  hideTarifsPage,
+  tarifsMenuTitle,
+  tarifsMenuTitleEn,
+  tarifsPageTitle,
+  tarifsPageTitleEn,
+  tarifsPageDescription,
+  tarifsPageDescriptionEn,
+  tarifsContent,
+  menuActivities,
+  menuActivitiesEn,
+  menuSorties,
+  menuSortiesEn,
+  menuGuide,
+  menuGuideEn,
+  menuBlog,
+  menuBlogEn,
+  sejourSidebarNotice,
+  sejourSidebarNoticeEn,
+  accentColor,
+  highlightColor,
+  btnHoverColor,
+  textColorLight,
+  titleColorLight,
+  textColorDark,
+  titleColorDark
 }`
 
 export const faqsQuery = groq`*[_type == "faq"] | order(order asc, _createdAt desc) {
@@ -411,7 +484,7 @@ export const faqsQuery = groq`*[_type == "faq"] | order(order asc, _createdAt de
   questionEn,
   answer,
   answerEn,
-  category
+  "category": coalesce(category->slug.current, category)
 }`
 
 export const resourcesQuery = groq`*[_type == "resource"] | order(_createdAt desc) {

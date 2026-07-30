@@ -3,7 +3,7 @@ import React from 'react'
 import Image from 'next/image';
 import Link from 'next/link';
 import { client } from "@/sanity/lib/client";
-import { sejourBySlugQuery, postsBySejourQuery, postsByActivityQuery } from "@/sanity/lib/queries";
+import { sejourBySlugQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from "@/sanity/lib/queries";
 import { notFound } from 'next/navigation';
 import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar } from 'lucide-react';
 
@@ -12,6 +12,7 @@ import SejourTabs from '@/components/SejourTabs';
 import RichContent from '@/components/RichContent';
 import BlogCard from '@/components/BlogCard';
 import FAQAccordion from '@/components/FAQAccordion';
+import { renderRichText } from '@/utils/richText';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -37,15 +38,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function SejourDetail({ params }: { params: Promise<{ activitySlug: string, subCategorySlug: string, slug: string }> }) {
   const { activitySlug, subCategorySlug, slug } = await params;
-  const sejour = await client.fetch(sejourBySlugQuery, { slug });
+  const [sejour, settingsData] = await Promise.all([
+    client.fetch(sejourBySlugQuery, { slug }),
+    client.fetch(settingsQuery)
+  ]);
   const { at, t, translatePortableText } = await getServerTranslations();
 
   if (!sejour) notFound();
 
-  // Articles directement liés au séjour
-  const directPosts = sejour._id
-    ? await client.fetch(postsBySejourQuery, { sejourId: sejour._id })
-    : [];
+  // Articles liés (par tags ou par lien direct de séjour)
+  let directPosts = [];
+  if (sejour.relatedTagIds && sejour.relatedTagIds.length > 0) {
+    directPosts = await client.fetch(postsByTagsQuery, { tagIds: sejour.relatedTagIds });
+  } else if (sejour._id) {
+    directPosts = await client.fetch(postsBySejourQuery, { sejourId: sejour._id });
+  }
 
   // Compléter avec des articles de la même activité si moins de 3 articles directs
   const directIds = directPosts.map((p: any) => p.slug);
@@ -71,14 +78,21 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
     return level ? map[level] || level : ''
   }
 
-  const hasTabs = sejour.programme || sejour.budget || sejour.infosPratiques || sejour.materiel || sejour.materielPdf
+  const dynamicTabs = (sejour.tabs || []).map((tab: any, idx: number) => ({
+    id: `dynamic-${idx}`,
+    label: at({ fr: tab.title, en: tab.titleEn }),
+    content: translatePortableText(tab.content) || null
+  }))
 
-  const tabs = [
+  const legacyTabs = [
     { id: 'programme', label: at('Programme'), content: sejour.programme ? translatePortableText(sejour.programme) : null },
     { id: 'budget', label: at('Budget'), content: sejour.budget ? translatePortableText(sejour.budget) : null },
     { id: 'infos', label: at('Infos Pratiques'), content: sejour.infosPratiques ? translatePortableText(sejour.infosPratiques) : null },
     { id: 'materiel', label: at('Matériel'), content: sejour.materiel ? translatePortableText(sejour.materiel) : null, pdf: sejour.materielPdf ?? null },
-  ]
+  ].filter(tab => tab.content !== null || tab.pdf !== null)
+
+  const tabs = [...dynamicTabs, ...legacyTabs]
+  const hasTabs = tabs.length > 0
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -268,15 +282,21 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                     </div>
                   )}
 
-                  <div className="mt-6 space-y-4 p-5 rounded-3xl bg-accent/5 border border-accent/10">
-                    <p className="text-[11px] leading-relaxed text-foreground/70 font-medium">
-                      <span className="text-accent font-bold block mb-1 uppercase">{at('PARTAGE DE SORTIE')}</span>
-                      {at("Ces dates sont destinées aux personnes souhaitant s'inscrire individuellement et partager les frais d'une sortie.")}
-                    </p>
-                    <p className="text-[11px] leading-relaxed text-foreground/70 font-medium">
-                      <span className="text-accent font-bold block mb-1 uppercase">{at('GROUPES & SUR MESURE')}</span>
-                      {at('Si vous êtes un groupe déjà constitué ou si vous souhaitez')} <span className="text-accent font-bold">{at('ouvrir de nouvelles dates')}</span> {at('à la demande, contactez-moi directement pour un engagement privé.')}
-                    </p>
+                  <div className="mt-6 space-y-4 p-5 rounded-3xl bg-accent/5 border border-accent/10 text-[11px] leading-relaxed text-foreground/70 font-medium">
+                    {settingsData?.sejourSidebarNotice ? (
+                      renderRichText(translatePortableText(settingsData.sejourSidebarNotice) || at(settingsData.sejourSidebarNotice))
+                    ) : (
+                      <>
+                        <p className="mb-3">
+                          <span className="text-accent font-bold block mb-1 uppercase">{at('PARTAGE DE SORTIE')}</span>
+                          {at("Ces dates sont destinées aux personnes souhaitant s'inscrire individuellement et partager les frais d'une sortie.")}
+                        </p>
+                        <p>
+                          <span className="text-accent font-bold block mb-1 uppercase">{at('GROUPES & SUR MESURE')}</span>
+                          {at('Si vous êtes un groupe déjà constitué ou si vous souhaitez')} <span className="text-accent font-bold">{at('ouvrir de nouvelles dates')}</span> {at('à la demande, contactez-moi directement pour un engagement privé.')}
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
               )}

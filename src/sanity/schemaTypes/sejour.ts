@@ -137,7 +137,7 @@ export const sejourType = defineType({
     }),
     defineField({
       name: 'content',
-      title: 'Contenu riche (Programme, etc.)',
+      title: 'Contenu riche (Programme, etc.) [Obsolète - Utilisez les onglets]',
       type: 'array',
       of: [{
         type: 'block',
@@ -151,10 +151,11 @@ export const sejourType = defineType({
           { title: 'Citation', value: 'blockquote' }
         ],
       }, { type: 'image' }],
+      hidden: true,
     }),
     defineField({
       name: 'programme',
-      title: 'Onglet — Programme',
+      title: 'Onglet — Programme [Obsolète]',
       type: 'array',
       of: [{
         type: 'block',
@@ -167,10 +168,11 @@ export const sejourType = defineType({
           { title: 'Droite', value: 'blockRight' },
         ],
       }, { type: 'image' }],
+      hidden: true,
     }),
     defineField({
       name: 'budget',
-      title: 'Onglet — Budget',
+      title: 'Onglet — Budget [Obsolète]',
       type: 'array',
       of: [{
         type: 'block',
@@ -183,10 +185,11 @@ export const sejourType = defineType({
           { title: 'Droite', value: 'blockRight' },
         ],
       }, { type: 'image' }],
+      hidden: true,
     }),
     defineField({
       name: 'infosPratiques',
-      title: 'Onglet — Infos Pratiques',
+      title: 'Onglet — Infos Pratiques [Obsolète]',
       type: 'array',
       of: [{
         type: 'block',
@@ -199,10 +202,11 @@ export const sejourType = defineType({
           { title: 'Droite', value: 'blockRight' },
         ],
       }, { type: 'image' }],
+      hidden: true,
     }),
     defineField({
       name: 'materiel',
-      title: 'Onglet — Matériel',
+      title: 'Onglet — Matériel [Obsolète]',
       type: 'array',
       of: [{
         type: 'block',
@@ -215,6 +219,43 @@ export const sejourType = defineType({
           { title: 'Droite', value: 'blockRight' },
         ],
       }, { type: 'image' }],
+      hidden: true,
+    }),
+    defineField({
+      name: 'tabs',
+      title: 'Onglets personnalisés',
+      description: 'Créez et organisez vos onglets librement.',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          name: 'sejourTab',
+          title: 'Onglet',
+          fields: [
+            defineField({ name: 'title', type: 'string', title: 'Titre (Français)', validation: (Rule) => Rule.required() }),
+            defineField({ name: 'titleEn', type: 'string', title: 'Titre (Anglais)', validation: (Rule) => Rule.required() }),
+            defineField({
+              name: 'content',
+              type: 'array',
+              title: 'Contenu',
+              of: [
+                {
+                  type: 'block',
+                  styles: [
+                    { title: 'Normal', value: 'normal' },
+                    { title: 'H2', value: 'h2' },
+                    { title: 'H3', value: 'h3' },
+                    { title: 'Centré', value: 'blockCenter' },
+                    { title: 'Justifié', value: 'blockJustify' },
+                    { title: 'Droite', value: 'blockRight' },
+                  ],
+                },
+                { type: 'image' }
+              ]
+            })
+          ]
+        }
+      ]
     }),
     defineField({
       name: 'materielPdf',
@@ -257,7 +298,14 @@ export const sejourType = defineType({
       title: 'Questions fréquentes (FAQ)',
       description: 'Sélectionnez des FAQ spécifiques à afficher sur la page de ce séjour.',
       type: 'array',
-      of: [{ type: 'reference', to: [{ type: 'faq' }] }],
+      of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
+    }),
+    defineField({
+      name: 'relatedTags',
+      title: 'Tags d\'articles liés',
+      description: 'Sélectionnez des tags. Les articles de blog possédant ces tags seront affichés en bas de la page de ce séjour.',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'tag' }], weak: true }],
     }),
   ],
 })

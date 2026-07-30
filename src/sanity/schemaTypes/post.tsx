@@ -134,7 +134,7 @@ export const postType = defineType({
       name: 'tags',
       title: 'Tags / Catégories',
       type: 'array',
-      of: [{ type: 'reference', to: [{ type: 'tag' }] }],
+      of: [{ type: 'reference', to: [{ type: 'tag' }], weak: true }],
       description: 'Tags et catégories associés à cet article'
     }),
     defineField({
@@ -173,6 +173,61 @@ export const postType = defineType({
       components: {
         input: PostMediaManagerInput
       }
+    }),
+    defineField({
+      name: 'topo',
+      title: 'Données pratiques / Topo',
+      description: 'Données techniques, topos de la course, informations pratiques.',
+      type: 'array',
+      of: [
+        {
+          type: 'block',
+          styles: [
+            { title: 'Normal', value: 'normal' },
+            { title: 'H2', value: 'h2' },
+            { title: 'H3', value: 'h3' },
+            { title: 'Centré', value: 'blockCenter' },
+            { title: 'Justifié', value: 'blockJustify' },
+            { title: 'Droite', value: 'blockRight' },
+            { title: 'Citation', value: 'blockquote' }
+          ]
+        },
+        {
+          type: 'image',
+          options: { hotspot: true },
+          fields: [
+            { name: 'imageName', type: 'string', title: 'Nom personnalisé / Titre de l\'image' },
+            { name: 'caption', type: 'string', title: 'Légende' },
+            { name: 'alt', type: 'string', title: 'Texte alternatif (ALT)' },
+          ]
+        }
+      ]
+    }),
+    defineField({
+      name: 'faqs',
+      title: 'FAQ de l\'article',
+      description: 'Sélectionnez des FAQ spécifiques à afficher sur cet article de blog.',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
+    }),
+    defineField({
+      name: 'ctaText',
+      title: 'Texte d\'appel à l\'action (Français)',
+      type: 'string',
+      description: 'Optionnel. Laisse par défaut si vide : "Toi aussi tu souhaites vivre ce type d\'aventure ? Contacte-moi !"',
+    }),
+    defineField({
+      name: 'ctaTextEn',
+      title: 'Texte d\'appel à l\'action (Anglais)',
+      type: 'string',
+      description: 'Optionnel. Laisse par défaut si vide : "Want to experience this type of adventure too? Contact me!"',
+    }),
+    defineField({
+      name: 'ctaLink',
+      title: 'Lien d\'appel à l\'action',
+      type: 'string',
+      initialValue: '/contact',
+      description: 'Le lien vers lequel redirige le bouton d\'appel à l\'action.',
     }),
   ],
 })

@@ -35,17 +35,11 @@ export const faqType = defineType({
     }),
     defineField({
       name: 'category',
-      title: 'Catégorie',
-      type: 'string',
-      initialValue: 'general',
-      options: {
-        list: [
-          { title: 'Général & Réservations', value: 'general' },
-          { title: 'Technique & Équipement', value: 'technical' },
-          { title: 'Sécurité & Guide', value: 'safety' },
-        ],
-      },
-      validation: (Rule) => Rule.required(),
+      title: 'Catégorie de FAQ',
+      type: 'reference',
+      to: [{ type: 'faqCategory' }],
+      weak: true,
+      description: 'Sélectionnez une catégorie dynamique ou laissez vide.',
     }),
     defineField({
       name: 'order',
@@ -58,18 +52,20 @@ export const faqType = defineType({
   preview: {
     select: {
       question: 'question',
-      category: 'category',
+      categoryTitle: 'category->title',
+      categoryString: 'category',
     },
     prepare(selection) {
-      const { question, category } = selection
-      const catMap: Record<string, string> = {
+      const { question, categoryTitle, categoryString } = selection
+      const legacyMap: Record<string, string> = {
         general: 'Général & Réservations',
         technical: 'Technique & Équipement',
         safety: 'Sécurité & Guide',
       }
+      const categoryName = categoryTitle || legacyMap[categoryString] || categoryString || 'Sans catégorie'
       return {
         title: question || 'Sans question',
-        subtitle: catMap[category] || category || 'Catégorie générale',
+        subtitle: categoryName,
       }
     },
   },

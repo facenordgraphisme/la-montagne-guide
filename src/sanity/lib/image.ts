@@ -21,10 +21,13 @@ export function getVanityImageUrl(url: string, filename?: string) {
     
   if (!slug) return url;
   
-  // Get extension from original URL (ignoring query params)
-  const cleanUrl = url.split('?')[0];
+  // Split URL and query params
+  const [cleanUrl, query] = url.split('?');
+  
+  // Get extension from original URL
   const extMatch = cleanUrl.match(/\.([a-z0-9]+)$/i);
   const ext = extMatch ? extMatch[0] : '';
   
-  return `${url}/${slug}${ext}`;
+  const vanityUrl = `${cleanUrl}/${slug}${ext}`;
+  return query ? `${vanityUrl}?${query}` : vanityUrl;
 }

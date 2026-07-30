@@ -13,8 +13,9 @@ import { urlFor, getVanityImageUrl } from "@/sanity/lib/image";
 import { getServerTranslations } from '@/i18n/server';
 import { PortableText } from '@portabletext/react';
 import FAQAccordion from "@/components/FAQAccordion";
-import { Calendar, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, ArrowLeft, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
 import ImageGallery from '@/components/ImageGallery';
+import PostComments from '@/components/PostComments';
 import { formatFriendlyDate } from '@/utils/date';
 
 const VALID_ACTIVITIES = ['alpinisme', 'ski', 'escalade', 'cascade-de-glace', 'paralpinisme', 'voyages'];
@@ -410,6 +411,7 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                     sizes="(max-width: 1024px) 100vw, 800px"
                     className="object-cover"
                     priority
+                    unoptimized
                   />
                 </div>
               )}
@@ -421,6 +423,16 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                   <p className="italic text-foreground/45">{at('Pas de contenu pour le moment.')}</p>
                 )}
               </div>
+
+              {post.topo && post.topo.length > 0 && (
+                <div className="mt-16 p-8 md:p-12 rounded-[2rem] border border-border bg-foreground/[0.02] prose prose-invert max-w-none">
+                  <h3 className="text-xl font-bold uppercase tracking-widest text-accent mb-6 flex items-center gap-2">
+                    <FileText size={18} />
+                    {lang === 'en' ? 'Practical Info / Route Topo' : 'Données Pratiques / Topo'}
+                  </h3>
+                  <PortableText value={translatePortableText(post.topo)} components={blogBlockComponents} />
+                </div>
+              )}
 
               {post.gallery && post.gallery.length > 0 && (
                 <div className="mt-16 pt-16 border-t border-border/40">
@@ -437,21 +449,58 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                 </div>
               )}
 
-              {post.tags && post.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-16 pt-8 border-t border-border/40">
-                  {post.tags.map((tag: any, idx: number) => {
-                    const tagLabel = typeof tag === 'string' ? tag : tag.name;
-                    return (
-                      <span 
-                        key={idx} 
-                        className="px-4 py-2 rounded-full text-xs font-black bg-foreground/5 text-foreground/60 uppercase tracking-widest border border-border"
-                      >
-                        {at(tagLabel)}
-                      </span>
-                    );
-                  })}
+              {post.faqs && post.faqs.length > 0 && (
+                <div className="mt-16 pt-16 border-t border-border/40">
+                  <h3 className="text-xl font-bold uppercase tracking-widest text-accent mb-8">{at('FAQ de la course')}</h3>
+                  <FAQAccordion faqs={post.faqs} />
                 </div>
               )}
+
+              {(() => {
+                const uniqueTags: any[] = [];
+                const seen = new Set();
+                (post.tags || []).forEach((tag: any) => {
+                  if (!tag) return;
+                  const label = typeof tag === 'string' ? tag : (tag.name || '');
+                  const normalized = label.trim().toLowerCase();
+                  if (normalized && !seen.has(normalized)) {
+                    seen.add(normalized);
+                    uniqueTags.push(tag);
+                  }
+                });
+                if (uniqueTags.length === 0) return null;
+                return (
+                  <div className="flex flex-wrap gap-2 mt-16 pt-8 border-t border-border/40">
+                    {uniqueTags.map((tag: any, idx: number) => {
+                      const tagLabel = typeof tag === 'string' ? tag : tag.name;
+                      return (
+                        <span 
+                          key={idx} 
+                          className="px-4 py-2 rounded-full text-xs font-black bg-foreground/5 text-foreground/60 uppercase tracking-widest border border-border"
+                        >
+                          {at(tagLabel)}
+                        </span>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+
+              {/* CTA Block */}
+              <div className="mt-16 p-8 md:p-12 rounded-[2rem] border border-accent/20 bg-linear-to-br from-accent/5 to-secondary/5 text-center shadow-xl">
+                <h3 className="text-2xl md:text-3xl font-black tracking-tight mb-4 text-foreground uppercase">
+                  {post.ctaText ? at(post.ctaText) : (lang === 'en' ? "Want to experience this type of adventure too?" : "Toi aussi tu souhaites vivre ce type d'aventure ?")}
+                </h3>
+                <p className="text-foreground/60 text-sm md:text-base mb-8 max-w-xl mx-auto">
+                  {lang === 'en' ? "Contact me to discuss and organize your next custom high-mountain project." : "Contactez-moi pour discuter de votre projet de haute montagne et organiser votre prochaine sortie sur mesure."}
+                </p>
+                <Link href={post.ctaLink || '/contact'} className="btn-primary inline-block px-8 py-4 text-sm font-black uppercase tracking-widest text-white!">
+                  {lang === 'en' ? "Contact me" : "Contactez-moi"}
+                </Link>
+              </div>
+
+              {/* Client Comments Block */}
+              <PostComments postId={post._id} initialComments={post.comments || []} />
 
               {(post.prevPost || post.nextPost) && (
                 <div className="flex items-center justify-between border-t border-border/40 pt-8 mt-16 gap-4">
