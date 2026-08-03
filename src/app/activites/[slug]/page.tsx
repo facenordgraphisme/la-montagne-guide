@@ -216,9 +216,9 @@ export default async function PrestationDetail({ params }: { params: Promise<{ s
               <span className="text-accent font-black tracking-widest uppercase text-xs mb-4 block">{data.universBadge || "NOS UNIVERS"}</span>
               <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-6">{data.universTitle || "Une progression adaptée à vos envies"}</h2>
               {data.universDescription && (
-                <p className="text-lg text-foreground/60 leading-relaxed">
-                  {data.universDescription}
-                </p>
+                <div className="text-lg text-foreground/60 leading-relaxed prose-custom inline-block text-center">
+                  <PortableText value={data.universDescription} />
+                </div>
               )}
             </div>
             <div className={`grid grid-cols-1 md:grid-cols-2 ${data.univers.length > 4 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-8`}>

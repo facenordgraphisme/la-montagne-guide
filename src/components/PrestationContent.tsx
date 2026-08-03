@@ -180,9 +180,9 @@ const PrestationContent = ({ data, initialLang = 'fr' }: PrestationContentProps)
               <span className="text-accent font-black tracking-widest uppercase text-xs mb-4 block">{at(data.universBadge) || t('prestation.universBadge')}</span>
               <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-6">{at(data.universTitle) || t('prestation.universTitle')}</h2>
               {data.universDescription && (
-                <p className="text-lg text-foreground/60 leading-relaxed">
-                  {at(data.universDescription)}
-                </p>
+                <div className="text-lg text-foreground/60 leading-relaxed prose-custom inline-block text-center">
+                  <PortableText value={translatePortableText(data.universDescription) || at(data.universDescription)} />
+                </div>
               )}
             </div>
             <div className={`grid grid-cols-1 md:grid-cols-2 ${data.univers.length > 4 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-8`}>

@@ -17,6 +17,7 @@ import { Calendar, ArrowLeft, ChevronLeft, ChevronRight, FileText } from 'lucide
 import ImageGallery from '@/components/ImageGallery';
 import PostComments from '@/components/PostComments';
 import { formatFriendlyDate } from '@/utils/date';
+import { toPlainText } from '@/utils/richText';
 
 const VALID_ACTIVITIES = ['alpinisme', 'ski', 'escalade', 'cascade-de-glace', 'paralpinisme', 'voyages'];
 
@@ -175,7 +176,7 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
     const activity = await client.fetch(activityBySlugQuery, { slug: activitySlug });
     if (!activity) return {};
     const title = `${at(activity.title)} | La Montagne Guide`;
-    const description = activity.intro ? at(activity.intro) : (activity.description ? at(activity.description).substring(0, 160) : '');
+    const description = activity.intro ? at(activity.intro) : (activity.description ? toPlainText(at(activity.description)).substring(0, 160) : '');
     const ogImage = activity.image || undefined;
     return {
       title,
@@ -234,7 +235,7 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
           <div className="container relative z-10 px-6 text-center pt-20">
             <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-white uppercase mb-8 leading-[0.8]">{at(activity.title)}</h1>
             <p className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed font-medium">
-              {at(activity.intro || activity.description?.substring(0, 200))}
+              {at(activity.intro) || toPlainText(at(activity.description))?.substring(0, 200)}
             </p>
           </div>
         </section>
@@ -261,9 +262,15 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
           <div className="container mx-auto px-6">
             <div className="text-center mb-20">
               <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-6">{at(activity.universTitle || "Choisissez votre univers")}</h2>
-              <p className="text-lg text-foreground/60 max-w-2xl mx-auto font-medium">
-                {at(activity.universDescription || "Découvrez nos différentes approches de la montagne, adaptées à vos envies et à votre niveau.")}
-              </p>
+              {activity.universDescription && activity.universDescription.length > 0 ? (
+                <div className="text-lg text-foreground/60 max-w-2xl mx-auto font-medium prose-custom inline-block text-center">
+                  <PortableText value={translatePortableText(activity.universDescription) || at(activity.universDescription)} />
+                </div>
+              ) : (
+                <p className="text-lg text-foreground/60 max-w-2xl mx-auto font-medium">
+                  {at("Découvrez nos différentes approches de la montagne, adaptées à vos envies et à votre niveau.")}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
