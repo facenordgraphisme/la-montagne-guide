@@ -116,6 +116,7 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
   priceEncadrement,
   priceFraisSejour,
   hideUpcomingSorties,
+  hideGallery,
   "programme": programme[]{
     ...,
     _type == "image" => { ..., "asset": asset-> }
@@ -146,7 +147,8 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
     content[]{
       ...,
       _type == "image" => { ..., "asset": asset-> }
-    }
+    },
+    "pdf": pdf.asset->url
   },
   "relatedTags": relatedTags[]->slug.current,
   "relatedTagIds": relatedTags[]._ref

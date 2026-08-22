@@ -12,7 +12,7 @@ import SejourTabs from '@/components/SejourTabs';
 import RichContent from '@/components/RichContent';
 import BlogCard from '@/components/BlogCard';
 import FAQAccordion from '@/components/FAQAccordion';
-import { renderRichText } from '@/utils/richText';
+import { renderRichText, toPlainText } from '@/utils/richText';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!sejour) return {};
 
   const title = `${at(sejour.title)} | La Montagne Guide`;
-  const description = sejour.description ? at(sejour.description).substring(0, 160) : '';
+  const description = sejour.description ? toPlainText(sejour.description).substring(0, 160) : '';
   const ogImage = sejour.image || undefined;
 
   return {
@@ -46,27 +46,32 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
 
   if (!sejour) notFound();
 
-  // Articles liés (par tags ou par lien direct de séjour)
-  let directPosts = [];
-  if (sejour.relatedTagIds && sejour.relatedTagIds.length > 0) {
-    directPosts = await client.fetch(postsByTagsQuery, { tagIds: sejour.relatedTagIds });
-  } else if (sejour._id) {
-    directPosts = await client.fetch(postsBySejourQuery, { sejourId: sejour._id });
+  // Articles liés : si des tags sont choisis sur ce séjour, on affiche STRICTEMENT ces
+  // articles (pas de complément avec d'autres articles de l'activité).
+  const hasTagSelection = sejour.relatedTagIds && sejour.relatedTagIds.length > 0;
+  let relatedPosts: any[] = [];
+
+  if (hasTagSelection) {
+    relatedPosts = (await client.fetch(postsByTagsQuery, { tagIds: sejour.relatedTagIds })).slice(0, 6);
+  } else {
+    const directPosts = sejour._id
+      ? await client.fetch(postsBySejourQuery, { sejourId: sejour._id })
+      : [];
+
+    // Compléter avec des articles de la même activité si moins de 3 articles directs
+    const directIds = directPosts.map((p: any) => p.slug);
+    const activityPosts = (directPosts.length < 3 && sejour.activityType)
+      ? await client.fetch(postsByActivityQuery, {
+          activityType: sejour.activityType,
+          excludedIds: sejour._id ? [sejour._id] : []
+        })
+      : [];
+
+    // Fusionner sans doublons (déduplication par slug)
+    const seenSlugs = new Set(directIds);
+    const extraPosts = activityPosts.filter((p: any) => !seenSlugs.has(p.slug));
+    relatedPosts = [...directPosts, ...extraPosts].slice(0, 6);
   }
-
-  // Compléter avec des articles de la même activité si moins de 3 articles directs
-  const directIds = directPosts.map((p: any) => p.slug);
-  const activityPosts = (directPosts.length < 3 && sejour.activityType)
-    ? await client.fetch(postsByActivityQuery, {
-        activityType: sejour.activityType,
-        excludedIds: sejour._id ? [sejour._id] : []
-      })
-    : [];
-
-  // Fusionner sans doublons (déduplication par slug)
-  const seenSlugs = new Set(directIds);
-  const extraPosts = activityPosts.filter((p: any) => !seenSlugs.has(p.slug));
-  const relatedPosts = [...directPosts, ...extraPosts].slice(0, 6);
 
   const getLevelLabel = (level?: string) => {
     const map: Record<string, string> = {
@@ -81,7 +86,8 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
   const dynamicTabs = (sejour.tabs || []).map((tab: any, idx: number) => ({
     id: `dynamic-${idx}`,
     label: at({ fr: tab.title, en: tab.titleEn }),
-    content: translatePortableText(tab.content) || null
+    content: translatePortableText(tab.content) || null,
+    pdf: tab.pdf ?? null
   }))
 
   const legacyTabs = [
@@ -98,7 +104,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
     "@context": "https://schema.org",
     "@type": "TouristTrip",
     "name": at(sejour.title),
-    "description": sejour.description ? at(sejour.description) : undefined,
+    "description": sejour.description ? toPlainText(sejour.description) : undefined,
     "image": sejour.image || undefined,
     "touristType": sejour.activityType ? at(sejour.activityType) : undefined,
     "offers": sejour.basePrice ? {
@@ -172,9 +178,9 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-12">
               {sejour.description && (
-                <p className="text-2xl font-medium leading-relaxed text-foreground/80">
-                  {at(sejour.description)}
-                </p>
+                <div className="text-2xl font-medium leading-relaxed text-foreground/80">
+                  {renderRichText(sejour.description)}
+                </div>
               )}
 
               {hasTabs ? (
@@ -307,7 +313,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
       </section>
 
       {/* Photo Gallery */}
-      {sejour.gallery && sejour.gallery.length > 0 && (
+      {!sejour.hideGallery && sejour.gallery && sejour.gallery.length > 0 && (
         <section className="pb-24">
           <div className="container mx-auto px-6">
             <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase mb-10">

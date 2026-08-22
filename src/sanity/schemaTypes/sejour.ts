@@ -252,7 +252,14 @@ export const sejourType = defineType({
                 },
                 { type: 'image' }
               ]
-            })
+            }),
+            defineField({
+              name: 'pdf',
+              type: 'file',
+              title: 'PDF téléchargeable (optionnel)',
+              description: 'Ex: liste de matériel à télécharger. Un bouton de téléchargement apparaîtra dans cet onglet.',
+              options: { accept: '.pdf' },
+            }),
           ]
         }
       ]
@@ -286,6 +293,13 @@ export const sejourType = defineType({
       type: 'boolean',
       initialValue: false,
       description: 'Cochez pour masquer les dates de sorties sur la page de ce séjour (ex: séjour uniquement sur demande privée).',
+    }),
+    defineField({
+      name: 'hideGallery',
+      title: 'Masquer la galerie photos',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Cochez pour masquer la galerie photos sur la page de ce séjour, même si des photos sont renseignées.',
     }),
     defineField({
       name: 'bookAdventureUrl',
