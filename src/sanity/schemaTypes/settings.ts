@@ -593,5 +593,36 @@ export const settingsType = defineType({
       type: 'string',
       group: 'design',
     }),
+    defineField({
+      name: 'fontFamily',
+      title: 'Police du site',
+      description: 'La police utilisée pour tous les textes du site. Laissez vide pour la police par défaut (Outfit).',
+      type: 'string',
+      group: 'design',
+      options: {
+        list: [
+          { title: 'Outfit (moderne, par défaut)', value: 'outfit' },
+          { title: 'Poppins (rond, chaleureux)', value: 'poppins' },
+          { title: 'Montserrat (classique, élégant)', value: 'montserrat' },
+          { title: 'Playfair Display (serif, prestige)', value: 'playfair' },
+          { title: 'Inter (neutre, très lisible)', value: 'inter' },
+        ],
+      },
+    }),
+    defineField({
+      name: 'fontScale',
+      title: 'Taille du texte',
+      description: 'Ajuste la taille de tous les textes du site (titres et paragraphes) de façon proportionnelle. Laissez vide pour la taille par défaut.',
+      type: 'string',
+      group: 'design',
+      options: {
+        list: [
+          { title: 'Petit (90%)', value: '0.9' },
+          { title: 'Normal (100%)', value: '1' },
+          { title: 'Grand (110%)', value: '1.1' },
+          { title: 'Très grand (120%)', value: '1.2' },
+        ],
+      },
+    }),
   ],
 })

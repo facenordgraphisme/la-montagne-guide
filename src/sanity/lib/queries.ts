@@ -477,7 +477,9 @@ export const settingsQuery = groq`*[_type == "settings"][0]{
   textColorLight,
   titleColorLight,
   textColorDark,
-  titleColorDark
+  titleColorDark,
+  fontFamily,
+  fontScale
 }`
 
 export const faqsQuery = groq`*[_type == "faq"] | order(order asc, _createdAt desc) {

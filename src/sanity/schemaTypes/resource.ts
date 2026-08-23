@@ -117,7 +117,7 @@ export const resourceType = defineType({
       title: 'FAQ Associées',
       description: 'Questions/Réponses spécifiques à afficher en bas de ce guide.',
       type: 'array',
-      of: [{ type: 'reference', to: [{ type: 'faq' }] }],
+      of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
     }),
   ],
   preview: {

@@ -234,7 +234,7 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
           </div>
           <div className="container relative z-10 px-6 text-center pt-20">
             <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-white uppercase mb-8 leading-[0.8]">{at(activity.title)}</h1>
-            <p className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed font-medium">
+            <p className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed font-medium text-center">
               {at(activity.intro) || toPlainText(activity.description)?.substring(0, 200)}
             </p>
           </div>

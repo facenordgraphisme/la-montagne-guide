@@ -173,7 +173,7 @@ export const guideType = defineType({
       title: 'Questions fréquentes (FAQ)',
       description: 'Sélectionnez des FAQ spécifiques à afficher sur la page À Propos.',
       type: 'array',
-      of: [{ type: 'reference', to: [{ type: 'faq' }] }],
+      of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
     }),
   ],
 })

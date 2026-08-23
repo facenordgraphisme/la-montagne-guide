@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Outfit, Poppins, Montserrat, Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { cookies } from 'next/headers';
@@ -15,6 +15,35 @@ const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
 });
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-poppins",
+});
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+});
+
+const playfairDisplay = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const FONT_VARIABLES: Record<string, string> = {
+  outfit: "--font-outfit",
+  poppins: "--font-poppins",
+  montserrat: "--font-montserrat",
+  playfair: "--font-playfair",
+  inter: "--font-inter",
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -73,7 +102,7 @@ export default async function RootLayout({
   const sortedActivities = sortActivities(activitiesData, settingsData?.activitiesOrder);
 
   return (
-    <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth" className={`${outfit.variable} antialiased scroll-smooth`}>
+    <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth" className={`${outfit.variable} ${poppins.variable} ${montserrat.variable} ${playfairDisplay.variable} ${inter.variable} antialiased scroll-smooth`}>
       <body className="bg-background text-foreground transition-colors duration-300">
         <ThemeProvider
           attribute="data-theme"
@@ -90,6 +119,8 @@ export default async function RootLayout({
                   ${settingsData.btnHoverColor ? `--btn-hover: ${settingsData.btnHoverColor} !important;` : ''}
                   ${settingsData.textColorLight ? `--foreground: ${settingsData.textColorLight} !important;` : ''}
                   ${settingsData.titleColorLight ? `--title-color: ${settingsData.titleColorLight} !important;` : ''}
+                  ${settingsData.fontFamily && FONT_VARIABLES[settingsData.fontFamily] ? `--font-body: var(${FONT_VARIABLES[settingsData.fontFamily]}) !important;` : ''}
+                  ${settingsData.fontScale ? `--font-scale: ${settingsData.fontScale} !important;` : ''}
                 }
                 [data-theme='dark'] {
                   ${settingsData.textColorDark ? `--foreground: ${settingsData.textColorDark} !important;` : ''}

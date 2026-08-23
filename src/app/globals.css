@@ -11,6 +11,8 @@
   --surface: #edf2f7; /* Gris-bleu un peu plus prononcé pour l'alternance */
   --btn-hover: var(--secondary);
   --title-color: var(--foreground);
+  --font-body: var(--font-outfit);
+  --font-scale: 1;
 }
 
 [data-theme='dark'] {
@@ -35,22 +37,28 @@
   --color-surface: var(--surface);
   --color-card: rgb(var(--card));
   --color-border: var(--border);
-  --font-sans: var(--font-outfit);
+  --font-sans: var(--font-body);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-outfit), sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
+@layer base {
+  html {
+    font-size: calc(16px * var(--font-scale, 1));
+  }
 
-h1, h2, h3, h4, h5, h6 {
-  color: var(--title-color);
-}
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-body), sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
 
-p {
-  text-align: justify;
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--title-color);
+  }
+
+  p {
+    text-align: justify;
+  }
 }
 
 @layer utilities {
