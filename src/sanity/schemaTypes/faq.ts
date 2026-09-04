@@ -53,19 +53,12 @@ export const faqType = defineType({
     select: {
       question: 'question',
       categoryTitle: 'category->title',
-      categoryString: 'category',
     },
     prepare(selection) {
-      const { question, categoryTitle, categoryString } = selection
-      const legacyMap: Record<string, string> = {
-        general: 'Général & Réservations',
-        technical: 'Technique & Équipement',
-        safety: 'Sécurité & Guide',
-      }
-      const categoryName = categoryTitle || legacyMap[categoryString] || categoryString || 'Sans catégorie'
+      const { question, categoryTitle } = selection
       return {
         title: question || 'Sans question',
-        subtitle: categoryName,
+        subtitle: categoryTitle || 'Sans catégorie',
       }
     },
   },
