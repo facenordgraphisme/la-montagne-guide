@@ -282,8 +282,24 @@ export const sejourType = defineType({
           type: 'image',
           options: { hotspot: true },
           fields: [
-            defineField({ name: 'alt', type: 'string', title: 'Texte alternatif' }),
+            defineField({ name: 'imageName', type: 'string', title: 'Nom / Titre de l\'image', description: 'Pour organiser ou identifier l\'image dans la galerie.' }),
+            defineField({ name: 'caption', type: 'string', title: 'Légende' }),
+            defineField({ name: 'alt', type: 'string', title: 'Texte alternatif (ALT)' }),
           ],
+          preview: {
+            select: {
+              title: 'imageName',
+              subtitle: 'caption',
+              media: 'asset',
+            },
+            prepare({ title, subtitle, media }: { title?: string; subtitle?: string; media?: unknown }) {
+              return {
+                title: title || 'Sans titre',
+                subtitle: subtitle || '',
+                media,
+              }
+            },
+          },
         },
       ],
     }),

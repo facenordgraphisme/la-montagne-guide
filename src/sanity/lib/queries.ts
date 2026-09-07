@@ -134,13 +134,13 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
     _type == "image" => { ..., "asset": asset-> }
   },
   "materielPdf": materielPdf.asset->url,
-  "gallery": gallery[]{alt, "url": asset->url},
+  "gallery": gallery[]{imageName, caption, alt, "url": asset->url},
   "upcomingSorties": *[_type == "sortie" && sejour._ref == ^._id && startDate >= now()] | order(startDate asc) {
     date,
     availableSpots,
     isFull
   },
-  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), order}[defined(_id)],
+  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), order},
   tabs[]{
     title,
     titleEn,
@@ -392,7 +392,7 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
     ...,
     _type == "image" => { ..., "asset": asset-> }
   },
-  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), order}[defined(_id)],
+  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), order},
   "comments": *[_type == "comment" && post._ref == ^._id && approved == true] | order(_createdAt asc) {
     _id,
     name,
@@ -479,7 +479,10 @@ export const settingsQuery = groq`*[_type == "settings"][0]{
   textColorDark,
   titleColorDark,
   fontFamily,
-  fontScale
+  fontScale,
+  ressourcesBadge,
+  ressourcesBadgeEn,
+  ressourcesHeaderAlign
 }`
 
 export const faqsQuery = groq`*[_type == "faq"] | order(order asc, _createdAt desc) {

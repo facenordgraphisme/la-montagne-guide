@@ -394,6 +394,35 @@ export const settingsType = defineType({
       of: descriptionBlocks,
       group: 'ressources',
     }),
+    defineField({
+      name: 'ressourcesBadge',
+      title: 'Texte du badge (Français)',
+      type: 'string',
+      initialValue: 'RESSOURCES & CONSEILS',
+      description: 'Petit texte en accent affiché au-dessus du titre (ex : "RESSOURCES & CONSEILS").',
+      group: 'ressources',
+    }),
+    defineField({
+      name: 'ressourcesBadgeEn',
+      title: 'Texte du badge (Anglais)',
+      type: 'string',
+      initialValue: 'RESOURCES & ADVICE',
+      group: 'ressources',
+    }),
+    defineField({
+      name: 'ressourcesHeaderAlign',
+      title: 'Alignement du header',
+      type: 'string',
+      initialValue: 'left',
+      options: {
+        list: [
+          { title: 'Gauche', value: 'left' },
+          { title: 'Centré', value: 'center' },
+        ],
+        layout: 'radio',
+      },
+      group: 'ressources',
+    }),
 
     // PAGE TARIFS
     defineField({

@@ -50,7 +50,8 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
   const [activeId, setActiveId] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
-  const items = faqs && faqs.length > 0 ? faqs : DEFAULT_FAQS
+  const cleanFaqs = faqs?.filter((item) => item && item._id)
+  const items = cleanFaqs && cleanFaqs.length > 0 ? cleanFaqs : DEFAULT_FAQS
 
   // Handle toggling FAQ items
   const toggleItem = (id: string) => {
