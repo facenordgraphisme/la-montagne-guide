@@ -275,7 +275,7 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {univers.map((univ: any, i: number) => {
-                const universSlug = univ.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+                const universSlug = univ.slug || univ.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
                 return (
                   <Link 
                     key={i} 

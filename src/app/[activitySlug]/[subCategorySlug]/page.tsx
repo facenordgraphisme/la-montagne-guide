@@ -59,7 +59,7 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
   if (!activity) return {};
 
   const currentUnivers = activity.univers?.find((u: any) => {
-    const uSlug = u.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+    const uSlug = u.slug || u.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
     return uSlug === subCategorySlug;
   });
 
@@ -95,7 +95,7 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
 
   // On trouve l'univers correspondant au slug
   const currentUnivers = activity.univers?.find((u: any) => {
-    const uSlug = u.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+    const uSlug = u.slug || u.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
     return uSlug === subCategorySlug;
   });
 
