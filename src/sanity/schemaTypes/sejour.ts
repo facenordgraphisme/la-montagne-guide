@@ -292,7 +292,7 @@ export const sejourType = defineType({
               subtitle: 'caption',
               media: 'asset',
             },
-            prepare({ title, subtitle, media }: { title?: string; subtitle?: string; media?: unknown }) {
+            prepare({ title, subtitle, media }: { title?: string; subtitle?: string; media?: any }) {
               return {
                 title: title || 'Sans titre',
                 subtitle: subtitle || '',
