@@ -33,7 +33,19 @@ const blockAlignComponents = {
         {children}
       </blockquote>
     ),
-  }
+  },
+  marks: {
+    link: ({ children, value }: any) => (
+      <a
+        href={value?.href}
+        target={value?.blank !== false ? '_blank' : '_self'}
+        rel="noopener noreferrer"
+        className="text-accent underline font-semibold hover:opacity-80 transition-opacity"
+      >
+        {children}
+      </a>
+    ),
+  },
 };
 
 export async function generateStaticParams() {
@@ -128,7 +140,7 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
             )}
 
             {/* Rich text body content */}
-            <div className="prose prose-invert prose-lg max-w-none text-foreground/80 leading-relaxed">
+            <div className="prose-custom max-w-none text-foreground/80 leading-relaxed text-lg">
               {displayContent ? (
                 <PortableText value={displayContent} components={blockAlignComponents} />
               ) : (
@@ -147,7 +159,7 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
                 </h3>
                 <div className="space-y-6">
                   {data.relatedActivities.map((act: any) => {
-                    const stayLink = `/${act.categorySlug || 'ski'}/${act.subCategory?.slug || 'initiation'}/${act.slug}`;
+                    const stayLink = `/${act.categorySlug || 'alpinisme'}/${act.subCategorySlug || 'initiation'}/${act.slug}`;
                     return (
                       <Link 
                         key={act.slug} 

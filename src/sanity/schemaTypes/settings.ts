@@ -39,6 +39,7 @@ export const settingsType = defineType({
     { name: 'tarifs', title: 'Page Tarifs' },
     { name: 'menu', title: 'Menu / Navigation' },
     { name: 'sejoursSettings', title: 'Page Séjours' },
+    { name: 'homepage', title: "Page d'Accueil" },
     { name: 'design', title: 'Design & Apparence' },
   ],
   fields: [
@@ -568,6 +569,16 @@ export const settingsType = defineType({
       type: 'array',
       of: descriptionBlocks,
       group: 'sejoursSettings',
+    }),
+
+    // PAGE D'ACCUEIL
+    defineField({
+      name: 'homeFaqCategories',
+      title: 'Catégories FAQ à afficher sur l\'accueil',
+      description: 'Sélectionnez les catégories à afficher dans la section FAQ de la page d\'accueil. Si aucune catégorie n\'est sélectionnée, toutes les FAQ sont affichées.',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'faqCategory' }], weak: true }],
+      group: 'homepage',
     }),
 
     // DESIGN & APPARENCE

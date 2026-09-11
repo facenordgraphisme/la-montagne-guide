@@ -51,6 +51,37 @@ const portableTextComponents: PortableTextComponents = {
       </blockquote>
     ),
   },
+  marks: {
+    link: ({ children, value }) => (
+      <a
+        href={value?.href}
+        target={value?.blank !== false ? '_blank' : '_self'}
+        rel="noopener noreferrer"
+        className="text-accent underline font-semibold hover:opacity-80 transition-opacity"
+      >
+        {children}
+      </a>
+    ),
+  },
+  types: {
+    mapEmbed: ({ value }) => {
+      if (!value?.url) return null;
+      return (
+        <div className="my-6 overflow-hidden rounded-2xl border border-border">
+          <iframe
+            src={value.url}
+            width="100%"
+            height={value.height || 400}
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Carte Google Maps"
+          />
+        </div>
+      );
+    },
+  },
 }
 
 export default function SejourTabs({ tabs }: SejourTabsProps) {

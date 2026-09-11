@@ -249,8 +249,51 @@ export const sejourType = defineType({
                     { title: 'Justifié', value: 'blockJustify' },
                     { title: 'Droite', value: 'blockRight' },
                   ],
+                  marks: {
+                    decorators: [
+                      { title: 'Gras', value: 'strong' },
+                      { title: 'Italique', value: 'em' },
+                    ],
+                    annotations: [
+                      {
+                        name: 'link',
+                        type: 'object',
+                        title: 'Lien hypertexte',
+                        fields: [
+                          { name: 'href', type: 'url', title: 'URL' },
+                          { name: 'blank', type: 'boolean', title: 'Ouvrir dans un nouvel onglet', initialValue: true },
+                        ],
+                      },
+                    ],
+                  },
                 },
-                { type: 'image' }
+                { type: 'image' },
+                {
+                  type: 'object',
+                  name: 'mapEmbed',
+                  title: 'Carte Google Maps',
+                  fields: [
+                    defineField({
+                      name: 'url',
+                      type: 'url',
+                      title: 'URL d\'intégration Google Maps',
+                      description: 'Dans Google Maps → Partager → Intégrer une carte → copier l\'URL du src dans le code iframe.',
+                      validation: (Rule) => Rule.required(),
+                    }),
+                    defineField({
+                      name: 'height',
+                      type: 'number',
+                      title: 'Hauteur de la carte (px)',
+                      initialValue: 400,
+                    }),
+                  ],
+                  preview: {
+                    select: { title: 'url' },
+                    prepare({ title }: { title?: string }) {
+                      return { title: title ? `Carte : ${title.substring(0, 60)}…` : 'Carte Google Maps' };
+                    },
+                  },
+                },
               ]
             }),
             defineField({
@@ -336,6 +379,13 @@ export const sejourType = defineType({
       description: 'Sélectionnez des tags. Les articles de blog possédant ces tags seront affichés en bas de la page de ce séjour.',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'tag' }], weak: true }],
+    }),
+    defineField({
+      name: 'hideRelatedPosts',
+      title: 'Masquer les dernières sorties du blog',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Cochez pour ne pas afficher la section "Dernières Sorties" sur la page de ce séjour.',
     }),
   ],
 })

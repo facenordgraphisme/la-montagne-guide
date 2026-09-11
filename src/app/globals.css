@@ -137,3 +137,5 @@ body {
 .prose-custom li { font-size: inherit; line-height: 1.75; margin-bottom: 0.5em; }
 .prose-custom strong { font-weight: 700; }
 .prose-custom em { font-style: italic; }
+.prose-custom a { color: var(--accent); text-decoration: underline; font-weight: 600; }
+.prose-custom a:hover { opacity: 0.8; }

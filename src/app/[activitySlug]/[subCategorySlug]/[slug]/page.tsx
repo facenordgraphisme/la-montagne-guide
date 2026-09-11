@@ -337,8 +337,16 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
         </section>
       )}
 
+      {sejour.faqs && sejour.faqs.length > 0 && (
+        <section className="py-20 border-t border-border/10 bg-background">
+          <div className="container mx-auto px-6 max-w-4xl">
+            <FAQAccordion faqs={sejour.faqs} />
+          </div>
+        </section>
+      )}
+
       {/* Related Blog Posts */}
-      {relatedPosts && relatedPosts.length > 0 && (
+      {!sejour.hideRelatedPosts && relatedPosts && relatedPosts.length > 0 && (
         <section className="pb-24 bg-surface/40">
           <div className="container mx-auto px-6 pt-16">
             <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase mb-10">
@@ -349,14 +357,6 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                 <BlogCard key={post.slug} post={post} />
               ))}
             </div>
-          </div>
-        </section>
-      )}
-
-      {sejour.faqs && sejour.faqs.length > 0 && (
-        <section className="py-20 border-t border-border/10 bg-background">
-          <div className="container mx-auto px-6 max-w-4xl">
-            <FAQAccordion faqs={sejour.faqs} />
           </div>
         </section>
       )}

@@ -31,6 +31,14 @@ export default async function Home() {
 
   const sortedActivities = sortActivities(activitiesData, settingsData?.activitiesOrder);
 
+  // Filter FAQs by selected categories (if any configured in settings)
+  const allowedCategories: string[] | null = settingsData?.homeFaqCategories?.length
+    ? settingsData.homeFaqCategories.filter(Boolean)
+    : null;
+  const filteredFaqs = allowedCategories
+    ? faqsData?.filter((faq: any) => allowedCategories.includes(faq.category))
+    : faqsData;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -128,7 +136,7 @@ export default async function Home() {
             className="bg-background"
           />
         )}
-        <FAQAccordion faqs={faqsData} />
+        <FAQAccordion faqs={filteredFaqs} />
         {!settingsData?.hidePartners && (
           <PartnersSlider partners={settingsData?.partners} />
         )}

@@ -19,7 +19,21 @@ export const blockAlignComponents = {
       const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
       return <p style={{ textAlign: 'justify', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
     },
-  }
+  },
+  marks: {
+    link: ({ children, value }: any) => (
+      <a
+        href={value?.href}
+        target={value?.blank !== false ? '_blank' : '_self'}
+        rel="noopener noreferrer"
+        className="text-accent underline font-semibold hover:opacity-80 transition-opacity"
+      >
+        {children}
+      </a>
+    ),
+    strong: ({ children }: any) => <strong className="font-bold">{children}</strong>,
+    em: ({ children }: any) => <em className="italic">{children}</em>,
+  },
 };
 
 export function renderRichText(value: any, defaultText = '') {

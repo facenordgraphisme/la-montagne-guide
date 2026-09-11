@@ -140,7 +140,7 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
     availableSpots,
     isFull
   },
-  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), order},
+  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": category->slug.current, "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order},
   tabs[]{
     title,
     titleEn,
@@ -151,7 +151,8 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
     "pdf": pdf.asset->url
   },
   "relatedTags": relatedTags[]->slug.current,
-  "relatedTagIds": relatedTags[]._ref
+  "relatedTagIds": relatedTags[]._ref,
+  hideRelatedPosts
 }`
 
 export const postsBySejourQuery = groq`*[_type == "post" && relatedSejour._ref == $sejourId] | order(publishedAt desc)[0...6] {
@@ -244,14 +245,14 @@ export const activityBySlugQuery = groq`*[_type == "activity" && slug.current ==
     description,
     "image": image.asset->url,
     catalogTitle,
-    "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, category, order}
+    "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order}
   },
   price,
   period,
   location,
   showUpcomingSorties,
   type,
-  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, category, order}
+  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order}
 }`
 
 export const blogTeaserQuery = groq`*[_type == "post"] | order(publishedAt desc)[0...$limit] {
@@ -285,7 +286,7 @@ export const guideQuery = groq`*[_type == "guide"][0] {
   },
   hideStats,
   hideValues,
-  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, category, order}
+  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order}
 }`
 
 export const contactQuery = groq`*[_type == "contact"][0] {
@@ -392,7 +393,7 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
     ...,
     _type == "image" => { ..., "asset": asset-> }
   },
-  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), order},
+  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": category->slug.current, "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order},
   "comments": *[_type == "comment" && post._ref == ^._id && approved == true] | order(_createdAt asc) {
     _id,
     name,
@@ -482,7 +483,8 @@ export const settingsQuery = groq`*[_type == "settings"][0]{
   fontScale,
   ressourcesBadge,
   ressourcesBadgeEn,
-  ressourcesHeaderAlign
+  ressourcesHeaderAlign,
+  "homeFaqCategories": homeFaqCategories[]->slug.current
 }`
 
 export const faqsQuery = groq`*[_type == "faq"] | order(order asc, _createdAt desc) {
@@ -491,7 +493,9 @@ export const faqsQuery = groq`*[_type == "faq"] | order(order asc, _createdAt de
   questionEn,
   answer,
   answerEn,
-  "category": coalesce(category->slug.current, category)
+  "category": category->slug.current,
+  "categoryTitle": category->title,
+  "categoryTitleEn": category->titleEn
 }`
 
 export const resourcesQuery = groq`*[_type == "resource"] | order(_createdAt desc) {
@@ -527,10 +531,9 @@ export const resourceBySlugQuery = groq`*[_type == "resource" && slug.current ==
     basePrice,
     duration,
     level,
-    subCategory-> {
-      slug
-    }
+    "categorySlug": activityType,
+    "subCategorySlug": subCategory->slug.current
   },
-  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, category, order}
+  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order}
 }`
 
