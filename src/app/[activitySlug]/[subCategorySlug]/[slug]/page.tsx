@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { client } from "@/sanity/lib/client";
 import { sejourBySlugQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from "@/sanity/lib/queries";
 import { notFound } from 'next/navigation';
-import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar } from 'lucide-react';
+import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Download } from 'lucide-react';
 
 import { getServerTranslations } from '@/i18n/server';
 import SejourTabs from '@/components/SejourTabs';
@@ -46,19 +46,18 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
 
   if (!sejour) notFound();
 
-  // Articles liés : si des tags sont choisis sur ce séjour, on affiche STRICTEMENT ces
-  // articles (pas de complément avec d'autres articles de l'activité).
-  const hasTagSelection = sejour.relatedTagIds && sejour.relatedTagIds.length > 0;
+  // Priorité articles liés : 1. Sélection manuelle, 2. Tags, 3. Auto (sejour direct + activité)
   let relatedPosts: any[] = [];
 
-  if (hasTagSelection) {
+  if (sejour.relatedPosts && sejour.relatedPosts.length > 0) {
+    relatedPosts = sejour.relatedPosts.slice(0, 6);
+  } else if (sejour.relatedTagIds && sejour.relatedTagIds.length > 0) {
     relatedPosts = (await client.fetch(postsByTagsQuery, { tagIds: sejour.relatedTagIds })).slice(0, 6);
   } else {
     const directPosts = sejour._id
       ? await client.fetch(postsBySejourQuery, { sejourId: sejour._id })
       : [];
 
-    // Compléter avec des articles de la même activité si moins de 3 articles directs
     const directIds = directPosts.map((p: any) => p.slug);
     const activityPosts = (directPosts.length < 3 && sejour.activityType)
       ? await client.fetch(postsByActivityQuery, {
@@ -67,7 +66,6 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
         })
       : [];
 
-    // Fusionner sans doublons (déduplication par slug)
     const seenSlugs = new Set(directIds);
     const extraPosts = activityPosts.filter((p: any) => !seenSlugs.has(p.slug));
     relatedPosts = [...directPosts, ...extraPosts].slice(0, 6);
@@ -229,24 +227,35 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                       <Euro size={18} className="text-accent" />
                       <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{at('Tarifs')}</span>
                     </div>
-                    {sejour.priceEncadrement ? (
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-[11px] font-bold text-foreground/50 uppercase tracking-wider">{at('Encadrement')}</span>
-                        <span className="font-black text-highlight">{at(sejour.priceEncadrement)}</span>
-                      </div>
-                    ) : null}
-                    {sejour.priceFraisSejour ? (
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-[11px] font-bold text-foreground/50 uppercase tracking-wider">{at('Frais de séjour')}</span>
-                        <span className="font-black text-foreground/80">{at(sejour.priceFraisSejour)}</span>
-                      </div>
-                    ) : null}
-                    {!sejour.priceEncadrement && !sejour.priceFraisSejour && sejour.basePrice ? (
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-[10px] font-bold text-foreground/30 uppercase">{at('À partir de')}</span>
-                        <span className="text-2xl font-black text-highlight leading-none">{at(sejour.basePrice)}</span>
-                      </div>
-                    ) : null}
+                    {sejour.prixToutCompris ? (
+                      sejour.prixToutComprisAmount ? (
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-[11px] font-bold text-foreground/50 uppercase tracking-wider">{at('Tout compris')}</span>
+                          <span className="font-black text-highlight">{at(sejour.prixToutComprisAmount)}</span>
+                        </div>
+                      ) : null
+                    ) : (
+                      <>
+                        {sejour.priceEncadrement ? (
+                          <div className="flex justify-between items-baseline">
+                            <span className="text-[11px] font-bold text-foreground/50 uppercase tracking-wider">{at('Encadrement')}</span>
+                            <span className="font-black text-highlight">{at(sejour.priceEncadrement)}</span>
+                          </div>
+                        ) : null}
+                        {sejour.priceFraisSejour ? (
+                          <div className="flex justify-between items-baseline">
+                            <span className="text-[11px] font-bold text-foreground/50 uppercase tracking-wider">{at('Frais de séjour')}</span>
+                            <span className="font-black text-foreground/80">{at(sejour.priceFraisSejour)}</span>
+                          </div>
+                        ) : null}
+                        {!sejour.priceEncadrement && !sejour.priceFraisSejour && sejour.basePrice ? (
+                          <div className="flex justify-between items-baseline">
+                            <span className="text-[10px] font-bold text-foreground/30 uppercase">{at('À partir de')}</span>
+                            <span className="text-2xl font-black text-highlight leading-none">{at(sejour.basePrice)}</span>
+                          </div>
+                        ) : null}
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -320,18 +329,35 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
               {at('Galerie')} <span className="text-accent italic">{at('Photos')}</span>
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {sejour.gallery.map((photo: { url: string; alt?: string }, i: number) => (
-                <div key={i} className="relative aspect-square overflow-hidden rounded-2xl group">
-                  <Image
-                    src={photo.url}
-                    alt={photo.alt || at(sejour.title)}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-                </div>
-              ))}
+              {sejour.gallery.map((photo: { url: string; alt?: string; imageName?: string; originalFilename?: string; extension?: string }, i: number) => {
+                const dlFilename = photo.imageName
+                  ? `${photo.imageName}.${photo.extension || photo.originalFilename?.split('.').pop() || 'jpg'}`
+                  : photo.originalFilename;
+                const downloadUrl = dlFilename ? `${photo.url.split('?')[0]}?dl=${encodeURIComponent(dlFilename)}` : undefined;
+                return (
+                  <div key={i} className="relative aspect-square overflow-hidden rounded-2xl group">
+                    <Image
+                      src={photo.url}
+                      alt={photo.alt || at(sejour.title)}
+                      fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                    {downloadUrl && (
+                      <a
+                        href={downloadUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Télécharger"
+                        className="absolute bottom-2 right-2 p-1.5 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-accent/80 z-10"
+                      >
+                        <Download size={13} />
+                      </a>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>

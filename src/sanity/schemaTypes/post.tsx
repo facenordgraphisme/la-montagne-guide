@@ -134,7 +134,7 @@ export const postType = defineType({
       name: 'tags',
       title: 'Tags / Catégories',
       type: 'array',
-      of: [{ type: 'reference', to: [{ type: 'tag' }], weak: true }],
+      of: [{ type: 'reference', to: [{ type: 'tag' }] }],
       description: 'Tags et catégories associés à cet article'
     }),
     defineField({

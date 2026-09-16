@@ -83,6 +83,15 @@ export const structure = (S: StructureBuilder) =>
 
       S.divider(),
 
+      // Accès direct à tous les séjours (filet de sécurité si subCategory non définie)
+      S.listItem()
+        .title('Catalogue des Séjours')
+        .id('sejour-all')
+        .icon(Mountain)
+        .child(S.documentTypeList('sejour').title('Tous les séjours')),
+
+      S.divider(),
+
       // Regular document types, filtered to exclude singletons and types already reachable via la navigation hiérarchique ci-dessus
       ...S.documentTypeListItems().filter(
         (listItem) => !['home', 'guide', 'contact', 'settings', 'activity', 'univers', 'sejour'].includes(listItem.getId() || '')

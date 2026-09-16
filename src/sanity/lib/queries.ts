@@ -134,7 +134,7 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
     _type == "image" => { ..., "asset": asset-> }
   },
   "materielPdf": materielPdf.asset->url,
-  "gallery": gallery[]{imageName, caption, alt, "url": asset->url},
+  "gallery": gallery[]{imageName, caption, alt, "url": asset->url, "originalFilename": asset->originalFilename, "extension": asset->extension},
   "upcomingSorties": *[_type == "sortie" && sejour._ref == ^._id && startDate >= now()] | order(startDate asc) {
     date,
     availableSpots,
@@ -152,7 +152,16 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
   },
   "relatedTags": relatedTags[]->slug.current,
   "relatedTagIds": relatedTags[]._ref,
-  hideRelatedPosts
+  hideRelatedPosts,
+  "relatedPosts": relatedPosts[]->{
+    title,
+    "slug": slug.current,
+    "date": publishedAt,
+    "image": mainImage.asset->url,
+    "imageAlt": mainImage.alt,
+    "imageName": mainImage.imageName,
+    excerpt
+  }
 }`
 
 export const postsBySejourQuery = groq`*[_type == "post" && relatedSejour._ref == $sejourId] | order(publishedAt desc)[0...6] {
@@ -366,14 +375,20 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
       ...,
       images[] {
         ...,
-        "alt": coalesce(alt, asset->altText)
+        "alt": coalesce(alt, asset->altText),
+        "url": asset->url,
+        "originalFilename": asset->originalFilename,
+        "extension": asset->extension
       }
     }
   },
   "gallery": gallery[]{
     caption,
+    imageName,
     "alt": coalesce(alt, asset->altText),
-    "url": asset->url
+    "url": asset->url,
+    "originalFilename": asset->originalFilename,
+    "extension": asset->extension
   },
   "tags": array::compact([
     activityType->{ "name": title, "slug": slug.current, "tagType": "category" }

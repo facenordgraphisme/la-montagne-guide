@@ -71,7 +71,7 @@ export default async function TarifsPage() {
 
         {/* Content Section */}
         {settingsData?.tarifsContent && (
-          <div className="glass p-8 md:p-16 rounded-[40px] border border-border bg-card/5 max-w-4xl mx-auto prose prose-invert prose-custom">
+          <div className="glass p-8 md:p-16 rounded-[40px] border border-border bg-card/5 max-w-4xl mx-auto prose-custom">
             {renderRichText(translatePortableText(settingsData.tarifsContent) || at(settingsData.tarifsContent))}
           </div>
         )}

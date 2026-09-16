@@ -128,7 +128,7 @@ export default async function GuidePage() {
                     {sect.title && (
                       <h2 className="text-4xl font-bold text-foreground">{at(sect.title)}</h2>
                     )}
-                    <div className="prose prose-invert prose-lg max-w-none text-foreground/70">
+                    <div className="prose-custom max-w-none text-foreground/70 leading-relaxed text-lg">
                       {sect.content && (
                         <PortableText value={translatePortableText(sect.content)} components={blockAlignComponents} />
                       )}
@@ -163,7 +163,7 @@ export default async function GuidePage() {
 
               <div className="space-y-8 text-lg text-foreground/70 leading-relaxed">
                 <h2 className="text-4xl font-bold text-foreground">{at(guide.bioTitle)}</h2>
-                <div className="prose prose-invert prose-lg max-w-none text-foreground/70">
+                <div className="prose-custom max-w-none text-foreground/70 leading-relaxed text-lg">
                   {guide.bio ? (
                     <PortableText value={translatePortableText(guide.bio)} components={blockAlignComponents} />
                   ) : (

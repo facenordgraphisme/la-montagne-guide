@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seo": "npx tsx scripts/generate-seo.ts",
+    "seo:write": "npx tsx scripts/generate-seo.ts --write"
   },
   "dependencies": {
     "@portabletext/react": "^6.0.3",
@@ -29,6 +31,7 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.126.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

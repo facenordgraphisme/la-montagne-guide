@@ -21,6 +21,19 @@ import { toPlainText } from '@/utils/richText';
 
 const VALID_ACTIVITIES = ['alpinisme', 'ski', 'escalade', 'cascade-de-glace', 'paralpinisme', 'voyages'];
 
+function buildDownloadUrl(url: string, imageName?: string, originalFilename?: string, extension?: string): string | undefined {
+  if (!url) return undefined;
+  const base = url.split('?')[0];
+  if (imageName) {
+    const ext = extension || originalFilename?.split('.').pop() || 'jpg';
+    return `${base}?dl=${encodeURIComponent(`${imageName}.${ext}`)}`;
+  }
+  if (originalFilename) {
+    return `${base}?dl=${encodeURIComponent(originalFilename)}`;
+  }
+  return undefined;
+}
+
 // Portable Text component for activity blocks
 const activityBlockComponents = {
   block: {
@@ -122,15 +135,22 @@ const blogBlockComponents = {
       if (!value || !value.images) return null;
       const formattedImages = value.images
         .filter((img: any) => img && img.asset)
-        .map((img: any) => ({
-          src: urlFor(img).url(),
-          alt: img.alt || img.caption || 'Image galerie',
-          caption: img.caption
-        }));
+        .map((img: any) => {
+          const rawUrl = img.url || img.asset?.url || urlFor(img).url();
+          const sizingParams = '?w=1600&q=80&auto=format&fit=max';
+          const sizedUrl = rawUrl.includes('?') ? rawUrl : `${rawUrl}${sizingParams}`;
+          const vanityName = img.imageName || img.originalFilename?.split('.')[0];
+          return {
+            src: getVanityImageUrl(sizedUrl, vanityName),
+            alt: img.alt || img.caption || 'Image galerie',
+            caption: img.caption,
+            downloadUrl: buildDownloadUrl(rawUrl, img.imageName, img.originalFilename, img.extension),
+          };
+        });
       if (formattedImages.length === 0) return null;
       return (
         <div className="my-12">
-          <ImageGallery images={formattedImages} />
+          <ImageGallery images={formattedImages} unoptimized />
         </div>
       );
     },
@@ -423,7 +443,7 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                 </div>
               )}
 
-              <div className="prose prose-invert max-w-none">
+              <div className="prose-custom max-w-none">
                 {post.body ? (
                   <PortableText value={translatePortableText(post.body)} components={blogBlockComponents} />
                 ) : (
@@ -432,7 +452,7 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
               </div>
 
               {post.topo && post.topo.length > 0 && (
-                <div className="mt-16 p-8 md:p-12 rounded-[2rem] border border-border bg-foreground/[0.02] prose prose-invert max-w-none">
+                <div className="mt-16 p-8 md:p-12 rounded-[2rem] border border-border bg-foreground/[0.02] prose-custom max-w-none">
                   <h3 className="text-xl font-bold uppercase tracking-widest text-accent mb-6 flex items-center gap-2">
                     <FileText size={18} />
                     {lang === 'en' ? 'Practical Info / Route Topo' : 'Données Pratiques / Topo'}
@@ -444,14 +464,21 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
               {post.gallery && post.gallery.length > 0 && (
                 <div className="mt-16 pt-16 border-t border-border/40">
                   <h3 className="text-xl font-bold uppercase tracking-widest text-accent mb-8">{at('Galerie Photos')}</h3>
-                  <ImageGallery 
+                  <ImageGallery
+                    unoptimized
                     images={post.gallery
                       .filter((img: any) => img && img.url)
-                      .map((img: any) => ({
-                        src: img.url,
-                        alt: img.alt || 'Image galerie',
-                        caption: img.caption
-                      }))} 
+                      .map((img: any) => {
+                        const sizingParams = '?w=1600&q=80&auto=format&fit=max';
+                        const sizedUrl = `${img.url}${sizingParams}`;
+                        const vanityName = img.imageName || img.originalFilename?.split('.')[0];
+                        return {
+                          src: getVanityImageUrl(sizedUrl, vanityName),
+                          alt: img.alt || 'Image galerie',
+                          caption: img.caption,
+                          downloadUrl: buildDownloadUrl(img.url, img.imageName, img.originalFilename, img.extension),
+                        };
+                      })}
                   />
                 </div>
               )}
