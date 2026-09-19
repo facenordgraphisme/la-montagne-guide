@@ -55,7 +55,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const activeLanguage = cookieStore.get('NEXT_LOCALE')?.value || 'fr';
 
     return {
-      metadataBase: new URL('https://la-montagne.guide'),
+      metadataBase: new URL('https://www.la-montagne-guide.fr'),
       title: activeLanguage === 'en' ? settingsData?.seoTitleEn : settingsData?.seoTitle,
       description: activeLanguage === 'en' ? settingsData?.seoDescriptionEn : settingsData?.seoDescription,
       icons: {
