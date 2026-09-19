@@ -47,13 +47,15 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
 
   if (!sejour) notFound();
 
+  const postsLimit = sejour.relatedPostsLimit || 6;
+
   // Priorité articles liés : 1. Sélection manuelle, 2. Tags, 3. Auto (sejour direct + activité)
   let relatedPosts: any[] = [];
 
   if (sejour.relatedPosts && sejour.relatedPosts.length > 0) {
-    relatedPosts = sejour.relatedPosts.slice(0, 6);
+    relatedPosts = sejour.relatedPosts.slice(0, postsLimit);
   } else if (sejour.relatedTagIds && sejour.relatedTagIds.length > 0) {
-    relatedPosts = (await client.fetch(postsByTagsQuery, { tagIds: sejour.relatedTagIds })).slice(0, 6);
+    relatedPosts = (await client.fetch(postsByTagsQuery, { tagIds: sejour.relatedTagIds })).slice(0, postsLimit);
   } else {
     const directPosts = sejour._id
       ? await client.fetch(postsBySejourQuery, { sejourId: sejour._id })
@@ -69,7 +71,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
 
     const seenSlugs = new Set(directIds);
     const extraPosts = activityPosts.filter((p: any) => !seenSlugs.has(p.slug));
-    relatedPosts = [...directPosts, ...extraPosts].slice(0, 6);
+    relatedPosts = [...directPosts, ...extraPosts].slice(0, postsLimit);
   }
 
   const getLevelLabel = (level?: string) => {

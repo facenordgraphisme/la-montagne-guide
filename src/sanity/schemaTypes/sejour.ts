@@ -431,6 +431,14 @@ export const sejourType = defineType({
       of: [{ type: 'reference', to: [{ type: 'tag' }], weak: true }],
     }),
     defineField({
+      name: 'relatedPostsLimit',
+      title: 'Nombre d\'articles à afficher',
+      type: 'number',
+      initialValue: 6,
+      description: 'Nombre maximum d\'articles de blog affichés dans "Dernières Sorties". Par défaut : 6.',
+      validation: (Rule) => Rule.min(1).max(24).integer(),
+    }),
+    defineField({
       name: 'hideRelatedPosts',
       title: 'Masquer les dernières sorties du blog',
       type: 'boolean',

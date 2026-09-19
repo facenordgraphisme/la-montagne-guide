@@ -157,6 +157,7 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
   },
   "relatedTags": relatedTags[]->slug.current,
   "relatedTagIds": relatedTags[]._ref,
+  relatedPostsLimit,
   hideRelatedPosts,
   "relatedPosts": relatedPosts[]->{
     title,
