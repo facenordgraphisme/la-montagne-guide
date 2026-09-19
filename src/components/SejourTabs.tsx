@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { PortableText } from '@portabletext/react'
 import type { PortableTextComponents } from '@portabletext/react'
 import { Download, FileText } from 'lucide-react'
+import { useLanguage } from '@/context/LanguageContext'
 
 interface Tab {
   id: string
@@ -85,6 +86,7 @@ const portableTextComponents: PortableTextComponents = {
 }
 
 export default function SejourTabs({ tabs }: SejourTabsProps) {
+  const { at } = useLanguage()
   const visibleTabs = tabs.filter(tab =>
     (tab.content && tab.content.length > 0) || tab.pdf
   )
@@ -130,7 +132,7 @@ export default function SejourTabs({ tabs }: SejourTabsProps) {
                 className="inline-flex items-center gap-3 px-6 py-4 bg-highlight/10 hover:bg-highlight/20 border border-highlight/30 hover:border-highlight/60 text-highlight rounded-2xl font-bold text-sm uppercase tracking-widest transition-all duration-300 group"
               >
                 <FileText size={18} className="shrink-0" />
-                Télécharger la liste de matériel (PDF)
+                {at('Télécharger la liste de matériel (PDF)')}
                 <Download size={16} className="shrink-0 group-hover:translate-y-0.5 transition-transform" />
               </a>
             </div>

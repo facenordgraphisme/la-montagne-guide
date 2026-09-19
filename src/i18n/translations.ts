@@ -234,4 +234,40 @@ export const sanityTranslations: Record<string, string> = {
 
   // Footer
   "navigation": "Navigation",
+
+  // Sejour detail page — pricing & booking
+  "tarif de base": "Base price",
+  "réserver ce séjour": "Book this trip",
+  "conseils & réservation par téléphone possible": "Advice & booking by phone available",
+  "tout compris": "All-inclusive",
+  "encadrement": "Guide fee",
+  "frais de séjour": "Stay costs",
+  "tarifs": "Pricing",
+  "galerie": "Gallery",
+  "photos": "Photos",
+  "dernières": "Latest",
+  "programme": "Programme",
+  "budget": "Budget",
+  "infos pratiques": "Practical Info",
+  "matériel": "Equipment",
+  "télécharger la liste de matériel (pdf)": "Download equipment list (PDF)",
+
+  // Blog / article page
+  "galerie photos": "Photo Gallery",
+  "faq de la course": "Trip FAQ",
+  "précédent": "Previous",
+  "suivant": "Next",
+  "pas de contenu pour le moment.": "No content yet.",
+
+  // Sorties listing
+  "activités": "Activities",
+  "terminée": "Ended",
+  "date passée": "Past date",
+  "cette sortie est passée": "This trip has passed",
+  "masquer les sorties passées": "Hide past trips",
+  "voir les sorties passées": "Show past trips",
+
+  // PrestationContent hardcoded strings
+  "possibilité d'ouvrir des dates à la demande": "Dates available on request",
+  "groupes constitués : engagement privé possible": "Formed groups: private engagement available",
 };

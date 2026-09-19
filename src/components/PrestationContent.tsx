@@ -160,10 +160,10 @@ const PrestationContent = ({ data, initialLang = 'fr' }: PrestationContentProps)
                 <Link href="/contact" className="btn-primary w-full block text-center !text-white">{t('prestation.book')}</Link>
                 <div className="mt-8 space-y-3">
                   <p className="text-[10px] text-center text-foreground/40 font-bold uppercase tracking-widest leading-relaxed">
-                    Possibilité d'ouvrir des dates à la demande
+                    {at("Possibilité d'ouvrir des dates à la demande")}
                   </p>
                   <p className="text-[10px] text-center text-foreground/40 font-bold uppercase tracking-widest leading-relaxed border-t border-white/5 pt-3">
-                    Groupes constitués : Engagement privé possible
+                    {at("Groupes constitués : Engagement privé possible")}
                   </p>
                 </div>
               </div>
