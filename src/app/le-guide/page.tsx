@@ -87,12 +87,12 @@ export default async function GuidePage() {
       <section className="relative pt-48 pb-20 overflow-hidden">
         <div className="container mx-auto px-6 relative z-10">
           <div className="max-w-4xl">
-            <span className="text-accent font-bold tracking-widest uppercase text-sm mb-4 block">{at(guide.badge)}</span>
+            <span className="text-accent font-bold tracking-widest uppercase text-sm mb-4 block">{at({ fr: guide.badge, en: guide.badgeEn })}</span>
             <h1 className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 text-gradient uppercase">
-              {at(guide.titleNormal)} <br /> {at(guide.titleAccent)}
+              {at({ fr: guide.titleNormal, en: guide.titleNormalEn })} <br /> {at({ fr: guide.titleAccent, en: guide.titleAccentEn })}
             </h1>
             <p className="text-xl text-foreground/60 leading-relaxed italic border-l-4 border-accent pl-8 py-2">
-              "{at(guide.quote)}"
+              "{at({ fr: guide.quote, en: guide.quoteEn })}"
             </p>
           </div>
         </div>
@@ -126,11 +126,11 @@ export default async function GuidePage() {
                   {/* Text Column */}
                   <div className="space-y-8 text-lg text-foreground/70 leading-relaxed">
                     {sect.title && (
-                      <h2 className="text-4xl font-bold text-foreground">{at(sect.title)}</h2>
+                      <h2 className="text-4xl font-bold text-foreground">{at({ fr: sect.title, en: sect.titleEn })}</h2>
                     )}
                     <div className="prose-custom max-w-none text-foreground/70 leading-relaxed text-lg">
                       {sect.content && (
-                        <PortableText value={translatePortableText(sect.content)} components={blockAlignComponents} />
+                        <PortableText value={translatePortableText({ fr: sect.content, en: sect.contentEn })} components={blockAlignComponents} />
                       )}
                     </div>
                     {idx === guide.sections.length - 1 && (
@@ -199,7 +199,7 @@ export default async function GuidePage() {
               </div>
               <div>
                 <p className="text-4xl md:text-6xl font-black text-highlight mb-2">{at(guide.experience)}</p>
-                <p className="text-xs md:text-sm uppercase tracking-widest font-black opacity-50">{at(guide.experienceSub)}</p>
+                <p className="text-xs md:text-sm uppercase tracking-widest font-black opacity-50">{at({ fr: guide.experienceSub, en: guide.experienceSubEn })}</p>
               </div>
             </div>
           </div>
@@ -217,8 +217,8 @@ export default async function GuidePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {(guide.values || []).map((v: any, index: number) => (
                 <div key={index} className="glass p-10 rounded-[40px] hover:border-accent transition-colors">
-                  <h3 className="text-2xl font-bold mb-4 text-accent">{at(v.title)}</h3>
-                  <p className="text-foreground/60">{at(v.description)}</p>
+                  <h3 className="text-2xl font-bold mb-4 text-accent">{at({ fr: v.title, en: v.titleEn })}</h3>
+                  <p className="text-foreground/60">{at({ fr: v.description, en: v.descriptionEn })}</p>
                 </div>
               ))}
             </div>

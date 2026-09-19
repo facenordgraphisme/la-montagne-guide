@@ -18,7 +18,7 @@ import { sortActivities } from "@/utils/activity";
 
 export default async function Home() {
   const homeData = await client.fetch(homeQuery);
-  const { at } = await getServerTranslations();
+  const { at, translatePortableText, lang } = await getServerTranslations();
   const limit = homeData?.featuredPostsLimit || 3;
   const [sortiesData, testimonialsData, blogTeaserData, activitiesData, settingsData, faqsData] = await Promise.all([
     client.fetch(sortiesQuery),
@@ -64,10 +64,10 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <Hero 
-        title={homeData?.heroTitle}
-        subtitle={homeData?.heroSubtitle}
-        description={homeData?.heroDescription}
+      <Hero
+        title={at({ fr: homeData?.heroTitle, en: homeData?.heroTitleEn })}
+        subtitle={at({ fr: homeData?.heroSubtitle, en: homeData?.heroSubtitleEn })}
+        description={translatePortableText({ fr: homeData?.heroDescription, en: homeData?.heroDescriptionEn })}
         images={homeData?.heroImages}
         textAlign={homeData?.heroTextAlign}
         btnDiscoverText={homeData?.heroBtnDiscoverText}
@@ -76,63 +76,63 @@ export default async function Home() {
         btnDeparturesTextEn={homeData?.heroBtnDeparturesTextEn}
       />
       <div className="space-y-0">
-        <AboutSection 
-          badge={homeData?.aboutBadge}
-          title={homeData?.aboutTitle}
-          titleAccent={homeData?.aboutTitleAccent}
-          description={homeData?.aboutDescription}
+        <AboutSection
+          badge={at({ fr: homeData?.aboutBadge, en: homeData?.aboutBadgeEn })}
+          title={at({ fr: homeData?.aboutTitle, en: homeData?.aboutTitleEn })}
+          titleAccent={at({ fr: homeData?.aboutTitleAccent, en: homeData?.aboutTitleAccentEn })}
+          description={translatePortableText({ fr: homeData?.aboutDescription, en: homeData?.aboutDescriptionEn })}
           image={homeData?.aboutImage}
           experience={homeData?.experienceYears}
           className="bg-background"
         />
-        <ActivitySection 
-          title={homeData?.activitiesTitle}
-          titleAccent={homeData?.activitiesTitleAccent}
-          description={homeData?.activitiesDescription}
+        <ActivitySection
+          title={at({ fr: homeData?.activitiesTitle, en: homeData?.activitiesTitleEn })}
+          titleAccent={at({ fr: homeData?.activitiesTitleAccent, en: homeData?.activitiesTitleAccentEn })}
+          description={translatePortableText({ fr: homeData?.activitiesDescription, en: homeData?.activitiesDescriptionEn })}
           data={sortedActivities}
           className="bg-surface"
         />
         {!homeData?.hideSorties && (
-          <UpcomingSorties 
-            data={sortiesData} 
-            badge={homeData?.sortiesBadge}
-            title={homeData?.sortiesTitle}
-            titleAccent={homeData?.sortiesTitleAccent}
+          <UpcomingSorties
+            data={sortiesData}
+            badge={at({ fr: homeData?.sortiesBadge, en: homeData?.sortiesBadgeEn })}
+            title={at({ fr: homeData?.sortiesTitle, en: homeData?.sortiesTitleEn })}
+            titleAccent={at({ fr: homeData?.sortiesTitleAccent, en: homeData?.sortiesTitleAccentEn })}
             className="bg-background"
           />
         )}
         {!homeData?.hideAdventure && (
-          <AdventureStart 
-            badge={homeData?.adventureBadge}
-            title={homeData?.adventureTitle}
-            titleAccent={homeData?.adventureTitleAccent}
-            description={homeData?.adventureDescription}
-            features={homeData?.adventureFeatures}
+          <AdventureStart
+            badge={at({ fr: homeData?.adventureBadge, en: homeData?.adventureBadgeEn })}
+            title={at({ fr: homeData?.adventureTitle, en: homeData?.adventureTitleEn })}
+            titleAccent={at({ fr: homeData?.adventureTitleAccent, en: homeData?.adventureTitleAccentEn })}
+            description={translatePortableText({ fr: homeData?.adventureDescription, en: homeData?.adventureDescriptionEn })}
+            features={lang === 'en' && homeData?.adventureFeaturesEn?.length ? homeData.adventureFeaturesEn : homeData?.adventureFeatures}
             image={homeData?.adventureImage}
             className="bg-surface"
           />
         )}
-        <ContactHome 
-          badge={homeData?.contactBadge}
-          title={homeData?.contactTitle}
-          titleAccent={homeData?.contactTitleAccent}
-          description={homeData?.contactDescription}
+        <ContactHome
+          badge={at({ fr: homeData?.contactBadge, en: homeData?.contactBadgeEn })}
+          title={at({ fr: homeData?.contactTitle, en: homeData?.contactTitleEn })}
+          titleAccent={at({ fr: homeData?.contactTitleAccent, en: homeData?.contactTitleAccentEn })}
+          description={translatePortableText({ fr: homeData?.contactDescription, en: homeData?.contactDescriptionEn })}
         />
         {!homeData?.hideTestimonials && (
-          <Testimonials 
-            data={testimonialsData} 
-            badge={homeData?.testimonialsBadge}
-            title={homeData?.testimonialsTitle}
-            titleAccent={homeData?.testimonialsTitleAccent}
+          <Testimonials
+            data={testimonialsData}
+            badge={at({ fr: homeData?.testimonialsBadge, en: homeData?.testimonialsBadgeEn })}
+            title={at({ fr: homeData?.testimonialsTitle, en: homeData?.testimonialsTitleEn })}
+            titleAccent={at({ fr: homeData?.testimonialsTitleAccent, en: homeData?.testimonialsTitleAccentEn })}
             className="bg-surface"
           />
         )}
         {!homeData?.hideBlog && (
-          <BlogTeaser 
-            data={blogTeaserData} 
-            badge={homeData?.blogBadge}
-            title={homeData?.blogTitle}
-            titleAccent={homeData?.blogTitleAccent}
+          <BlogTeaser
+            data={blogTeaserData}
+            badge={at({ fr: homeData?.blogBadge, en: homeData?.blogBadgeEn })}
+            title={at({ fr: homeData?.blogTitle, en: homeData?.blogTitleEn })}
+            titleAccent={at({ fr: homeData?.blogTitleAccent, en: homeData?.blogTitleAccentEn })}
             className="bg-background"
           />
         )}

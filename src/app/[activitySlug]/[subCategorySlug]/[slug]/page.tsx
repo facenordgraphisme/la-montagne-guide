@@ -17,12 +17,13 @@ import { renderRichText, toPlainText } from '@/utils/richText';
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const sejour = await client.fetch(sejourBySlugQuery, { slug });
-  const { at } = await getServerTranslations();
+  const { at, lang } = await getServerTranslations();
 
   if (!sejour) return {};
 
-  const title = `${at(sejour.title)} | La Montagne Guide`;
-  const description = sejour.description ? toPlainText(sejour.description).substring(0, 160) : '';
+  const title = `${at({ fr: sejour.title, en: sejour.titleEn })} | La Montagne Guide`;
+  const descForMeta = lang === 'en' && sejour.descriptionEn?.length ? sejour.descriptionEn : sejour.description;
+  const description = descForMeta ? toPlainText(descForMeta).substring(0, 160) : '';
   const ogImage = sejour.image || undefined;
 
   return {
@@ -84,7 +85,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
   const dynamicTabs = (sejour.tabs || []).map((tab: any, idx: number) => ({
     id: `dynamic-${idx}`,
     label: at({ fr: tab.title, en: tab.titleEn }),
-    content: translatePortableText(tab.content) || null,
+    content: translatePortableText({ fr: tab.content, en: tab.contentEn }) || null,
     pdf: tab.pdf ?? null
   }))
 
@@ -101,7 +102,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "TouristTrip",
-    "name": at(sejour.title),
+    "name": at({ fr: sejour.title, en: sejour.titleEn }),
     "description": sejour.description ? toPlainText(sejour.description) : undefined,
     "image": sejour.image || undefined,
     "touristType": sejour.activityType ? at(sejour.activityType) : undefined,
@@ -131,7 +132,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
           {sejour.image && (
             <Image
               src={sejour.image}
-              alt={at(sejour.title)}
+              alt={at({ fr: sejour.title, en: sejour.titleEn })}
               fill
               sizes="100vw"
               priority
@@ -163,7 +164,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
           </div>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter uppercase leading-[1.0] text-white">
-            {at(sejour.title)}
+            {at({ fr: sejour.title, en: sejour.titleEn })}
           </h1>
         </div>
       </section>
@@ -177,7 +178,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
             <div className="lg:col-span-2 space-y-12">
               {sejour.description && (
                 <div className="text-2xl font-medium leading-relaxed text-foreground/80">
-                  {renderRichText(sejour.description)}
+                  {renderRichText(translatePortableText({ fr: sejour.description, en: sejour.descriptionEn }))}
                 </div>
               )}
 
@@ -202,7 +203,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                       <Clock size={18} className="text-accent" />
                       <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{at('Durée')}</span>
                     </div>
-                    <span className="font-bold">{at(sejour.duration)}</span>
+                    <span className="font-bold">{at({ fr: sejour.duration, en: sejour.durationEn })}</span>
                   </div>
 
                   <div className="flex justify-between items-center py-4 border-b border-border">

@@ -9,9 +9,14 @@ export const universType = defineType({
   fields: [
     defineField({
       name: 'title',
-      title: 'Nom de l\'univers',
+      title: 'Nom de l\'univers (FR)',
       type: 'string',
       description: 'Ex: Initiation, Pente Raide, Course de légende...',
+    }),
+    defineField({
+      name: 'titleEn',
+      title: 'Nom de l\'univers (EN)',
+      type: 'string',
     }),
     defineField({
       name: 'slug',
@@ -31,7 +36,24 @@ export const universType = defineType({
     }),
     defineField({
       name: 'description',
-      title: 'Description de l\'univers',
+      title: 'Description de l\'univers (FR)',
+      type: 'array',
+      of: [{
+        type: 'block',
+        styles: [
+          { title: 'Normal', value: 'normal' },
+          { title: 'H2', value: 'h2' },
+          { title: 'H3', value: 'h3' },
+          { title: 'Centré', value: 'blockCenter' },
+          { title: 'Justifié', value: 'blockJustify' },
+          { title: 'Droite', value: 'blockRight' },
+          { title: 'Citation', value: 'blockquote' }
+        ]
+      }],
+    }),
+    defineField({
+      name: 'descriptionEn',
+      title: 'Description de l\'univers (EN)',
       type: 'array',
       of: [{
         type: 'block',
@@ -54,9 +76,14 @@ export const universType = defineType({
     }),
     defineField({
       name: 'catalogTitle',
-      title: 'Titre du catalogue de séjours',
+      title: 'Titre du catalogue de séjours (FR)',
       type: 'string',
       description: 'Optionnel. Par défaut: "Catalogue Séjours".',
+    }),
+    defineField({
+      name: 'catalogTitleEn',
+      title: 'Titre du catalogue de séjours (EN)',
+      type: 'string',
     }),
     defineField({
       name: 'faqs',

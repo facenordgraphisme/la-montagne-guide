@@ -190,13 +190,15 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ activitySlug: string }> }): Promise<Metadata> {
   const { activitySlug } = await params;
-  const { at } = await getServerTranslations();
+  const { at, lang } = await getServerTranslations();
 
   if (VALID_ACTIVITIES.includes(activitySlug)) {
     const activity = await client.fetch(activityBySlugQuery, { slug: activitySlug });
     if (!activity) return {};
-    const title = `${at(activity.title)} | La Montagne Guide`;
-    const description = activity.intro ? at(activity.intro) : (activity.description ? toPlainText(activity.description).substring(0, 160) : '');
+    const title = `${at({ fr: activity.title, en: activity.titleEn })} | La Montagne Guide`;
+    const introText = activity.introEn && lang === 'en' ? activity.introEn : activity.intro;
+    const descBlocks = lang === 'en' && activity.descriptionEn?.length ? activity.descriptionEn : activity.description;
+    const description = introText ? at(introText) : (descBlocks ? toPlainText(descBlocks).substring(0, 160) : '');
     const ogImage = activity.image || undefined;
     return {
       title,
@@ -253,9 +255,9 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
             <div className="absolute inset-0 bg-black/40 bg-gradient-to-t from-background via-transparent to-black/20" />
           </div>
           <div className="container relative z-10 px-6 text-center pt-20">
-            <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-white uppercase mb-8 leading-[0.8]">{at(activity.title)}</h1>
+            <h1 className="text-6xl md:text-9xl font-black tracking-tighter text-white uppercase mb-8 leading-[0.8]">{at({ fr: activity.title, en: activity.titleEn })}</h1>
             <p className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed font-medium text-center">
-              {at(activity.intro) || toPlainText(activity.description)?.substring(0, 200)}
+              {at({ fr: activity.intro, en: activity.introEn }) || toPlainText(activity.description)?.substring(0, 200)}
             </p>
           </div>
         </section>
@@ -269,8 +271,8 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                     <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center text-accent mx-auto mb-6">
                       <span className="font-black text-xl">{i + 1}</span>
                     </div>
-                    <h3 className="text-xl font-black mb-4 text-accent uppercase tracking-widest leading-tight">{at(point.title)}</h3>
-                    <p className="text-foreground/60 leading-relaxed font-medium">{at(point.description)}</p>
+                    <h3 className="text-xl font-black mb-4 text-accent uppercase tracking-widest leading-tight">{at({ fr: point.title, en: point.titleEn })}</h3>
+                    <p className="text-foreground/60 leading-relaxed font-medium">{at({ fr: point.description, en: point.descriptionEn })}</p>
                   </div>
                 ))}
               </div>
@@ -281,10 +283,10 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
         <section className="py-24">
           <div className="container mx-auto px-6">
             <div className="text-center mb-20">
-              <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-6">{at(activity.universTitle || "Choisissez votre univers")}</h2>
+              <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-6">{at({ fr: activity.universTitle, en: activity.universTitleEn }) || at("Choisissez votre univers")}</h2>
               {activity.universDescription && activity.universDescription.length > 0 ? (
                 <div className="text-lg text-foreground/60 max-w-2xl mx-auto font-medium prose-custom inline-block text-center">
-                  <PortableText value={translatePortableText(activity.universDescription) || at(activity.universDescription)} />
+                  <PortableText value={translatePortableText({ fr: activity.universDescription, en: activity.universDescriptionEn }) || at(activity.universDescription)} />
                 </div>
               ) : (
                 <p className="text-lg text-foreground/60 max-w-2xl mx-auto font-medium">
@@ -305,17 +307,17 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                     {univ.image && (
                       <Image 
                         src={urlFor(univ.image).url()}
-                        alt={at(univ.title)}
+                        alt={at({ fr: univ.title, en: univ.titleEn })}
                         fill
                         sizes="(max-width: 768px) 100vw, 50vw"
                         className="object-cover transition-transform duration-700 group-hover:scale-110"
                       />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-                    
+
                     <div className="absolute inset-0 p-12 flex flex-col justify-end">
                       <h3 className="text-3xl md:text-5xl font-black text-foreground uppercase tracking-tighter group-hover:text-accent transition-colors">
-                        {at(univ.title)}
+                        {at({ fr: univ.title, en: univ.titleEn })}
                       </h3>
                     </div>
                   </Link>

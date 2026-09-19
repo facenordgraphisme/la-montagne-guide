@@ -26,11 +26,8 @@ export const sejourType = defineType({
   type: 'document',
   icon: Mountain,
   fields: [
-    defineField({
-      name: 'title',
-      title: 'Titre du séjour',
-      type: 'string',
-    }),
+    defineField({ name: 'title', title: 'Titre du séjour (FR)', type: 'string' }),
+    defineField({ name: 'titleEn', title: 'Titre du séjour (EN)', type: 'string' }),
     defineField({
       name: 'slug',
       title: 'Slug',
@@ -102,10 +99,11 @@ export const sejourType = defineType({
     }),
     defineField({
       name: 'duration',
-      title: 'Durée',
+      title: 'Durée (FR)',
       type: 'string',
       description: 'Ex: 1 jour, 3 jours, 1 semaine',
     }),
+    defineField({ name: 'durationEn', title: 'Durée (EN)', type: 'string', description: 'Ex: 1 day, 3 days, 1 week' }),
     defineField({
       name: 'basePrice',
       title: 'Prix "À partir de"',
@@ -142,12 +140,8 @@ export const sejourType = defineType({
       type: 'image',
       options: { hotspot: true },
     }),
-    defineField({
-      name: 'description',
-      title: 'Description détaillée',
-      type: 'array',
-      of: descriptionBlocks,
-    }),
+    defineField({ name: 'description', title: 'Description détaillée (FR)', type: 'array', of: descriptionBlocks }),
+    defineField({ name: 'descriptionEn', title: 'Description détaillée (EN)', type: 'array', of: descriptionBlocks }),
     defineField({
       name: 'content',
       title: 'Contenu riche (Programme, etc.) [Obsolète - Utilisez les onglets]',
@@ -307,6 +301,42 @@ export const sejourType = defineType({
                     },
                   },
                 },
+              ]
+            }),
+            defineField({
+              name: 'contentEn',
+              type: 'array',
+              title: 'Contenu (EN)',
+              of: [
+                {
+                  type: 'block',
+                  styles: [
+                    { title: 'Normal', value: 'normal' },
+                    { title: 'H2', value: 'h2' },
+                    { title: 'H3', value: 'h3' },
+                    { title: 'Centré', value: 'blockCenter' },
+                    { title: 'Justifié', value: 'blockJustify' },
+                    { title: 'Droite', value: 'blockRight' },
+                  ],
+                  marks: {
+                    decorators: [
+                      { title: 'Gras', value: 'strong' },
+                      { title: 'Italique', value: 'em' },
+                    ],
+                    annotations: [
+                      {
+                        name: 'link',
+                        type: 'object',
+                        title: 'Lien hypertexte',
+                        fields: [
+                          { name: 'href', type: 'url', title: 'URL' },
+                          { name: 'blank', type: 'boolean', title: 'Ouvrir dans un nouvel onglet', initialValue: true },
+                        ],
+                      },
+                    ],
+                  },
+                },
+                { type: 'image' },
               ]
             }),
             defineField({

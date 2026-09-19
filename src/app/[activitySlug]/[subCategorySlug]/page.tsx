@@ -65,8 +65,8 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
 
   if (!currentUnivers) return {};
 
-  const title = `${at(currentUnivers.title)} - ${at(activity.title)} | La Montagne Guide`;
-  const plainTextDescription = blocksToText(currentUnivers.description, lang);
+  const title = `${at({ fr: currentUnivers.title, en: currentUnivers.titleEn })} - ${at({ fr: activity.title, en: activity.titleEn })} | La Montagne Guide`;
+  const plainTextDescription = blocksToText({ fr: currentUnivers.description, en: currentUnivers.descriptionEn }, lang);
   const description = plainTextDescription ? plainTextDescription.substring(0, 160) : '';
   const ogImage = currentUnivers.image || activity.image || undefined;
 
@@ -115,7 +115,7 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
           {currentUnivers.image ? (
             <Image 
               src={currentUnivers.image}
-              alt={at(currentUnivers.title)}
+              alt={at({ fr: currentUnivers.title, en: currentUnivers.titleEn })}
               fill
               sizes="100vw"
               priority
@@ -123,9 +123,9 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
             />
           ) : (
              activity.image && (
-              <Image 
+              <Image
                 src={activity.image}
-                alt={at(activity.title)}
+                alt={at({ fr: activity.title, en: activity.titleEn })}
                 fill
                 sizes="100vw"
                 priority
@@ -142,11 +142,11 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
             className="inline-flex items-center gap-2 text-white/60 font-bold mb-12 hover:text-accent transition-all duration-300 group"
           >
             <ArrowLeft size={16} />
-            {at('RETOUR À')} {at(activity.title).toUpperCase()}
+            {at('RETOUR À')} {at({ fr: activity.title, en: activity.titleEn }).toUpperCase()}
           </Link>
-          
+
           <h1 className="text-6xl md:text-9xl font-black tracking-tighter uppercase leading-[0.8] text-white mb-12">
-            {at(currentUnivers.title)}
+            {at({ fr: currentUnivers.title, en: currentUnivers.titleEn })}
           </h1>
         </div>
       </section>
@@ -157,7 +157,7 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
           <div className="glass p-12 md:p-24 rounded-[60px] border border-white/10 shadow-2xl bg-background/80 backdrop-blur-3xl max-w-5xl mx-auto text-center relative">
             <div className="prose-custom prose-xl mx-auto mb-16">
               {currentUnivers.description ? (
-                <PortableText value={translatePortableText(currentUnivers.description)} components={blockAlignComponents} />
+                <PortableText value={translatePortableText({ fr: currentUnivers.description, en: currentUnivers.descriptionEn })} components={blockAlignComponents} />
               ) : (
                 <p className="text-foreground/60">{at('Description à venir pour cet univers.')}</p>
               )}
@@ -171,14 +171,14 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
               <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
                 <div className="flex-1">
                   <p className="text-xl font-black leading-[1.1] tracking-tighter text-foreground uppercase">
-                    {at(activity.customTripText) || t("customTrip.text")}
+                    {at({ fr: activity.customTripText, en: activity.customTripTextEn }) || t("customTrip.text")}
                   </p>
                 </div>
                 <Link
                   href="/contact"
                   className="whitespace-nowrap px-8 py-4 text-sm uppercase tracking-widest font-black rounded-full bg-highlight text-white shadow-xl shadow-highlight/30 hover:shadow-highlight/50 hover:-translate-y-0.5 transition-all duration-300"
                 >
-                  {at(activity.customTripCTA) || t("customTrip.cta")}
+                  {at({ fr: activity.customTripCTA, en: activity.customTripCTAEn }) || t("customTrip.cta")}
                 </Link>
               </div>
             </div>
@@ -191,7 +191,7 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase">
-              {currentUnivers.catalogTitle ? at(currentUnivers.catalogTitle) : (
+              {currentUnivers.catalogTitle ? at({ fr: currentUnivers.catalogTitle, en: currentUnivers.catalogTitleEn }) : (
                 <>
                   {at('Catalogue')} <span className="text-accent italic">{at('Séjours')}</span>
                 </>

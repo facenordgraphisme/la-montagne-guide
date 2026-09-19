@@ -1,55 +1,53 @@
 import { groq } from 'next-sanity'
 
 export const homeQuery = groq`*[_type == "home"][0]{
-  heroTitle,
-  heroSubtitle,
-  heroDescription,
+  heroTitle, heroTitleEn,
+  heroSubtitle, heroSubtitleEn,
+  heroDescription, heroDescriptionEn,
   "heroImages": heroImages[].asset->url,
-  
-  aboutBadge,
-  aboutTitle,
-  aboutTitleAccent,
-  aboutDescription,
+
+  aboutBadge, aboutBadgeEn,
+  aboutTitle, aboutTitleEn,
+  aboutTitleAccent, aboutTitleAccentEn,
+  aboutDescription, aboutDescriptionEn,
   "aboutImage": aboutImage.asset->url,
   experienceYears,
 
-  activitiesTitle,
-  activitiesTitleAccent,
-  activitiesDescription,
+  activitiesTitle, activitiesTitleEn,
+  activitiesTitleAccent, activitiesTitleAccentEn,
+  activitiesDescription, activitiesDescriptionEn,
 
-  sortiesBadge,
-  sortiesTitle,
-  sortiesTitleAccent,
+  sortiesBadge, sortiesBadgeEn,
+  sortiesTitle, sortiesTitleEn,
+  sortiesTitleAccent, sortiesTitleAccentEn,
 
-  adventureBadge,
-  adventureTitle,
-  adventureTitleAccent,
-  adventureDescription,
-  adventureFeatures,
+  adventureBadge, adventureBadgeEn,
+  adventureTitle, adventureTitleEn,
+  adventureTitleAccent, adventureTitleAccentEn,
+  adventureDescription, adventureDescriptionEn,
+  adventureFeatures, adventureFeaturesEn,
   "adventureImage": adventureImage.asset->url,
 
-  contactBadge,
-  contactTitle,
-  contactTitleAccent,
-  contactDescription,
+  contactBadge, contactBadgeEn,
+  contactTitle, contactTitleEn,
+  contactTitleAccent, contactTitleAccentEn,
+  contactDescription, contactDescriptionEn,
 
-  testimonialsBadge,
-  testimonialsTitle,
-  testimonialsTitleAccent,
+  testimonialsBadge, testimonialsBadgeEn,
+  testimonialsTitle, testimonialsTitleEn,
+  testimonialsTitleAccent, testimonialsTitleAccentEn,
 
-  blogBadge,
-  blogTitle,
-  blogTitleAccent,
+  blogBadge, blogBadgeEn,
+  blogTitle, blogTitleEn,
+  blogTitleAccent, blogTitleAccentEn,
   hideTestimonials,
   hideBlog,
   hideSorties,
   hideAdventure,
   featuredPostsLimit,
   heroTextAlign,
-  heroBtnDiscoverText,
-  heroBtnDiscoverTextEn,
-  heroBtnDeparturesText,
-  heroBtnDeparturesTextEn
+  heroBtnDiscoverText, heroBtnDiscoverTextEn,
+  heroBtnDeparturesText, heroBtnDeparturesTextEn
 }`
 
 export const testimonialsQuery = groq`*[_type == "testimonial"] | order(_createdAt desc) {
@@ -141,10 +139,17 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
     isFull
   },
   "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": category->slug.current, "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order},
+  title, titleEn,
+  description, descriptionEn,
+  duration, durationEn,
   tabs[]{
     title,
     titleEn,
     content[]{
+      ...,
+      _type == "image" => { ..., "asset": asset-> }
+    },
+    contentEn[]{
       ...,
       _type == "image" => { ..., "asset": asset-> }
     },
@@ -209,58 +214,60 @@ export const sortieBySlugQuery = groq`*[_type == "sortie" && slug.current == $sl
 
 export const activitiesQuery = groq`*[_type == "activity"] | order(title asc) {
   _id,
-  title,
+  title, titleEn,
   "slug": slug.current,
-  subtitle,
-  intro,
-  description,
+  subtitle, subtitleEn,
+  intro, introEn,
+  description, descriptionEn,
   "image": image.asset->url,
   keyPoints,
-  details,
-  universBadge,
-  universTitle,
-  universDescription,
+  details, detailsEn,
+  universBadge, universBadgeEn,
+  universTitle, universTitleEn,
+  universDescription, universDescriptionEn,
   "univers": *[_type == "univers" && activity._ref == ^._id] {
-    title,
+    title, titleEn,
     "slug": slug.current,
-    description,
+    description, descriptionEn,
     "image": image.asset->url,
-    catalogTitle
+    catalogTitle, catalogTitleEn
   },
   price,
-  period,
-  location,
+  period, periodEn,
+  location, locationEn,
   showUpcomingSorties,
   type,
-  customTripText,
-  customTripCTA
+  customTripText, customTripTextEn,
+  customTripCTA, customTripCTAEn
 }`
 
 export const activityBySlugQuery = groq`*[_type == "activity" && slug.current == $slug][0] {
-  title,
+  title, titleEn,
   "slug": slug.current,
-  subtitle,
-  intro,
-  description,
+  subtitle, subtitleEn,
+  intro, introEn,
+  description, descriptionEn,
   "image": image.asset->url,
   keyPoints,
-  details,
-  universBadge,
-  universTitle,
-  universDescription,
+  details, detailsEn,
+  universBadge, universBadgeEn,
+  universTitle, universTitleEn,
+  universDescription, universDescriptionEn,
   "univers": *[_type == "univers" && activity._ref == ^._id] {
-    title,
+    title, titleEn,
     "slug": slug.current,
-    description,
+    description, descriptionEn,
     "image": image.asset->url,
-    catalogTitle,
+    catalogTitle, catalogTitleEn,
     "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order}
   },
   price,
-  period,
-  location,
+  period, periodEn,
+  location, locationEn,
   showUpcomingSorties,
   type,
+  customTripText, customTripTextEn,
+  customTripCTA, customTripCTAEn,
   "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order}
 }`
 
@@ -275,21 +282,21 @@ export const blogTeaserQuery = groq`*[_type == "post"] | order(publishedAt desc)
 }`
 
 export const guideQuery = groq`*[_type == "guide"][0] {
-  badge,
-  titleNormal,
-  titleAccent,
-  quote,
+  badge, badgeEn,
+  titleNormal, titleNormalEn,
+  titleAccent, titleAccentEn,
+  quote, quoteEn,
   "image": image.asset->url,
-  bioTitle,
-  bio,
+  bioTitle, bioTitleEn,
+  bio, bioEn,
   certification,
-  certificationSub,
+  certificationSub, certificationSubEn,
   experience,
-  experienceSub,
-  values,
+  experienceSub, experienceSubEn,
+  values[]{title, titleEn, description, descriptionEn},
   sections[] {
-    title,
-    content,
+    title, titleEn,
+    content, contentEn,
     image,
     imagePosition
   },
