@@ -55,17 +55,18 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
   if (sejour.relatedPosts && sejour.relatedPosts.length > 0) {
     relatedPosts = sejour.relatedPosts.slice(0, postsLimit);
   } else if (sejour.relatedTagIds && sejour.relatedTagIds.length > 0) {
-    relatedPosts = (await client.fetch(postsByTagsQuery, { tagIds: sejour.relatedTagIds })).slice(0, postsLimit);
+    relatedPosts = (await client.fetch(postsByTagsQuery, { tagIds: sejour.relatedTagIds, limit: postsLimit })).slice(0, postsLimit);
   } else {
     const directPosts = sejour._id
-      ? await client.fetch(postsBySejourQuery, { sejourId: sejour._id })
+      ? await client.fetch(postsBySejourQuery, { sejourId: sejour._id, limit: postsLimit })
       : [];
 
     const directIds = directPosts.map((p: any) => p.slug);
     const activityPosts = (directPosts.length < 3 && sejour.activityType)
       ? await client.fetch(postsByActivityQuery, {
           activityType: sejour.activityType,
-          excludedIds: sejour._id ? [sejour._id] : []
+          excludedIds: sejour._id ? [sejour._id] : [],
+          limit: postsLimit
         })
       : [];
 

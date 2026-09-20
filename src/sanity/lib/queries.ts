@@ -170,7 +170,7 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
   }
 }`
 
-export const postsBySejourQuery = groq`*[_type == "post" && relatedSejour._ref == $sejourId] | order(publishedAt desc)[0...6] {
+export const postsBySejourQuery = groq`*[_type == "post" && relatedSejour._ref == $sejourId] | order(publishedAt desc)[0...$limit] {
   title,
   "slug": slug.current,
   "date": publishedAt,
@@ -180,7 +180,7 @@ export const postsBySejourQuery = groq`*[_type == "post" && relatedSejour._ref =
   excerpt
 }`
 
-export const postsByTagsQuery = groq`*[_type == "post" && count(tags[@._ref in $tagIds]) > 0] | order(publishedAt desc)[0...6] {
+export const postsByTagsQuery = groq`*[_type == "post" && count(tags[@._ref in $tagIds]) > 0] | order(publishedAt desc)[0...$limit] {
   title,
   "slug": slug.current,
   "date": publishedAt,
@@ -190,7 +190,7 @@ export const postsByTagsQuery = groq`*[_type == "post" && count(tags[@._ref in $
   excerpt
 }`
 
-export const postsByActivityQuery = groq`*[_type == "post" && (activityType == $activityType || activityType->_ref == $activityType || activityType->type == $activityType || activityType->slug.current == $activityType) && !(relatedSejour._ref in $excludedIds)] | order(publishedAt desc)[0...6] {
+export const postsByActivityQuery = groq`*[_type == "post" && (activityType == $activityType || activityType->_ref == $activityType || activityType->type == $activityType || activityType->slug.current == $activityType) && !(relatedSejour._ref in $excludedIds)] | order(publishedAt desc)[0...$limit] {
   title,
   "slug": slug.current,
   "date": publishedAt,
