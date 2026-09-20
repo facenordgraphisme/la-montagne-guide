@@ -270,4 +270,11 @@ export const sanityTranslations: Record<string, string> = {
   // PrestationContent hardcoded strings
   "possibilité d'ouvrir des dates à la demande": "Dates available on request",
   "groupes constitués : engagement privé possible": "Formed groups: private engagement available",
+  // ContactForm
+  "envoyer le message": "Send message",
+  "envoi en cours...": "Sending...",
+  "message envoyé !": "Message sent!",
+  "je vous répondrai dans les plus brefs délais.": "I'll get back to you as soon as possible.",
+  "envoyer un autre message": "Send another message",
+  "une erreur est survenue. veuillez réessayer ou nous contacter par téléphone.": "An error occurred. Please try again or contact us by phone.",
 };
