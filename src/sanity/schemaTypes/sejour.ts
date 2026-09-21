@@ -362,6 +362,13 @@ export const sejourType = defineType({
       options: { accept: '.pdf' },
     }),
     defineField({
+      name: 'galleryTags',
+      title: 'Galerie — Importer par tags',
+      description: 'Sélectionnez des tags : toutes les photos des articles ayant ces tags seront ajoutées automatiquement à la galerie.',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'tag' }], weak: true }],
+    }),
+    defineField({
       name: 'gallery',
       title: 'Galerie photos',
       type: 'array',

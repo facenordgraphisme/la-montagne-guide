@@ -159,6 +159,7 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
   },
   "relatedTags": relatedTags[]->slug.current,
   "relatedTagIds": relatedTags[]._ref,
+  "galleryTagIds": galleryTags[]._ref,
   relatedPostsLimit,
   hideRelatedPosts,
   "relatedPosts": relatedPosts[]->{
@@ -180,6 +181,25 @@ export const postsBySejourQuery = groq`*[_type == "post" && relatedSejour._ref =
   "imageAlt": mainImage.alt,
   "imageName": mainImage.imageName,
   excerpt
+}`
+
+export const imagesByTagsQuery = groq`*[_type == "post" && count(tags[@._ref in $tagIds]) > 0] {
+  "mainImage": select(
+    mainImage.asset != null => {
+      "url": mainImage.asset->url,
+      "alt": mainImage.alt,
+      "imageName": mainImage.imageName,
+      "originalFilename": mainImage.asset->originalFilename,
+      "extension": mainImage.asset->extension
+    }
+  ),
+  "gallery": gallery[]{
+    imageName,
+    alt,
+    "url": asset->url,
+    "originalFilename": asset->originalFilename,
+    "extension": asset->extension
+  }
 }`
 
 export const postsByTagsQuery = groq`*[_type == "post" && count(tags[@._ref in $tagIds]) > 0] | order(publishedAt desc)[0...$limit] {

@@ -3,7 +3,7 @@ import React from 'react'
 import Image from 'next/image';
 import Link from 'next/link';
 import { client } from "@/sanity/lib/client";
-import { sejourBySlugQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from "@/sanity/lib/queries";
+import { sejourBySlugQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, imagesByTagsQuery, settingsQuery } from "@/sanity/lib/queries";
 import { notFound } from 'next/navigation';
 import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Download, Users, CalendarDays } from 'lucide-react';
 
@@ -46,6 +46,26 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
   const { at, t, translatePortableText } = await getServerTranslations();
 
   if (!sejour) notFound();
+
+  // Images importées depuis les articles par tags
+  const tagGalleryPhotos: any[] = []
+  if (sejour.galleryTagIds?.length) {
+    const postsWithImages = await client.fetch(imagesByTagsQuery, { tagIds: sejour.galleryTagIds })
+    const manualUrls = new Set((sejour.gallery || []).map((p: any) => p.url))
+    for (const post of postsWithImages) {
+      if (post.mainImage?.url && !manualUrls.has(post.mainImage.url)) {
+        tagGalleryPhotos.push(post.mainImage)
+        manualUrls.add(post.mainImage.url)
+      }
+      for (const img of post.gallery || []) {
+        if (img.url && !manualUrls.has(img.url)) {
+          tagGalleryPhotos.push(img)
+          manualUrls.add(img.url)
+        }
+      }
+    }
+  }
+  const fullGallery = [...(sejour.gallery || []), ...tagGalleryPhotos]
 
   const postsLimit = sejour.relatedPostsLimit || 6;
 
@@ -346,14 +366,14 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
       </section>
 
       {/* Photo Gallery */}
-      {!sejour.hideGallery && sejour.gallery && sejour.gallery.length > 0 && (
+      {!sejour.hideGallery && fullGallery.length > 0 && (
         <section className="pb-24">
           <div className="container mx-auto px-6">
             <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase mb-10">
               {at('Galerie')} <span className="text-accent italic">{at('Photos')}</span>
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {sejour.gallery.map((photo: { url: string; alt?: string; imageName?: string; originalFilename?: string; extension?: string }, i: number) => {
+              {fullGallery.map((photo: { url: string; alt?: string; imageName?: string; originalFilename?: string; extension?: string }, i: number) => {
                 const dlFilename = photo.imageName
                   ? `${photo.imageName}.${photo.extension || photo.originalFilename?.split('.').pop() || 'jpg'}`
                   : photo.originalFilename;
