@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { client } from "@/sanity/lib/client";
 import { sejourBySlugQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from "@/sanity/lib/queries";
 import { notFound } from 'next/navigation';
-import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Download } from 'lucide-react';
+import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Download, Users, CalendarDays } from 'lucide-react';
 
 import { getServerTranslations } from '@/i18n/server';
 import SejourTabs from '@/components/SejourTabs';
@@ -224,6 +224,26 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                     </div>
                     <span className="font-bold">{at(sejour.massif)}</span>
                   </div>
+
+                  {sejour.participants && (
+                    <div className="flex justify-between items-center py-4 border-b border-border">
+                      <div className="flex items-center gap-3">
+                        <Users size={18} className="text-accent" />
+                        <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{at('Participants')}</span>
+                      </div>
+                      <span className="font-bold">{at(sejour.participants)}</span>
+                    </div>
+                  )}
+
+                  {sejour.period && (
+                    <div className="flex justify-between items-center py-4 border-b border-border">
+                      <div className="flex items-center gap-3">
+                        <CalendarDays size={18} className="text-accent" />
+                        <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{at('Période')}</span>
+                      </div>
+                      <span className="font-bold">{at(sejour.period)}</span>
+                    </div>
+                  )}
 
                   {/* Tarifs */}
                   <div className="py-4 border-b border-border space-y-3">

@@ -142,6 +142,8 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
   title, titleEn,
   description, descriptionEn,
   duration, durationEn,
+  participants,
+  period,
   tabs[]{
     title,
     titleEn,

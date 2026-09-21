@@ -98,6 +98,18 @@ export const sejourType = defineType({
     }),
     defineField({ name: 'durationEn', title: 'Durée (EN)', type: 'string', description: 'Ex: 1 day, 3 days, 1 week' }),
     defineField({
+      name: 'participants',
+      title: 'Nombre de participants (facultatif)',
+      type: 'string',
+      description: 'Ex: 2 à 4 personnes, Max 6 personnes…',
+    }),
+    defineField({
+      name: 'period',
+      title: 'Période (facultatif)',
+      type: 'string',
+      description: 'Ex: Juin à Septembre, Décembre à Avril…',
+    }),
+    defineField({
       name: 'basePrice',
       title: 'Prix "À partir de"',
       type: 'string',
