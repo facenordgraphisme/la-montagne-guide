@@ -111,6 +111,7 @@ export const activityType = defineType({
     defineField({ name: 'customTripTextEn', title: 'Texte Encart Sur Mesure (EN)', type: 'string' }),
     defineField({ name: 'customTripCTA', title: 'Texte Bouton Sur Mesure (FR)', type: 'string', description: 'Texte du bouton dans l\'encart en bas des pages d\'univers.' }),
     defineField({ name: 'customTripCTAEn', title: 'Texte Bouton Sur Mesure (EN)', type: 'string' }),
+    defineField({ name: 'hideCustomTrip', title: 'Masquer l\'encart "Sur Mesure"', type: 'boolean', initialValue: false, description: 'Cochez pour masquer l\'encart de contact sur mesure sur les pages d\'univers de cette activité.' }),
     defineField({
       name: 'faqs',
       title: 'Questions fréquentes (FAQ)',

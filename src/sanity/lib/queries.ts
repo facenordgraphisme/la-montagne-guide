@@ -241,7 +241,8 @@ export const activitiesQuery = groq`*[_type == "activity"] | order(title asc) {
   showUpcomingSorties,
   type,
   customTripText, customTripTextEn,
-  customTripCTA, customTripCTAEn
+  customTripCTA, customTripCTAEn,
+  hideCustomTrip
 }`
 
 export const activityBySlugQuery = groq`*[_type == "activity" && slug.current == $slug][0] {
@@ -271,6 +272,7 @@ export const activityBySlugQuery = groq`*[_type == "activity" && slug.current ==
   type,
   customTripText, customTripTextEn,
   customTripCTA, customTripCTAEn,
+  hideCustomTrip,
   "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order}
 }`
 

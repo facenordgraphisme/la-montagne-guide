@@ -166,6 +166,7 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
             <div className="w-24 h-1 bg-accent mx-auto" />
 
             {/* CTA Encart - Sur mesure */}
+            {!activity.hideCustomTrip && (
             <div className="md:absolute -bottom-16 right-0 md:right-12 p-8 md:p-10 rounded-[40px] shadow-2xl max-w-xl text-left mt-12 md:mt-0 group transition-all duration-500 overflow-hidden border border-highlight/30 hover:border-highlight/60 bg-linear-to-br from-highlight/10 via-highlight/5 to-orange-400/10 backdrop-blur-3xl">
               <div className="absolute -right-4 -top-4 w-32 h-32 bg-highlight/10 rounded-full blur-3xl group-hover:bg-highlight/20 transition-colors" />
               <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
@@ -182,6 +183,7 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
                 </Link>
               </div>
             </div>
+            )}
           </div>
         </div>
       </section>
