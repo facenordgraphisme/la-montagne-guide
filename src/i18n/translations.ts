@@ -273,7 +273,6 @@ export const sanityTranslations: Record<string, string> = {
   // Fiche technique
   "participants": "Participants",
   // ContactForm
-  "envoyer le message": "Send message",
   "envoi en cours...": "Sending...",
   "message envoyé !": "Message sent!",
   "je vous répondrai dans les plus brefs délais.": "I'll get back to you as soon as possible.",
