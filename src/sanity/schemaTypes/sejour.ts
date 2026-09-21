@@ -436,7 +436,10 @@ export const sejourType = defineType({
       type: 'number',
       initialValue: 6,
       description: 'Nombre maximum d\'articles de blog affichés dans "Dernières Sorties". Par défaut : 6.',
-      validation: (Rule) => Rule.min(1).max(24).integer(),
+      options: {
+        list: [6, 12, 18, 24, 30, 36, 42, 48, 54, 60].map(n => ({ title: `${n} articles`, value: n })),
+      },
+      validation: (Rule) => Rule.required().min(6),
     }),
     defineField({
       name: 'hideRelatedPosts',
