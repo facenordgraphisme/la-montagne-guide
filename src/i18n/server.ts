@@ -41,7 +41,7 @@ export async function getServerTranslations() {
   const at = (text: any) => {
     if (!text) return ''
     
-    if (typeof text === 'object' && (text.fr || text.en)) {
+    if (typeof text === 'object' && !Array.isArray(text)) {
       return text[lang] || text['fr'] || ''
     }
     
