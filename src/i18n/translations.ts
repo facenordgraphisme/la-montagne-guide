@@ -272,7 +272,6 @@ export const sanityTranslations: Record<string, string> = {
   "groupes constitués : engagement privé possible": "Formed groups: private engagement available",
   // Fiche technique
   "participants": "Participants",
-  "période": "Period",
   // ContactForm
   "envoyer le message": "Send message",
   "envoi en cours...": "Sending...",
