@@ -76,14 +76,7 @@ export const sejourType = defineType({
       name: 'level',
       title: 'Niveau',
       type: 'string',
-      options: {
-        list: [
-          { title: 'Débutant', value: 'debutant' },
-          { title: 'Intermédiaire', value: 'intermediaire' },
-          { title: 'Confirmé', value: 'confirme' },
-          { title: 'Expert', value: 'expert' },
-        ],
-      },
+      description: 'Ex: Débutant, F/PD, AD, D+, TD… Texte libre.',
     }),
     defineField({
       name: 'season',
