@@ -1,5 +1,6 @@
 import { defineField, defineType } from 'sanity'
 import { Mountain } from 'lucide-react'
+import { TagImagePickerInput } from '../components/TagImagePicker'
 
 const descriptionBlocks = [
   {
@@ -362,11 +363,20 @@ export const sejourType = defineType({
       options: { accept: '.pdf' },
     }),
     defineField({
-      name: 'galleryTags',
-      title: 'Galerie — Importer par tags',
-      description: 'Sélectionnez des tags : toutes les photos des articles ayant ces tags seront ajoutées automatiquement à la galerie.',
+      name: 'tagBrowsedImages',
+      title: 'Galerie — Sélection par tag',
+      description: 'Choisissez un tag, parcourez les photos des articles associés et cliquez pour les sélectionner.',
       type: 'array',
-      of: [{ type: 'reference', to: [{ type: 'tag' }], weak: true }],
+      of: [
+        {
+          type: 'image',
+          fields: [
+            defineField({ name: 'imageName', type: 'string', title: 'Nom / Titre' }),
+            defineField({ name: 'alt', type: 'string', title: 'Texte alternatif' }),
+          ],
+        },
+      ],
+      components: { input: TagImagePickerInput },
     }),
     defineField({
       name: 'gallery',

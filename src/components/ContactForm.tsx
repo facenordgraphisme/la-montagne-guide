@@ -56,7 +56,7 @@ export default function ContactForm() {
             </label>
             <input
               type="text"
-              name="from_name"
+              name="name"
               required
               className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 focus:outline-none focus:border-accent transition-colors text-foreground"
               placeholder={at('Votre nom')}
@@ -68,10 +68,21 @@ export default function ContactForm() {
             </label>
             <input
               type="email"
-              name="reply_to"
+              name="email"
               required
               className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 focus:outline-none focus:border-accent transition-colors text-foreground"
               placeholder="votre@email.com"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2">
+              {at('Téléphone')} <span className="text-foreground/20 normal-case font-normal">{at('(optionnel)')}</span>
+            </label>
+            <input
+              type="tel"
+              name="phone"
+              className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 focus:outline-none focus:border-accent transition-colors text-foreground"
+              placeholder="+33 6 00 00 00 00"
             />
           </div>
           <div>

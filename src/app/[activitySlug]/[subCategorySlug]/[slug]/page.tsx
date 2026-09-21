@@ -3,7 +3,7 @@ import React from 'react'
 import Image from 'next/image';
 import Link from 'next/link';
 import { client } from "@/sanity/lib/client";
-import { sejourBySlugQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, imagesByTagsQuery, settingsQuery } from "@/sanity/lib/queries";
+import { sejourBySlugQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from "@/sanity/lib/queries";
 import { notFound } from 'next/navigation';
 import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Download, Users, CalendarDays } from 'lucide-react';
 
@@ -47,25 +47,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
 
   if (!sejour) notFound();
 
-  // Images importées depuis les articles par tags
-  const tagGalleryPhotos: any[] = []
-  if (sejour.galleryTagIds?.length) {
-    const postsWithImages = await client.fetch(imagesByTagsQuery, { tagIds: sejour.galleryTagIds })
-    const manualUrls = new Set((sejour.gallery || []).map((p: any) => p.url))
-    for (const post of postsWithImages) {
-      if (post.mainImage?.url && !manualUrls.has(post.mainImage.url)) {
-        tagGalleryPhotos.push(post.mainImage)
-        manualUrls.add(post.mainImage.url)
-      }
-      for (const img of post.gallery || []) {
-        if (img.url && !manualUrls.has(img.url)) {
-          tagGalleryPhotos.push(img)
-          manualUrls.add(img.url)
-        }
-      }
-    }
-  }
-  const fullGallery = [...(sejour.gallery || []), ...tagGalleryPhotos]
+  const fullGallery = [...(sejour.gallery || []), ...(sejour.tagBrowsedImages || [])]
 
   const postsLimit = sejour.relatedPostsLimit || 6;
 
