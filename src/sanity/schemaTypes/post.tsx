@@ -211,6 +211,13 @@ export const postType = defineType({
       of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
     }),
     defineField({
+      name: 'relatedActivities',
+      title: 'Activités & Séjours associés',
+      description: 'Liez des séjours recommandés pour faire du maillage interne (affiché après le CTA).',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'sejour' }] }],
+    }),
+    defineField({
       name: 'ctaText',
       title: 'Texte d\'appel à l\'action (Français)',
       type: 'string',
@@ -242,6 +249,8 @@ function PostMediaManagerInput(props: any) {
   const client = useClient({ apiVersion: '2023-01-01' })
   const [assetAlts, setAssetAlts] = useState<Record<string, string>>({})
   const [assetNames, setAssetNames] = useState<Record<string, string>>({})
+  const [localValues, setLocalValues] = useState<Record<string, string>>({})
+  const documentId = useFormValue(['_id']) as string
 
   // Read fields from the form values
   const body = useFormValue(['body']) as any[] | undefined
@@ -300,9 +309,37 @@ function PostMediaManagerInput(props: any) {
       .catch(console.error)
   }, [body, gallery, client])
 
-  // Helper to dispatch a patch update back to Sanity
-  const handleUpdate = (value: string, path: any[]) => {
-    props.onChange(PatchEvent.from(set(value, path)))
+  // Sync existing document values into local state (only for keys not yet locally modified)
+  useEffect(() => {
+    setLocalValues(prev => {
+      const updates: Record<string, string> = {}
+      const sync = (img: any, prefix: string) => {
+        if (!img._key) return
+        if (img.imageName && !(`${prefix}${img._key}_name` in prev)) updates[`${prefix}${img._key}_name`] = img.imageName
+        if (img.caption && !(`${prefix}${img._key}_caption` in prev)) updates[`${prefix}${img._key}_caption`] = img.caption
+        if (img.alt && !(`${prefix}${img._key}_alt` in prev)) updates[`${prefix}${img._key}_alt`] = img.alt
+      }
+      bodyImages.forEach(img => sync(img, ''))
+      bodyGalleryImages.forEach(img => sync(img, 'bgi_'))
+      galleryImages.forEach(img => sync(img, 'gal_'))
+      return Object.keys(updates).length ? { ...prev, ...updates } : prev
+    })
+  }, [body, gallery])
+
+  // Patch a field at the document level (bypasses props.onChange which is scoped to mediaManager)
+  const buildPath = (segments: any[]): string =>
+    segments.map((seg, i) => {
+      if (typeof seg === 'string') return i === 0 ? seg : `.${seg}`
+      if (typeof seg === 'object' && '_key' in seg) return `[_key=="${seg._key}"]`
+      if (typeof seg === 'number') return `[${seg}]`
+      return ''
+    }).join('')
+
+  const handleUpdate = (localKey: string, value: string, pathSegments: any[]) => {
+    setLocalValues(prev => ({ ...prev, [localKey]: value }))
+    if (!documentId || !client) return
+    const pathStr = buildPath(pathSegments)
+    client.patch(documentId).set({ [pathStr]: value }).commit().catch(console.error)
   }
 
   return (
@@ -332,25 +369,25 @@ function PostMediaManagerInput(props: any) {
                     <Stack space={3} flex={1}>
                       <div>
                         <Label size={0}>Nom / Titre de l'image :</Label>
-                        <TextInput 
-                          value={img.imageName || ''} 
-                          onChange={(e: any) => handleUpdate(e.target.value, ['body', { _key: img._key }, 'imageName'])}
+                        <TextInput
+                          value={localValues[`${img._key}_name`] ?? (img.imageName || '')}
+                          onChange={(e: any) => handleUpdate(`${img._key}_name`, e.target.value, ['body', { _key: img._key }, 'imageName'])}
                           placeholder={img.asset?._ref && assetNames[img.asset._ref] ? assetNames[img.asset._ref].replace(/\.[^/.]+$/, "") : "Nom de l'image..."}
                         />
                       </div>
                       <div>
                         <Label size={0}>Légende :</Label>
-                        <TextInput 
-                          value={img.caption || ''} 
-                          onChange={(e: any) => handleUpdate(e.target.value, ['body', { _key: img._key }, 'caption'])}
+                        <TextInput
+                          value={localValues[`${img._key}_caption`] ?? (img.caption || '')}
+                          onChange={(e: any) => handleUpdate(`${img._key}_caption`, e.target.value, ['body', { _key: img._key }, 'caption'])}
                           placeholder="Légende affichée sous la photo..."
                         />
                       </div>
                       <div>
                         <Label size={0}>Texte alternatif (ALT) :</Label>
-                        <TextInput 
-                          value={img.alt || ''} 
-                          onChange={(e: any) => handleUpdate(e.target.value, ['body', { _key: img._key }, 'alt'])}
+                        <TextInput
+                          value={localValues[`${img._key}_alt`] ?? (img.alt || '')}
+                          onChange={(e: any) => handleUpdate(`${img._key}_alt`, e.target.value, ['body', { _key: img._key }, 'alt'])}
                           placeholder={img.asset?._ref ? assetAlts[img.asset._ref] : "Description SEO de l'image..."}
                         />
                       </div>
@@ -385,25 +422,25 @@ function PostMediaManagerInput(props: any) {
                        <Stack space={3} flex={1}>
                         <div>
                           <Label size={0}>Nom / Titre de l'image :</Label>
-                          <TextInput 
-                            value={img.imageName || ''} 
-                            onChange={(e: any) => handleUpdate(e.target.value, [...imagePath, 'imageName'])}
+                          <TextInput
+                            value={localValues[`bgi_${img._key}_name`] ?? (img.imageName || '')}
+                            onChange={(e: any) => handleUpdate(`bgi_${img._key}_name`, e.target.value, [...imagePath, 'imageName'])}
                             placeholder={img.asset?._ref && assetNames[img.asset._ref] ? assetNames[img.asset._ref].replace(/\.[^/.]+$/, "") : "Nom de l'image..."}
                           />
                         </div>
                         <div>
                           <Label size={0}>Légende :</Label>
-                          <TextInput 
-                            value={img.caption || ''} 
-                            onChange={(e: any) => handleUpdate(e.target.value, [...imagePath, 'caption'])}
+                          <TextInput
+                            value={localValues[`bgi_${img._key}_caption`] ?? (img.caption || '')}
+                            onChange={(e: any) => handleUpdate(`bgi_${img._key}_caption`, e.target.value, [...imagePath, 'caption'])}
                             placeholder="Légende de la photo dans la galerie..."
                           />
                         </div>
                         <div>
                           <Label size={0}>Texte alternatif (ALT) :</Label>
-                          <TextInput 
-                            value={img.alt || ''} 
-                            onChange={(e: any) => handleUpdate(e.target.value, [...imagePath, 'alt'])}
+                          <TextInput
+                            value={localValues[`bgi_${img._key}_alt`] ?? (img.alt || '')}
+                            onChange={(e: any) => handleUpdate(`bgi_${img._key}_alt`, e.target.value, [...imagePath, 'alt'])}
                             placeholder={img.asset?._ref ? assetAlts[img.asset._ref] : "Description SEO de l'image..."}
                           />
                         </div>
@@ -437,25 +474,25 @@ function PostMediaManagerInput(props: any) {
                      <Stack space={3} flex={1}>
                       <div>
                         <Label size={0}>Nom / Titre de l'image :</Label>
-                        <TextInput 
-                          value={img.imageName || ''} 
-                          onChange={(e: any) => handleUpdate(e.target.value, ['gallery', { _key: img._key }, 'imageName'])}
+                        <TextInput
+                          value={localValues[`gal_${img._key}_name`] ?? (img.imageName || '')}
+                          onChange={(e: any) => handleUpdate(`gal_${img._key}_name`, e.target.value, ['gallery', { _key: img._key }, 'imageName'])}
                           placeholder={img.asset?._ref && assetNames[img.asset._ref] ? assetNames[img.asset._ref].replace(/\.[^/.]+$/, "") : "Nom de l'image..."}
                         />
                       </div>
                       <div>
                         <Label size={0}>Légende :</Label>
-                        <TextInput 
-                          value={img.caption || ''} 
-                          onChange={(e: any) => handleUpdate(e.target.value, ['gallery', { _key: img._key }, 'caption'])}
+                        <TextInput
+                          value={localValues[`gal_${img._key}_caption`] ?? (img.caption || '')}
+                          onChange={(e: any) => handleUpdate(`gal_${img._key}_caption`, e.target.value, ['gallery', { _key: img._key }, 'caption'])}
                           placeholder="Légende affichée sous la photo..."
                         />
                       </div>
                       <div>
                         <Label size={0}>Texte alternatif (ALT) :</Label>
-                        <TextInput 
-                          value={img.alt || ''} 
-                          onChange={(e: any) => handleUpdate(e.target.value, ['gallery', { _key: img._key }, 'alt'])}
+                        <TextInput
+                          value={localValues[`gal_${img._key}_alt`] ?? (img.alt || '')}
+                          onChange={(e: any) => handleUpdate(`gal_${img._key}_alt`, e.target.value, ['gallery', { _key: img._key }, 'alt'])}
                           placeholder={img.asset?._ref ? assetAlts[img.asset._ref] : "Description SEO de l'image..."}
                         />
                       </div>

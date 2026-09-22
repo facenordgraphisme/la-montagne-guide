@@ -265,6 +265,7 @@ export const activityBySlugQuery = groq`*[_type == "activity" && slug.current ==
     description, descriptionEn,
     "image": image.asset->url,
     catalogTitle, catalogTitleEn,
+    metaTitle, metaDescription,
     "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order}
   },
   price,
@@ -275,6 +276,7 @@ export const activityBySlugQuery = groq`*[_type == "activity" && slug.current ==
   customTripText, customTripTextEn,
   customTripCTA, customTripCTAEn,
   hideCustomTrip,
+  metaTitle, metaDescription,
   "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order}
 }`
 
@@ -423,6 +425,14 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
     _type == "image" => { ..., "asset": asset-> }
   },
   "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": category->slug.current, "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order},
+  "relatedActivities": relatedActivities[]-> {
+    title,
+    "slug": slug.current,
+    "image": image.asset->url,
+    basePrice,
+    "categorySlug": activityType,
+    "subCategorySlug": subCategory->slug.current
+  },
   "comments": *[_type == "comment" && post._ref == ^._id && approved == true] | order(_createdAt asc) {
     _id,
     name,

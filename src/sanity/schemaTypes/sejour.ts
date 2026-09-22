@@ -101,19 +101,36 @@ export const sejourType = defineType({
     defineField({ name: 'durationEn', title: 'Durée (EN)', type: 'string', description: 'Ex: 1 day, 3 days, 1 week' }),
     defineField({
       name: 'participants',
-      title: 'Nombre de participants (facultatif)',
+      title: 'Nombre de participants (FR)',
       type: 'string',
       description: 'Ex: 2 à 4 personnes, Max 6 personnes…',
     }),
     defineField({
+      name: 'participantsEn',
+      title: 'Nombre de participants (EN)',
+      type: 'string',
+      description: 'Ex: 2 to 4 people, Max 6 people…',
+    }),
+    defineField({
       name: 'period',
-      title: 'Période (facultatif)',
+      title: 'Période (FR)',
       type: 'string',
       description: 'Ex: Juin à Septembre, Décembre à Avril…',
     }),
     defineField({
+      name: 'periodEn',
+      title: 'Période (EN)',
+      type: 'string',
+      description: 'Ex: June to September, December to April…',
+    }),
+    defineField({
       name: 'basePrice',
-      title: 'Prix "À partir de"',
+      title: 'Prix "À partir de" (FR)',
+      type: 'string',
+    }),
+    defineField({
+      name: 'basePriceEn',
+      title: 'Prix "À partir de" (EN)',
       type: 'string',
     }),
     defineField({
@@ -125,21 +142,39 @@ export const sejourType = defineType({
     }),
     defineField({
       name: 'prixToutComprisAmount',
-      title: 'Prix tout compris',
+      title: 'Prix tout compris (FR)',
       type: 'string',
       description: 'Ex: 1 490€/personne — affiché uniquement si le mode "tout compris" est activé.',
     }),
     defineField({
+      name: 'prixToutComprisAmountEn',
+      title: 'Prix tout compris (EN)',
+      type: 'string',
+      description: 'Ex: €1,490/person',
+    }),
+    defineField({
       name: 'priceEncadrement',
-      title: 'Tarif encadrement',
+      title: 'Tarif encadrement (FR)',
       type: 'string',
       description: 'Ex: 450€/personne — affiché si le mode "tout compris" est désactivé.',
     }),
     defineField({
+      name: 'priceEncadrementEn',
+      title: 'Tarif encadrement (EN)',
+      type: 'string',
+      description: 'Ex: €450/person',
+    }),
+    defineField({
       name: 'priceFraisSejour',
-      title: 'Frais de séjour',
+      title: 'Frais de séjour (FR)',
       type: 'string',
       description: 'Ex: 180€/personne (hébergement, repas) — affiché si le mode "tout compris" est désactivé.',
+    }),
+    defineField({
+      name: 'priceFraisSejourEn',
+      title: 'Frais de séjour (EN)',
+      type: 'string',
+      description: 'Ex: €180/person (accommodation, meals)',
     }),
     defineField({
       name: 'image',
@@ -344,6 +379,32 @@ export const sejourType = defineType({
                   },
                 },
                 { type: 'image' },
+                {
+                  type: 'object',
+                  name: 'mapEmbed',
+                  title: 'Carte Google Maps',
+                  fields: [
+                    defineField({
+                      name: 'url',
+                      type: 'url',
+                      title: 'URL d\'intégration Google Maps',
+                      description: 'Dans Google Maps → Partager → Intégrer une carte → copier l\'URL du src dans le code iframe.',
+                      validation: (Rule) => Rule.required(),
+                    }),
+                    defineField({
+                      name: 'height',
+                      type: 'number',
+                      title: 'Hauteur de la carte (px)',
+                      initialValue: 400,
+                    }),
+                  ],
+                  preview: {
+                    select: { title: 'url' },
+                    prepare({ title }: { title?: string }) {
+                      return { title: title ? `Carte : ${title.substring(0, 60)}…` : 'Carte Google Maps' };
+                    },
+                  },
+                },
               ]
             }),
             defineField({
@@ -470,6 +531,19 @@ export const sejourType = defineType({
       type: 'boolean',
       initialValue: false,
       description: 'Cochez pour ne pas afficher la section "Dernières Sorties" sur la page de ce séjour.',
+    }),
+    defineField({
+      name: 'metaTitle',
+      title: '🔍 SEO — Titre (balise title)',
+      type: 'string',
+      description: 'Optionnel. Remplace le titre auto-généré dans les résultats Google. Idéalement < 60 caractères.',
+    }),
+    defineField({
+      name: 'metaDescription',
+      title: '🔍 SEO — Description (meta description)',
+      type: 'text',
+      rows: 3,
+      description: 'Optionnel. Remplace la description auto-générée dans les résultats Google. Idéalement entre 120 et 160 caractères.',
     }),
   ],
 })

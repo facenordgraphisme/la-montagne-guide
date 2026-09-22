@@ -65,9 +65,12 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
 
   if (!currentUnivers) return {};
 
-  const title = `${at({ fr: currentUnivers.title, en: currentUnivers.titleEn })} - ${at({ fr: activity.title, en: activity.titleEn })} | La Montagne Guide`;
+  const autoTitle = `${at({ fr: currentUnivers.title, en: currentUnivers.titleEn })} - ${at({ fr: activity.title, en: activity.titleEn })} | La Montagne Guide`;
   const plainTextDescription = blocksToText({ fr: currentUnivers.description, en: currentUnivers.descriptionEn }, lang);
-  const description = plainTextDescription ? plainTextDescription.substring(0, 160) : '';
+  const autoDescription = plainTextDescription ? plainTextDescription.substring(0, 160) : '';
+
+  const title = currentUnivers.metaTitle || autoTitle;
+  const description = currentUnivers.metaDescription || autoDescription;
   const ogImage = currentUnivers.image || activity.image || undefined;
 
   return {

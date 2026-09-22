@@ -13,7 +13,7 @@ import { urlFor, getVanityImageUrl } from "@/sanity/lib/image";
 import { getServerTranslations } from '@/i18n/server';
 import { PortableText } from '@portabletext/react';
 import FAQAccordion from "@/components/FAQAccordion";
-import { Calendar, ArrowLeft, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
+import { Calendar, ArrowLeft, ChevronLeft, ChevronRight, FileText, Compass } from 'lucide-react';
 import ImageGallery from '@/components/ImageGallery';
 import PostComments from '@/components/PostComments';
 import { formatFriendlyDate } from '@/utils/date';
@@ -195,10 +195,13 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
   if (VALID_ACTIVITIES.includes(activitySlug)) {
     const activity = await client.fetch(activityBySlugQuery, { slug: activitySlug });
     if (!activity) return {};
-    const title = `${at({ fr: activity.title, en: activity.titleEn })} | La Montagne Guide`;
+    const autoTitle = `${at({ fr: activity.title, en: activity.titleEn })} | La Montagne Guide`;
     const introText = activity.introEn && lang === 'en' ? activity.introEn : activity.intro;
     const descBlocks = lang === 'en' && activity.descriptionEn?.length ? activity.descriptionEn : activity.description;
-    const description = introText ? at(introText) : (descBlocks ? toPlainText(descBlocks).substring(0, 160) : '');
+    const autoDescription = introText ? at(introText) : (descBlocks ? toPlainText(descBlocks).substring(0, 160) : '');
+
+    const title = activity.metaTitle || autoTitle;
+    const description = activity.metaDescription || autoDescription;
     const ogImage = activity.image || undefined;
     return {
       title,
@@ -534,6 +537,48 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                   {lang === 'en' ? "Contact me" : "Contactez-moi"}
                 </Link>
               </div>
+
+              {/* Related Activities & Séjours */}
+              {post.relatedActivities && post.relatedActivities.length > 0 && (
+                <div className="mt-16 pt-16 border-t border-border/40">
+                  <h3 className="text-xl font-bold uppercase tracking-widest text-accent mb-8 flex items-center gap-2">
+                    <Compass size={18} />
+                    {at('Séjours Recommandés')}
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {post.relatedActivities.map((act: any) => {
+                      const stayLink = `/${act.categorySlug || 'alpinisme'}/${act.subCategorySlug || 'initiation'}/${act.slug}`;
+                      return (
+                        <Link
+                          key={act.slug}
+                          href={stayLink}
+                          className="group flex gap-4 items-center p-4 rounded-2xl hover:bg-foreground/5 border border-border hover:border-accent/30 transition-all duration-300"
+                        >
+                          {act.image && (
+                            <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0">
+                              <Image
+                                src={act.image}
+                                alt={at(act.title)}
+                                fill
+                                sizes="80px"
+                                className="object-cover"
+                              />
+                            </div>
+                          )}
+                          <div className="overflow-hidden">
+                            <h4 className="font-bold text-sm text-foreground group-hover:text-accent transition-colors line-clamp-2">
+                              {at(act.title)}
+                            </h4>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-highlight mt-1">
+                              {act.basePrice ? at(act.basePrice) : at('Sur devis')}
+                            </p>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Client Comments Block */}
               <PostComments postId={post._id} initialComments={post.comments || []} />

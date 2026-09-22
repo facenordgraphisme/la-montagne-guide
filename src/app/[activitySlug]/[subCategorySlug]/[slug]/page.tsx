@@ -21,9 +21,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   if (!sejour) return {};
 
-  const title = `${at({ fr: sejour.title, en: sejour.titleEn })} | La Montagne Guide`;
+  const autoTitle = `${at({ fr: sejour.title, en: sejour.titleEn })} | La Montagne Guide`;
   const descForMeta = lang === 'en' && sejour.descriptionEn?.length ? sejour.descriptionEn : sejour.description;
-  const description = descForMeta ? toPlainText(descForMeta).substring(0, 160) : '';
+  const autoDescription = descForMeta ? toPlainText(descForMeta).substring(0, 160) : '';
+
+  const title = sejour.metaTitle || autoTitle;
+  const description = sejour.metaDescription || autoDescription;
   const ogImage = sejour.image || undefined;
 
   return {
@@ -233,7 +236,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                         <Users size={18} className="text-accent" />
                         <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{at('Participants')}</span>
                       </div>
-                      <span className="font-bold">{at(sejour.participants)}</span>
+                      <span className="font-bold">{at({ fr: sejour.participants, en: sejour.participantsEn })}</span>
                     </div>
                   )}
 
@@ -243,7 +246,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                         <CalendarDays size={18} className="text-accent" />
                         <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{at('Période')}</span>
                       </div>
-                      <span className="font-bold">{at(sejour.period)}</span>
+                      <span className="font-bold">{at({ fr: sejour.period, en: sejour.periodEn })}</span>
                     </div>
                   )}
 
@@ -257,7 +260,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                       sejour.prixToutComprisAmount ? (
                         <div className="flex justify-between items-baseline">
                           <span className="text-[11px] font-bold text-foreground/50 uppercase tracking-wider">{at('Tout compris')}</span>
-                          <span className="font-black text-highlight">{at(sejour.prixToutComprisAmount)}</span>
+                          <span className="font-black text-highlight">{at({ fr: sejour.prixToutComprisAmount, en: sejour.prixToutComprisAmountEn })}</span>
                         </div>
                       ) : null
                     ) : (
@@ -265,19 +268,19 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                         {sejour.priceEncadrement ? (
                           <div className="flex justify-between items-baseline">
                             <span className="text-[11px] font-bold text-foreground/50 uppercase tracking-wider">{at('Encadrement')}</span>
-                            <span className="font-black text-highlight">{at(sejour.priceEncadrement)}</span>
+                            <span className="font-black text-highlight">{at({ fr: sejour.priceEncadrement, en: sejour.priceEncadrementEn })}</span>
                           </div>
                         ) : null}
                         {sejour.priceFraisSejour ? (
                           <div className="flex justify-between items-baseline">
                             <span className="text-[11px] font-bold text-foreground/50 uppercase tracking-wider">{at('Frais de séjour')}</span>
-                            <span className="font-black text-foreground/80">{at(sejour.priceFraisSejour)}</span>
+                            <span className="font-black text-foreground/80">{at({ fr: sejour.priceFraisSejour, en: sejour.priceFraisSejourEn })}</span>
                           </div>
                         ) : null}
                         {!sejour.priceEncadrement && !sejour.priceFraisSejour && sejour.basePrice ? (
                           <div className="flex justify-between items-baseline">
                             <span className="text-[10px] font-bold text-foreground/30 uppercase">{at('À partir de')}</span>
-                            <span className="text-2xl font-black text-highlight leading-none">{at(sejour.basePrice)}</span>
+                            <span className="text-2xl font-black text-highlight leading-none">{at({ fr: sejour.basePrice, en: sejour.basePriceEn })}</span>
                           </div>
                         ) : null}
                       </>

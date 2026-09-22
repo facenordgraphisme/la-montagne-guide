@@ -119,5 +119,18 @@ export const activityType = defineType({
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
     }),
+    defineField({
+      name: 'metaTitle',
+      title: '🔍 SEO — Titre (balise title)',
+      type: 'string',
+      description: 'Optionnel. Remplace le titre auto-généré dans les résultats Google. Idéalement < 60 caractères.',
+    }),
+    defineField({
+      name: 'metaDescription',
+      title: '🔍 SEO — Description (meta description)',
+      type: 'text',
+      rows: 3,
+      description: 'Optionnel. Remplace la description auto-générée dans les résultats Google. Idéalement entre 120 et 160 caractères.',
+    }),
   ],
 })
