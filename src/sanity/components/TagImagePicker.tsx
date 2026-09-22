@@ -57,7 +57,7 @@ export function TagImagePickerInput({ value, onChange }: any) {
             }`,
             { tagId: selectedTagId }
           )
-        : // Query blog posts that have the selected article tag, then extract images
+        : // Query blog posts that have the selected article tag, then extract ALL images
           client
             .fetch(
               `*[_type == "post" && count(tags[@._ref == $tagId]) > 0] {
@@ -74,6 +74,20 @@ export function TagImagePickerInput({ value, onChange }: any) {
                   "url": asset->url,
                   "alt": alt,
                   "imageName": imageName
+                },
+                "bodyImages": body[_type == "image" && asset != null]{
+                  "assetId": asset._ref,
+                  "url": asset->url,
+                  "alt": alt,
+                  "imageName": imageName
+                },
+                "bodyGalleries": body[_type == "gallery"]{
+                  "images": images[asset != null]{
+                    "assetId": asset._ref,
+                    "url": asset->url,
+                    "alt": alt,
+                    "imageName": imageName
+                  }
                 }
               }`,
               { tagId: selectedTagId }
@@ -81,17 +95,19 @@ export function TagImagePickerInput({ value, onChange }: any) {
             .then((posts: any[]) => {
               const images: any[] = []
               const seen = new Set<string>()
+              const add = (img: any) => {
+                if (img?.assetId && !seen.has(img.assetId)) {
+                  seen.add(img.assetId)
+                  images.push(img)
+                }
+              }
               for (const post of posts) {
-                if (post.mainImage?.assetId && !seen.has(post.mainImage.assetId)) {
-                  seen.add(post.mainImage.assetId)
-                  images.push(post.mainImage)
+                add(post.mainImage)
+                for (const img of post.bodyImages || []) add(img)
+                for (const gallery of post.bodyGalleries || []) {
+                  for (const img of gallery.images || []) add(img)
                 }
-                for (const img of post.gallery || []) {
-                  if (img?.assetId && !seen.has(img.assetId)) {
-                    seen.add(img.assetId)
-                    images.push(img)
-                  }
-                }
+                for (const img of post.gallery || []) add(img)
               }
               return images
             })
