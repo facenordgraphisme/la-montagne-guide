@@ -148,7 +148,7 @@ const ActivitySection = ({
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
                 
                 <div className="absolute inset-0 p-8 flex flex-col justify-end text-white">
-                  <h3 className="text-2xl font-bold mb-2 group-hover:text-accent transition-colors">
+                  <h3 className="text-2xl font-bold mb-2 text-white group-hover:text-accent transition-colors">
                     {at(activity.title)}
                   </h3>
                   <p className="text-sm text-white/80 line-clamp-2 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
