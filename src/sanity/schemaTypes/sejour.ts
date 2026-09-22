@@ -81,8 +81,9 @@ export const sejourType = defineType({
     }),
     defineField({
       name: 'season',
-      title: 'Saison',
+      title: 'Saison (filtre "Prochains Départs")',
       type: 'string',
+      description: 'Utilisé pour filtrer les sorties dans le bloc "Prochains Départs". Ne s\'affiche pas dans la fiche technique.',
       options: {
         list: [
           { title: 'Été', value: 'ete' },
