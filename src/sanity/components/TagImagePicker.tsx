@@ -7,61 +7,97 @@ function generateKey() {
   return Math.random().toString(36).slice(2, 10)
 }
 
+type FilterMode = 'article' | 'media'
+
 export function TagImagePickerInput({ value, onChange }: any) {
   const client = useClient({ apiVersion: '2023-01-01' })
-  const [tags, setTags] = useState<any[]>([])
+  const [mode, setMode] = useState<FilterMode>('media')
+
+  const [articleTags, setArticleTags] = useState<any[]>([])
+  const [mediaTags, setMediaTags] = useState<any[]>([])
+
   const [selectedTagId, setSelectedTagId] = useState('')
   const [availableImages, setAvailableImages] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
-  // Cache assetId → image data so thumbnails stay visible after switching tags
   const [imageCache, setImageCache] = useState<Record<string, any>>({})
 
   const currentValue: any[] = value || []
 
+  // Fetch both tag types on mount
   useEffect(() => {
     client
       .fetch(`*[_type == "tag"] | order(name asc) { _id, name }`)
-      .then(setTags)
+      .then(setArticleTags)
+    client
+      .fetch(`*[_type == "media.tag"] | order(name.current asc) { _id, "name": name.current }`)
+      .then(setMediaTags)
   }, [client])
 
+  // Reset selected tag when mode switches
+  useEffect(() => {
+    setSelectedTagId('')
+    setAvailableImages([])
+  }, [mode])
+
+  // Fetch images when a tag is selected
   useEffect(() => {
     if (!selectedTagId) return
     setLoading(true)
-    client
-      .fetch(
-        `*[_type == "post" && count(tags[@._ref == $tagId]) > 0] {
-          "mainImage": select(
-            mainImage.asset != null => {
-              "assetId": mainImage.asset._ref,
-              "url": mainImage.asset->url,
-              "alt": mainImage.alt,
-              "imageName": mainImage.imageName
-            }
-          ),
-          "gallery": gallery[asset != null]{
-            "assetId": asset._ref,
-            "url": asset->url,
-            "alt": alt,
-            "imageName": imageName
-          }
-        }`,
-        { tagId: selectedTagId }
-      )
-      .then((posts: any[]) => {
-        const images: any[] = []
-        const seen = new Set<string>()
-        for (const post of posts) {
-          if (post.mainImage?.assetId && !seen.has(post.mainImage.assetId)) {
-            seen.add(post.mainImage.assetId)
-            images.push(post.mainImage)
-          }
-          for (const img of post.gallery || []) {
-            if (img?.assetId && !seen.has(img.assetId)) {
-              seen.add(img.assetId)
-              images.push(img)
-            }
-          }
-        }
+    setAvailableImages([])
+
+    const query =
+      mode === 'media'
+        ? // Query sanity.imageAsset directly by media.tag
+          client.fetch(
+            `*[_type == "sanity.imageAsset" && $tagId in opt.media.tags[]._ref] {
+              "assetId": _id,
+              "url": url,
+              "alt": altText,
+              "imageName": originalFilename
+            }`,
+            { tagId: selectedTagId }
+          )
+        : // Query blog posts that have the selected article tag, then extract images
+          client
+            .fetch(
+              `*[_type == "post" && count(tags[@._ref == $tagId]) > 0] {
+                "mainImage": select(
+                  mainImage.asset != null => {
+                    "assetId": mainImage.asset._ref,
+                    "url": mainImage.asset->url,
+                    "alt": mainImage.alt,
+                    "imageName": mainImage.imageName
+                  }
+                ),
+                "gallery": gallery[asset != null]{
+                  "assetId": asset._ref,
+                  "url": asset->url,
+                  "alt": alt,
+                  "imageName": imageName
+                }
+              }`,
+              { tagId: selectedTagId }
+            )
+            .then((posts: any[]) => {
+              const images: any[] = []
+              const seen = new Set<string>()
+              for (const post of posts) {
+                if (post.mainImage?.assetId && !seen.has(post.mainImage.assetId)) {
+                  seen.add(post.mainImage.assetId)
+                  images.push(post.mainImage)
+                }
+                for (const img of post.gallery || []) {
+                  if (img?.assetId && !seen.has(img.assetId)) {
+                    seen.add(img.assetId)
+                    images.push(img)
+                  }
+                }
+              }
+              return images
+            })
+
+    query
+      .then((images: any[]) => {
         setAvailableImages(images)
         setImageCache(prev => {
           const next = { ...prev }
@@ -70,7 +106,7 @@ export function TagImagePickerInput({ value, onChange }: any) {
         })
       })
       .finally(() => setLoading(false))
-  }, [selectedTagId, client])
+  }, [selectedTagId, mode, client])
 
   function isSelected(assetId: string) {
     return currentValue.some((v: any) => v.asset?._ref === assetId)
@@ -100,12 +136,44 @@ export function TagImagePickerInput({ value, onChange }: any) {
     onChange(next.length ? set(next) : unset())
   }
 
+  const activeTags = mode === 'media' ? mediaTags : articleTags
+
   return (
     <Stack space={4}>
+      {/* Mode toggle */}
+      <Flex gap={2}>
+        {([
+          { value: 'media', label: '🏷️ Media Tags' },
+          { value: 'article', label: '📝 Tags d\'articles' },
+        ] as { value: FilterMode; label: string }[]).map(opt => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => setMode(opt.value)}
+            style={{
+              padding: '6px 14px',
+              borderRadius: 20,
+              border: '1px solid',
+              cursor: 'pointer',
+              fontSize: 12,
+              fontWeight: 700,
+              transition: 'all 0.15s',
+              borderColor: mode === opt.value ? '#2276fc' : 'var(--card-border-color)',
+              background: mode === opt.value ? '#2276fc' : 'transparent',
+              color: mode === opt.value ? '#fff' : 'inherit',
+            }}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </Flex>
+
       {/* Tag selector */}
       <Select value={selectedTagId} onChange={e => setSelectedTagId(e.currentTarget.value)}>
-        <option value="">Choisir un tag pour parcourir les photos…</option>
-        {tags.map(t => (
+        <option value="">
+          {mode === 'media' ? 'Choisir un Media Tag…' : 'Choisir un tag d\'article…'}
+        </option>
+        {activeTags.map(t => (
           <option key={t._id} value={t._id}>{t.name}</option>
         ))}
       </Select>
