@@ -9,6 +9,7 @@ import { getServerTranslations } from '@/i18n/server';
 import { ArrowLeft, BookOpen, Clock, Compass } from 'lucide-react';
 import { PortableText } from '@portabletext/react';
 import FAQAccordion from "@/components/FAQAccordion";
+import SejourTabs from "@/components/SejourTabs";
 
 const blockAlignComponents = {
   block: {
@@ -82,6 +83,13 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
   const displayIntro = lang === 'en' ? (data.introEn || data.intro) : data.intro;
   const displayContent = lang === 'en' ? (data.contentEn || data.content) : data.content;
 
+  const tabs = (data.tabs || []).map((tab: any, idx: number) => ({
+    id: `tab-${idx}`,
+    label: lang === 'en' ? (tab.titleEn || tab.title) : tab.title,
+    content: lang === 'en' ? (tab.contentEn || tab.content || null) : (tab.content || null),
+    pdf: tab.pdf ?? null,
+  }));
+
   const catLabels: Record<string, string> = {
     alpinisme: 'Alpinisme',
     ski: 'Ski de Randonnée',
@@ -140,13 +148,20 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
             )}
 
             {/* Rich text body content */}
-            <div className="prose-custom max-w-none text-foreground/80 leading-relaxed text-lg">
-              {displayContent ? (
+            {displayContent && (
+              <div className="prose-custom max-w-none text-foreground/80 leading-relaxed text-lg">
                 <PortableText value={displayContent} components={blockAlignComponents} />
-              ) : (
-                <p className="italic text-foreground/40">{at('Ce guide est en cours de rédaction.')}</p>
-              )}
-            </div>
+              </div>
+            )}
+
+            {/* Custom tabs */}
+            {tabs.length > 0 && (
+              <SejourTabs tabs={tabs} />
+            )}
+
+            {!displayContent && tabs.length === 0 && (
+              <p className="italic text-foreground/40">{at('Ce guide est en cours de rédaction.')}</p>
+            )}
           </div>
 
           {/* Sidebar (Related Activities) */}

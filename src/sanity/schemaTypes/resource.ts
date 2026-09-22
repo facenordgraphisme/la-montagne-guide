@@ -106,6 +106,146 @@ export const resourceType = defineType({
       ],
     }),
     defineField({
+      name: 'tabs',
+      title: 'Onglets personnalisés',
+      description: 'Créez des onglets pour organiser le contenu (Programme, Matériel, etc.).',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          name: 'resourceTab',
+          title: 'Onglet',
+          fields: [
+            defineField({ name: 'title', type: 'string', title: 'Titre (Français)', validation: (Rule) => Rule.required() }),
+            defineField({ name: 'titleEn', type: 'string', title: 'Titre (Anglais)', validation: (Rule) => Rule.required() }),
+            defineField({
+              name: 'content',
+              type: 'array',
+              title: 'Contenu (Français)',
+              of: [
+                {
+                  type: 'block',
+                  styles: [
+                    { title: 'Normal', value: 'normal' },
+                    { title: 'H2', value: 'h2' },
+                    { title: 'H3', value: 'h3' },
+                    { title: 'Centré', value: 'blockCenter' },
+                    { title: 'Justifié', value: 'blockJustify' },
+                    { title: 'Droite', value: 'blockRight' },
+                    { title: 'Citation', value: 'blockquote' },
+                  ],
+                  marks: {
+                    decorators: [
+                      { title: 'Gras', value: 'strong' },
+                      { title: 'Italique', value: 'em' },
+                    ],
+                    annotations: [
+                      {
+                        name: 'link',
+                        type: 'object',
+                        title: 'Lien hypertexte',
+                        fields: [
+                          { name: 'href', type: 'url', title: 'URL' },
+                          { name: 'blank', type: 'boolean', title: 'Ouvrir dans un nouvel onglet', initialValue: true },
+                        ],
+                      },
+                    ],
+                  },
+                },
+                { type: 'image' },
+                {
+                  type: 'object',
+                  name: 'mapEmbed',
+                  title: 'Carte Google Maps',
+                  fields: [
+                    defineField({
+                      name: 'url',
+                      type: 'url',
+                      title: 'URL d\'intégration Google Maps',
+                      description: 'Dans Google Maps → Partager → Intégrer une carte → copier l\'URL du src.',
+                      validation: (Rule) => Rule.required(),
+                    }),
+                    defineField({ name: 'height', type: 'number', title: 'Hauteur (px)', initialValue: 400 }),
+                  ],
+                  preview: {
+                    select: { title: 'url' },
+                    prepare({ title }: { title?: string }) {
+                      return { title: title ? `Carte : ${title.substring(0, 60)}…` : 'Carte Google Maps' };
+                    },
+                  },
+                },
+              ],
+            }),
+            defineField({
+              name: 'contentEn',
+              type: 'array',
+              title: 'Contenu (Anglais)',
+              of: [
+                {
+                  type: 'block',
+                  styles: [
+                    { title: 'Normal', value: 'normal' },
+                    { title: 'H2', value: 'h2' },
+                    { title: 'H3', value: 'h3' },
+                    { title: 'Centré', value: 'blockCenter' },
+                    { title: 'Justifié', value: 'blockJustify' },
+                    { title: 'Droite', value: 'blockRight' },
+                    { title: 'Citation', value: 'blockquote' },
+                  ],
+                  marks: {
+                    decorators: [
+                      { title: 'Gras', value: 'strong' },
+                      { title: 'Italique', value: 'em' },
+                    ],
+                    annotations: [
+                      {
+                        name: 'link',
+                        type: 'object',
+                        title: 'Lien hypertexte',
+                        fields: [
+                          { name: 'href', type: 'url', title: 'URL' },
+                          { name: 'blank', type: 'boolean', title: 'Ouvrir dans un nouvel onglet', initialValue: true },
+                        ],
+                      },
+                    ],
+                  },
+                },
+                { type: 'image' },
+                {
+                  type: 'object',
+                  name: 'mapEmbed',
+                  title: 'Carte Google Maps',
+                  fields: [
+                    defineField({
+                      name: 'url',
+                      type: 'url',
+                      title: 'URL d\'intégration Google Maps',
+                      description: 'Dans Google Maps → Partager → Intégrer une carte → copier l\'URL du src.',
+                      validation: (Rule) => Rule.required(),
+                    }),
+                    defineField({ name: 'height', type: 'number', title: 'Hauteur (px)', initialValue: 400 }),
+                  ],
+                  preview: {
+                    select: { title: 'url' },
+                    prepare({ title }: { title?: string }) {
+                      return { title: title ? `Carte : ${title.substring(0, 60)}…` : 'Carte Google Maps' };
+                    },
+                  },
+                },
+              ],
+            }),
+            defineField({
+              name: 'pdf',
+              type: 'file',
+              title: 'PDF téléchargeable (optionnel)',
+              description: 'Ex: liste de matériel. Un bouton de téléchargement apparaîtra dans cet onglet.',
+              options: { accept: '.pdf' },
+            }),
+          ],
+        },
+      ],
+    }),
+    defineField({
       name: 'relatedActivities',
       title: 'Activités & Séjours associés',
       description: 'Liez des séjours recommandés pour faire du maillage interne.',

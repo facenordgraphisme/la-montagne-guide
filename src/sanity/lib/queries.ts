@@ -563,6 +563,19 @@ export const resourceBySlugQuery = groq`*[_type == "resource" && slug.current ==
   "image": image.asset->url,
   content,
   contentEn,
+  tabs[]{
+    title,
+    titleEn,
+    content[]{
+      ...,
+      _type == "image" => { ..., "asset": asset-> }
+    },
+    contentEn[]{
+      ...,
+      _type == "image" => { ..., "asset": asset-> }
+    },
+    "pdf": pdf.asset->url
+  },
   "relatedActivities": relatedActivities[]-> {
     title,
     "slug": slug.current,
