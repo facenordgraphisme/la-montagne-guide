@@ -407,7 +407,27 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
   "imageName": mainImage.imageName,
   excerpt,
   excerptEn,
-  bodyEn,
+  "bodyEn": bodyEn[] {
+    ...,
+    _type == "image" => {
+      ...,
+      "alt": coalesce(alt, asset->altText),
+      "altEn": coalesce(altEn, alt, asset->altText)
+    },
+    _type == "gallery" => {
+      ...,
+      images[] {
+        ...,
+        "alt": coalesce(alt, asset->altText),
+        "altEn": coalesce(altEn, alt, asset->altText),
+        captionEn,
+        "url": asset->url,
+        "originalFilename": asset->originalFilename,
+        "extension": asset->extension
+      }
+    },
+    _type == "ctaBlock" => { ..., "cta": cta-> }
+  },
   "body": body[] {
     ...,
     _type == "image" => {
