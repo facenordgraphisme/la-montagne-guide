@@ -1,5 +1,6 @@
 import { defineField, defineType } from 'sanity'
 import { FileText } from 'lucide-react'
+import { TagImagePickerInput } from '../components/TagImagePicker'
 
 export const postType = defineType({
   name: 'post',
@@ -9,8 +10,14 @@ export const postType = defineType({
   fields: [
     defineField({
       name: 'title',
-      title: 'Titre',
+      title: 'Titre (Français)',
       type: 'string',
+    }),
+    defineField({
+      name: 'titleEn',
+      title: 'Titre (Anglais)',
+      type: 'string',
+      description: 'Si vide, traduit automatiquement côté site. Utilisez "🌐 Traduire EN" pour remplir.',
     }),
     defineField({
       name: 'slug',
@@ -23,9 +30,16 @@ export const postType = defineType({
     }),
     defineField({
       name: 'excerpt',
-      title: 'Extrait',
+      title: 'Extrait (Français)',
       type: 'text',
       description: 'Un court résumé de l\'article pour la liste des blogs.',
+      validation: (Rule) => Rule.max(200),
+    }),
+    defineField({
+      name: 'excerptEn',
+      title: 'Extrait (Anglais)',
+      type: 'text',
+      description: 'Version anglaise de l\'extrait. Si vide, l\'extrait FR est utilisé.',
       validation: (Rule) => Rule.max(200),
     }),
     defineField({
@@ -45,8 +59,14 @@ export const postType = defineType({
         {
           name: 'alt',
           type: 'string',
-          title: 'Texte alternatif (ALT)',
+          title: 'Texte alternatif ALT (Français)',
           description: 'Pour le SEO et l\'accessibilité.',
+        },
+        {
+          name: 'altEn',
+          type: 'string',
+          title: 'Texte alternatif ALT (Anglais)',
+          description: 'Version anglaise du texte alt. Si vide, le texte FR est utilisé.',
         }
       ]
     }),
@@ -76,9 +96,11 @@ export const postType = defineType({
           type: 'image',
           options: { hotspot: true },
           fields: [
-            { name: 'imageName', type: 'string', title: 'Nom personnalisé / Titre de l\'image', description: 'Pour organiser ou nommer l\'image.' },
-            { name: 'caption', type: 'string', title: 'Légende' },
-            { name: 'alt', type: 'string', title: 'Texte alternatif (ALT)' },
+            { name: 'imageName', type: 'string', title: 'Nom / Titre' },
+            { name: 'caption', type: 'string', title: 'Légende (Français)' },
+            { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' },
+            { name: 'alt', type: 'string', title: 'ALT (Français)' },
+            { name: 'altEn', type: 'string', title: 'ALT (Anglais)' },
           ],
         },
         {
@@ -93,10 +115,12 @@ export const postType = defineType({
               of: [{
                 type: 'image',
                 options: { hotspot: true },
-                 fields: [
-                  { name: 'imageName', type: 'string', title: 'Nom personnalisé / Titre de l\'image', description: 'Pour organiser ou nommer l\'image.' },
-                  { name: 'caption', type: 'string', title: 'Légende' },
-                  { name: 'alt', type: 'string', title: 'Texte alternatif (ALT)' },
+                fields: [
+                  { name: 'imageName', type: 'string', title: 'Nom / Titre' },
+                  { name: 'caption', type: 'string', title: 'Légende (Français)' },
+                  { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' },
+                  { name: 'alt', type: 'string', title: 'ALT (Français)' },
+                  { name: 'altEn', type: 'string', title: 'ALT (Anglais)' },
                 ],
               }]
             }
@@ -113,6 +137,100 @@ export const postType = defineType({
               title: 'URL de la vidéo (YouTube, Vimeo, etc.)'
             }
           ]
+        },
+        {
+          type: 'object',
+          name: 'ctaBlock',
+          title: 'CTA / Appel à l\'action',
+          fields: [
+            { name: 'cta', type: 'reference', to: [{ type: 'cta' }], title: 'Choisir un CTA de la bibliothèque' }
+          ],
+          preview: {
+            select: { title: 'cta.name' },
+            prepare({ title }: any) {
+              return { title: `📣 CTA : ${title || '(non défini)'}` }
+            }
+          }
+        }
+      ],
+    }),
+    defineField({
+      name: 'bodyEn',
+      title: 'Corps (Anglais)',
+      type: 'array',
+      description: 'Version anglaise du corps de l\'article. Si vide, l\'article s\'affiche en français. Utilisez "🌐 Traduire EN".',
+      of: [
+        {
+          type: 'block',
+          styles: [
+            { title: 'Normal', value: 'normal' },
+            { title: 'H2', value: 'h2' },
+            { title: 'H3', value: 'h3' },
+            { title: 'Centré', value: 'blockCenter' },
+            { title: 'Justifié', value: 'blockJustify' },
+            { title: 'Droite', value: 'blockRight' },
+            { title: 'Citation', value: 'blockquote' }
+          ]
+        },
+        {
+          type: 'image',
+          options: { hotspot: true },
+          fields: [
+            { name: 'imageName', type: 'string', title: 'Nom / Titre' },
+            { name: 'caption', type: 'string', title: 'Légende (Français)' },
+            { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' },
+            { name: 'alt', type: 'string', title: 'ALT (Français)' },
+            { name: 'altEn', type: 'string', title: 'ALT (Anglais)' },
+          ],
+        },
+        {
+          name: 'gallery',
+          type: 'object',
+          title: 'Galerie d\'images',
+          fields: [
+            {
+              name: 'images',
+              type: 'array',
+              title: 'Images',
+              of: [{
+                type: 'image',
+                options: { hotspot: true },
+                fields: [
+                  { name: 'imageName', type: 'string', title: 'Nom / Titre' },
+                  { name: 'caption', type: 'string', title: 'Légende (Français)' },
+                  { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' },
+                  { name: 'alt', type: 'string', title: 'ALT (Français)' },
+                  { name: 'altEn', type: 'string', title: 'ALT (Anglais)' },
+                ],
+              }]
+            }
+          ]
+        },
+        {
+          name: 'video',
+          type: 'object',
+          title: 'Vidéo',
+          fields: [
+            {
+              name: 'url',
+              type: 'url',
+              title: 'URL de la vidéo (YouTube, Vimeo, etc.)'
+            }
+          ]
+        },
+        {
+          type: 'object',
+          name: 'ctaBlock',
+          title: 'CTA / Appel à l\'action',
+          fields: [
+            { name: 'cta', type: 'reference', to: [{ type: 'cta' }], title: 'Choisir un CTA de la bibliothèque' }
+          ],
+          preview: {
+            select: { title: 'cta.name' },
+            prepare({ title }: any) {
+              return { title: `📣 CTA : ${title || '(non défini)'}` }
+            }
+          }
         }
       ],
     }),
@@ -134,7 +252,7 @@ export const postType = defineType({
       name: 'tags',
       title: 'Tags / Catégories',
       type: 'array',
-      of: [{ type: 'reference', to: [{ type: 'tag' }] }],
+      of: [{ type: 'reference', to: [{ type: 'tag' }], weak: true }],
       description: 'Tags et catégories associés à cet article'
     }),
     defineField({
@@ -149,13 +267,32 @@ export const postType = defineType({
           type: 'image',
           options: { hotspot: true },
           fields: [
-            { name: 'imageName', type: 'string', title: 'Nom personnalisé / Titre de l\'image', description: 'Pour organiser ou nommer l\'image.' },
-            { name: 'caption', type: 'string', title: 'Légende' },
-            { name: 'alt', type: 'string', title: 'Texte alternatif (ALT)' },
+            { name: 'imageName', type: 'string', title: 'Nom / Titre' },
+            { name: 'caption', type: 'string', title: 'Légende (Français)' },
+            { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' },
+            { name: 'alt', type: 'string', title: 'ALT (Français)' },
+            { name: 'altEn', type: 'string', title: 'ALT (Anglais)' },
           ],
         },
       ],
       description: 'Optionnel. Galerie de photos qui s\'affichera automatiquement en bas de l\'article.',
+    }),
+    defineField({
+      name: 'tagBrowsedImages',
+      title: 'Galerie — Sélection par tag',
+      description: 'Choisissez un Media Tag ou un tag d\'article, parcourez les photos et cliquez pour les sélectionner.',
+      type: 'array',
+      of: [
+        {
+          type: 'image',
+          fields: [
+            defineField({ name: 'imageName', type: 'string', title: 'Nom / Titre' }),
+            defineField({ name: 'alt', type: 'string', title: 'ALT (Français)' }),
+            defineField({ name: 'altEn', type: 'string', title: 'ALT (Anglais)' }),
+          ],
+        },
+      ],
+      components: { input: TagImagePickerInput },
     }),
     defineField({
       name: 'mediaManager',
@@ -196,9 +333,11 @@ export const postType = defineType({
           type: 'image',
           options: { hotspot: true },
           fields: [
-            { name: 'imageName', type: 'string', title: 'Nom personnalisé / Titre de l\'image' },
-            { name: 'caption', type: 'string', title: 'Légende' },
-            { name: 'alt', type: 'string', title: 'Texte alternatif (ALT)' },
+            { name: 'imageName', type: 'string', title: 'Nom / Titre' },
+            { name: 'caption', type: 'string', title: 'Légende (Français)' },
+            { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' },
+            { name: 'alt', type: 'string', title: 'ALT (Français)' },
+            { name: 'altEn', type: 'string', title: 'ALT (Anglais)' },
           ]
         }
       ]
@@ -236,7 +375,45 @@ export const postType = defineType({
       initialValue: '/contact',
       description: 'Le lien vers lequel redirige le bouton d\'appel à l\'action.',
     }),
+    defineField({
+      name: 'reviewed',
+      title: '✅ Article relu / validé',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Cochez quand l\'article a été relu et validé pour publication.',
+    }),
   ],
+  orderings: [
+    {
+      title: 'Relus en premier',
+      name: 'reviewedFirst',
+      by: [
+        { field: 'reviewed', direction: 'desc' },
+        { field: 'publishedAt', direction: 'desc' },
+      ],
+    },
+    {
+      title: 'Date (récent en premier)',
+      name: 'publishedAtDesc',
+      by: [{ field: 'publishedAt', direction: 'desc' }],
+    },
+  ],
+  preview: {
+    select: {
+      title: 'title',
+      media: 'mainImage',
+      reviewed: 'reviewed',
+      date: 'publishedAt',
+    },
+    prepare({ title, media, reviewed, date }: any) {
+      const dateStr = date ? new Date(date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) : ''
+      return {
+        title: `${reviewed ? '✅' : '⬜'} ${title || 'Sans titre'}`,
+        subtitle: dateStr,
+        media,
+      }
+    },
+  },
 })
 
 // Custom React component to manage and edit ALT texts/captions of all images inside the post
@@ -335,11 +512,15 @@ function PostMediaManagerInput(props: any) {
       return ''
     }).join('')
 
-  const handleUpdate = (localKey: string, value: string, pathSegments: any[]) => {
+  const handleUpdate = (localKey: string, value: string, pathSegments: any[], assetRef?: string) => {
     setLocalValues(prev => ({ ...prev, [localKey]: value }))
     if (!documentId || !client) return
     const pathStr = buildPath(pathSegments)
     client.patch(documentId).set({ [pathStr]: value }).commit().catch(console.error)
+    // Sync alt text to the media library asset (sanity.imageAsset)
+    if (localKey.endsWith('_alt') && assetRef) {
+      client.patch(assetRef).set({ altText: value }).commit().catch(console.error)
+    }
   }
 
   return (
@@ -387,7 +568,7 @@ function PostMediaManagerInput(props: any) {
                         <Label size={0}>Texte alternatif (ALT) :</Label>
                         <TextInput
                           value={localValues[`${img._key}_alt`] ?? (img.alt || '')}
-                          onChange={(e: any) => handleUpdate(`${img._key}_alt`, e.target.value, ['body', { _key: img._key }, 'alt'])}
+                          onChange={(e: any) => handleUpdate(`${img._key}_alt`, e.target.value, ['body', { _key: img._key }, 'alt'], img.asset?._ref)}
                           placeholder={img.asset?._ref ? assetAlts[img.asset._ref] : "Description SEO de l'image..."}
                         />
                       </div>
@@ -440,7 +621,7 @@ function PostMediaManagerInput(props: any) {
                           <Label size={0}>Texte alternatif (ALT) :</Label>
                           <TextInput
                             value={localValues[`bgi_${img._key}_alt`] ?? (img.alt || '')}
-                            onChange={(e: any) => handleUpdate(`bgi_${img._key}_alt`, e.target.value, [...imagePath, 'alt'])}
+                            onChange={(e: any) => handleUpdate(`bgi_${img._key}_alt`, e.target.value, [...imagePath, 'alt'], img.asset?._ref)}
                             placeholder={img.asset?._ref ? assetAlts[img.asset._ref] : "Description SEO de l'image..."}
                           />
                         </div>
@@ -492,7 +673,7 @@ function PostMediaManagerInput(props: any) {
                         <Label size={0}>Texte alternatif (ALT) :</Label>
                         <TextInput
                           value={localValues[`gal_${img._key}_alt`] ?? (img.alt || '')}
-                          onChange={(e: any) => handleUpdate(`gal_${img._key}_alt`, e.target.value, ['gallery', { _key: img._key }, 'alt'])}
+                          onChange={(e: any) => handleUpdate(`gal_${img._key}_alt`, e.target.value, ['gallery', { _key: img._key }, 'alt'], img.asset?._ref)}
                           placeholder={img.asset?._ref ? assetAlts[img.asset._ref] : "Description SEO de l'image..."}
                         />
                       </div>

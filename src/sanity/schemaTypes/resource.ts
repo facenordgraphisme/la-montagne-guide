@@ -64,6 +64,10 @@ export const resourceType = defineType({
       title: 'Image principale',
       type: 'image',
       options: { hotspot: true },
+      fields: [
+        defineField({ name: 'alt', type: 'string', title: 'Texte ALT (Français)', description: 'Pour le SEO et l\'accessibilité.' }),
+        defineField({ name: 'altEn', type: 'string', title: 'Texte ALT (Anglais)', description: 'Version anglaise. Si vide, le texte FR est utilisé.' }),
+      ],
     }),
     defineField({
       name: 'content',
@@ -82,7 +86,8 @@ export const resourceType = defineType({
             { title: 'Citation', value: 'blockquote' }
           ]
         },
-        { type: 'image', options: { hotspot: true } }
+        { type: 'image', options: { hotspot: true }, fields: [{ name: 'caption', type: 'string', title: 'Légende (Français)' }, { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' }, { name: 'alt', type: 'string', title: 'ALT (Français)' }, { name: 'altEn', type: 'string', title: 'ALT (Anglais)' }] },
+        { type: 'object', name: 'ctaBlock', title: 'CTA / Appel à l\'action', fields: [{ name: 'cta', type: 'reference', to: [{ type: 'cta' }], title: 'Choisir un CTA' }], preview: { select: { title: 'cta.name' }, prepare({ title }: any) { return { title: `📣 CTA : ${title || '(non défini)'}` } } } }
       ],
     }),
     defineField({
@@ -102,7 +107,8 @@ export const resourceType = defineType({
             { title: 'Citation', value: 'blockquote' }
           ]
         },
-        { type: 'image', options: { hotspot: true } }
+        { type: 'image', options: { hotspot: true }, fields: [{ name: 'caption', type: 'string', title: 'Légende (Français)' }, { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' }, { name: 'alt', type: 'string', title: 'ALT (Français)' }, { name: 'altEn', type: 'string', title: 'ALT (Anglais)' }] },
+        { type: 'object', name: 'ctaBlock', title: 'CTA / Appel à l\'action', fields: [{ name: 'cta', type: 'reference', to: [{ type: 'cta' }], title: 'Choisir un CTA' }], preview: { select: { title: 'cta.name' }, prepare({ title }: any) { return { title: `📣 CTA : ${title || '(non défini)'}` } } } }
       ],
     }),
     defineField({
@@ -152,7 +158,7 @@ export const resourceType = defineType({
                     ],
                   },
                 },
-                { type: 'image' },
+                { type: 'image', options: { hotspot: true }, fields: [{ name: 'caption', type: 'string', title: 'Légende (Français)' }, { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' }, { name: 'alt', type: 'string', title: 'ALT (Français)' }, { name: 'altEn', type: 'string', title: 'ALT (Anglais)' }] },
                 {
                   type: 'object',
                   name: 'mapEmbed',
@@ -174,6 +180,7 @@ export const resourceType = defineType({
                     },
                   },
                 },
+                { type: 'object', name: 'ctaBlock', title: 'CTA / Appel à l\'action', fields: [{ name: 'cta', type: 'reference', to: [{ type: 'cta' }], title: 'Choisir un CTA' }], preview: { select: { title: 'cta.name' }, prepare({ title }: any) { return { title: `📣 CTA : ${title || '(non défini)'}` } } } },
               ],
             }),
             defineField({
@@ -210,7 +217,7 @@ export const resourceType = defineType({
                     ],
                   },
                 },
-                { type: 'image' },
+                { type: 'image', options: { hotspot: true }, fields: [{ name: 'caption', type: 'string', title: 'Légende (Français)' }, { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' }, { name: 'alt', type: 'string', title: 'ALT (Français)' }, { name: 'altEn', type: 'string', title: 'ALT (Anglais)' }] },
                 {
                   type: 'object',
                   name: 'mapEmbed',
@@ -232,6 +239,7 @@ export const resourceType = defineType({
                     },
                   },
                 },
+                { type: 'object', name: 'ctaBlock', title: 'CTA / Appel à l\'action', fields: [{ name: 'cta', type: 'reference', to: [{ type: 'cta' }], title: 'Choisir un CTA' }], preview: { select: { title: 'cta.name' }, prepare({ title }: any) { return { title: `📣 CTA : ${title || '(non défini)'}` } } } },
               ],
             }),
             defineField({
@@ -258,6 +266,45 @@ export const resourceType = defineType({
       description: 'Questions/Réponses spécifiques à afficher en bas de ce guide.',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
+    }),
+    defineField({
+      name: 'ctaTitle',
+      title: 'CTA Sidebar — Titre',
+      type: 'string',
+      description: 'Titre affiché dans le bloc CTA de la sidebar. Laisser vide pour le texte par défaut.',
+    }),
+    defineField({
+      name: 'ctaText',
+      title: 'CTA Sidebar — Texte',
+      type: 'text',
+      rows: 2,
+      description: 'Texte descriptif dans le bloc CTA. Laisser vide pour le texte par défaut.',
+    }),
+    defineField({
+      name: 'ctaLink',
+      title: 'CTA Sidebar — Lien',
+      type: 'string',
+      initialValue: '/contact',
+      description: 'URL de destination du bouton CTA.',
+    }),
+    defineField({
+      name: 'ctaButtonLabel',
+      title: 'CTA Sidebar — Libellé du bouton',
+      type: 'string',
+      description: 'Texte du bouton. Laisser vide pour "Me contacter".',
+    }),
+    defineField({
+      name: 'metaTitle',
+      title: '🔍 SEO — Titre (balise title)',
+      type: 'string',
+      description: 'Optionnel. Remplace le titre auto-généré dans les résultats Google. Idéalement < 60 caractères.',
+    }),
+    defineField({
+      name: 'metaDescription',
+      title: '🔍 SEO — Description (meta description)',
+      type: 'text',
+      rows: 3,
+      description: 'Optionnel. Résumé affiché sous le titre dans Google. Idéalement 120–160 caractères.',
     }),
   ],
   preview: {

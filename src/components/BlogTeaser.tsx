@@ -8,10 +8,13 @@ import { getVanityImageUrl } from '@/sanity/lib/image'
 
 interface Post {
   title: string
+  titleEn?: string
   excerpt: string
+  excerptEn?: string
   date: string
   image: string
   imageAlt?: string
+  imageAltEn?: string
   imageName?: string
   slug: string
 }
@@ -88,13 +91,17 @@ const BlogTeaser = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {list.map((post, i) => (
+          {list.map((post, i) => {
+            const displayTitle = { fr: post.title, en: post.titleEn }
+            const displayAlt = language === 'en' ? (post.imageAltEn || post.imageAlt) : post.imageAlt;
+            const displayExcerpt = language === 'en' ? (post.excerptEn || post.excerpt) : post.excerpt;
+            return (
             <Link key={i} href={`/${post.slug}`} className="group block">
               <div className="relative aspect-[16/10] rounded-[32px] overflow-hidden mb-6 shadow-lg">
                 {post.image && (
                   <Image
                     src={getVanityImageUrl(post.image, post.imageName || post.imageAlt || post.title)}
-                    alt={post.imageAlt ? at(post.imageAlt) : at(post.title)}
+                    alt={displayAlt ? at(displayAlt) : at(displayTitle)}
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -104,13 +111,14 @@ const BlogTeaser = ({
               </div>
               <p className="text-accent font-bold text-xs uppercase tracking-widest mb-3">{at(post.date)}</p>
               <h3 className="text-2xl font-bold mb-4 group-hover:text-accent transition-colors leading-tight">
-                {at(post.title)}
+                {at(displayTitle)}
               </h3>
               <p className="text-foreground/60 leading-relaxed line-clamp-2">
-                {at(post.excerpt)}
+                {at(displayExcerpt)}
               </p>
             </Link>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

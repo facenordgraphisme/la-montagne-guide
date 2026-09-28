@@ -10,6 +10,7 @@ import { structure } from './src/sanity/structure'
 import { StudioLogo } from './src/sanity/components/StudioLogo'
 import { studioTheme } from './src/sanity/theme'
 import { BulkTagTool } from './src/sanity/components/BulkTagTool'
+import { translateDocumentAction } from './src/sanity/actions/translateDocument'
 
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'your-project-id'
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production'
@@ -37,4 +38,12 @@ export default defineConfig({
     },
   ],
   schema,
+  document: {
+    actions: (prev, ctx) => {
+      if (['post', 'sejour', 'resource'].includes(ctx.schemaType)) {
+        return [translateDocumentAction, ...prev]
+      }
+      return prev
+    },
+  },
 })

@@ -1,17 +1,19 @@
 import type { Metadata } from 'next';
 import React from 'react'
 import Image from 'next/image';
+import { urlFor } from '@/sanity/lib/image'
 import Link from 'next/link';
 import { client } from "@/sanity/lib/client";
 import { resourceBySlugQuery, resourcesQuery } from "@/sanity/lib/queries";
 import { notFound } from 'next/navigation';
 import { getServerTranslations } from '@/i18n/server';
+import { autoFill, autoFillAll } from '@/lib/translate';
 import { ArrowLeft, BookOpen, Clock, Compass } from 'lucide-react';
 import { PortableText } from '@portabletext/react';
 import FAQAccordion from "@/components/FAQAccordion";
 import SejourTabs from "@/components/SejourTabs";
 
-const blockAlignComponents = {
+function makeBlockAlignComponents(lang: string) { return {
   block: {
     normal: ({ children }: any) => {
       const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
@@ -47,7 +49,54 @@ const blockAlignComponents = {
       </a>
     ),
   },
-};
+  types: {
+    image: ({ value }: any) => {
+      if (!value?.asset) return null;
+      const imgUrl = urlFor(value.asset).width(1200).auto('format').url();
+      const displayAlt = (lang === 'en' ? (value.altEn || value.alt) : value.alt) || '';
+      const displayCaption = lang === 'en' ? (value.captionEn || value.caption) : value.caption;
+      return (
+        <figure className="my-10">
+          <div className="relative w-full overflow-hidden rounded-2xl">
+            <Image
+              src={imgUrl}
+              alt={displayAlt}
+              width={1200}
+              height={800}
+              className="w-full h-auto object-cover"
+              sizes="(max-width: 1024px) 100vw, 800px"
+            />
+          </div>
+          {displayCaption && (
+            <figcaption className="text-center text-sm text-foreground/50 mt-3 italic">
+              {displayCaption}
+            </figcaption>
+          )}
+        </figure>
+      );
+    },
+    ctaBlock: ({ value }: any) => {
+      const cta = value.cta
+      if (!cta) return null
+      const text = lang === 'en' ? (cta.textEn || cta.text) : cta.text
+      const label = lang === 'en' ? (cta.buttonLabelEn || cta.buttonLabel) : cta.buttonLabel
+      const styleMap: Record<string, string> = {
+        primary: 'bg-accent/8 border-accent/20',
+        highlight: 'bg-highlight/8 border-highlight/20',
+        outline: 'bg-transparent border-foreground/15',
+      }
+      const btnClass = cta.style === 'highlight' ? 'btn-highlight' : cta.style === 'outline' ? 'btn-outline' : 'btn-primary'
+      return (
+        <div className={`not-prose my-10 p-8 rounded-2xl border ${styleMap[cta.style || 'primary'] || styleMap.primary} text-center`}>
+          {text && <p className="text-foreground/70 mb-6 text-base leading-relaxed">{text}</p>}
+          <Link href={cta.link || '/contact'} className={`${btnClass} inline-block !text-sm font-black uppercase tracking-widest`}>
+            {label}
+          </Link>
+        </div>
+      )
+    },
+  },
+}; }
 
 export async function generateStaticParams() {
   const resources = await client.fetch(resourcesQuery);
@@ -58,13 +107,15 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const res = await client.fetch(resourceBySlugQuery, { slug });
-  const { at } = await getServerTranslations();
+  let res = await client.fetch(resourceBySlugQuery, { slug });
+  const { at, lang } = await getServerTranslations();
 
   if (!res) return {};
+  res = await autoFill(res, [['title', 'titleEn'], ['intro', 'introEn'], ['imageAlt', 'imageAltEn']], lang);
 
-  const title = `${at(res.title)} | Conseils & Guides`;
-  const description = res.intro ? at(res.intro).substring(0, 160) : '';
+  const autoTitle = `${at(res.title)} | Conseils & Guides`;
+  const title = res.metaTitle || autoTitle;
+  const description = res.metaDescription || (res.intro ? at(res.intro).substring(0, 160) : '');
 
   return {
     title,
@@ -74,10 +125,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ResourceDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const data = await client.fetch(resourceBySlugQuery, { slug });
+  let data = await client.fetch(resourceBySlugQuery, { slug });
   const { at, lang } = await getServerTranslations();
 
   if (!data) notFound();
+  data = await autoFill(data, [['title', 'titleEn'], ['intro', 'introEn'], ['imageAlt', 'imageAltEn']], lang);
+  if (data.tabs?.length) {
+    data = { ...data, tabs: await autoFillAll(data.tabs, [['title', 'titleEn']], lang) };
+  }
 
   const displayTitle = lang === 'en' ? (data.titleEn || data.title) : data.title;
   const displayIntro = lang === 'en' ? (data.introEn || data.intro) : data.intro;
@@ -137,9 +192,9 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
             {/* Main guide image */}
             {data.image && (
               <div className="relative aspect-[16/9] rounded-[40px] overflow-hidden shadow-2xl">
-                <Image 
+                <Image
                   src={data.image}
-                  alt={displayTitle}
+                  alt={(lang === 'en' ? (data.imageAltEn || data.imageAlt) : data.imageAlt) || displayTitle}
                   fill
                   sizes="(max-width: 1024px) 100vw, 800px"
                   className="object-cover"
@@ -150,7 +205,7 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
             {/* Rich text body content */}
             {displayContent && (
               <div className="prose-custom max-w-none text-foreground/80 leading-relaxed text-lg">
-                <PortableText value={displayContent} components={blockAlignComponents} />
+                <PortableText value={displayContent} components={makeBlockAlignComponents(lang)} />
               </div>
             )}
 
@@ -206,15 +261,17 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
                 </div>
               </div>
             ) : (
-              // Secondary CTA fallback
+              // CTA block (customisable via Sanity)
               <div className="glass p-8 rounded-[40px] border border-border shadow-xl text-center">
                 <BookOpen className="text-accent w-12 h-12 mx-auto mb-4" />
-                <h3 className="text-xl font-bold mb-2">{at('Envie de tester sur le terrain ?')}</h3>
+                <h3 className="text-xl font-bold mb-2">
+                  {data.ctaTitle ? at(data.ctaTitle) : at('Envie de tester sur le terrain ?')}
+                </h3>
                 <p className="text-foreground/60 text-sm mb-6 leading-relaxed">
-                  {at('Discutez de votre projet ou organisez un séjour sur-mesure directement avec votre guide.')}
+                  {data.ctaText ? at(data.ctaText) : at('Discutez de votre projet ou organisez un séjour sur-mesure directement avec votre guide.')}
                 </p>
-                <Link href="/contact" className="btn-primary w-full block text-center !text-white text-xs font-black uppercase tracking-widest">
-                  {at('Me contacter')}
+                <Link href={data.ctaLink || '/contact'} className="btn-primary w-full block text-center !text-white text-xs font-black uppercase tracking-widest">
+                  {data.ctaButtonLabel ? at(data.ctaButtonLabel) : at('Me contacter')}
                 </Link>
               </div>
             )}

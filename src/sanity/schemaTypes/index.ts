@@ -14,6 +14,7 @@ import { faqCategoryType } from './faqCategory'
 import { commentType } from './comment'
 import { tagType } from './tag'
 import { resourceType } from './resource'
+import { ctaType } from './cta'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -32,5 +33,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     faqCategoryType,
     commentType,
     resourceType,
+    ctaType,
   ],
 }

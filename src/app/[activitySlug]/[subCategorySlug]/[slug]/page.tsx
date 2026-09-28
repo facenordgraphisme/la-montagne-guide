@@ -5,21 +5,52 @@ import Link from 'next/link';
 import { client } from "@/sanity/lib/client";
 import { sejourBySlugQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from "@/sanity/lib/queries";
 import { notFound } from 'next/navigation';
-import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Download, Users, CalendarDays } from 'lucide-react';
+import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Download, Users, CalendarDays, Info } from 'lucide-react';
 
 import { getServerTranslations } from '@/i18n/server';
+import { autoFill, autoFillAll } from '@/lib/translate';
 import SejourTabs from '@/components/SejourTabs';
 import RichContent from '@/components/RichContent';
 import BlogCard from '@/components/BlogCard';
 import FAQAccordion from '@/components/FAQAccordion';
 import { renderRichText, toPlainText } from '@/utils/richText';
 
+function FicheRow({ icon, label, value, tooltip }: {
+  icon: React.ReactNode
+  label: string
+  value: React.ReactNode
+  tooltip?: string
+}) {
+  if (!value) return null
+  return (
+    <div className="group/fiche relative flex justify-between items-center py-4 border-b border-border">
+      <div className="flex items-center gap-3">
+        {icon}
+        <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{label}</span>
+        {tooltip && (
+          <>
+            <Info size={12} className="text-accent/60 shrink-0 cursor-help" />
+            <div className="absolute left-0 bottom-full mb-2 z-30 w-64 p-3 rounded-xl glass text-xs text-foreground/80 shadow-xl border border-border
+              opacity-0 pointer-events-none
+              group-hover/fiche:opacity-100 group-hover/fiche:pointer-events-auto
+              transition-all duration-200 ease-out">
+              {tooltip}
+            </div>
+          </>
+        )}
+      </div>
+      <span className="font-bold text-right max-w-[55%]">{value}</span>
+    </div>
+  )
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const sejour = await client.fetch(sejourBySlugQuery, { slug });
+  let sejour = await client.fetch(sejourBySlugQuery, { slug });
   const { at, lang } = await getServerTranslations();
 
   if (!sejour) return {};
+  sejour = await autoFill(sejour, [['title', 'titleEn'], ['imageAlt', 'imageAltEn']], lang);
 
   const autoTitle = `${at({ fr: sejour.title, en: sejour.titleEn })} | La Montagne Guide`;
   const descForMeta = lang === 'en' && sejour.descriptionEn?.length ? sejour.descriptionEn : sejour.description;
@@ -42,13 +73,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function SejourDetail({ params }: { params: Promise<{ activitySlug: string, subCategorySlug: string, slug: string }> }) {
   const { activitySlug, subCategorySlug, slug } = await params;
-  const [sejour, settingsData] = await Promise.all([
+  const [rawSejour, settingsData] = await Promise.all([
     client.fetch(sejourBySlugQuery, { slug }),
     client.fetch(settingsQuery)
   ]);
-  const { at, t, translatePortableText } = await getServerTranslations();
+  const { at, t, lang, translatePortableText } = await getServerTranslations();
 
-  if (!sejour) notFound();
+  if (!rawSejour) notFound();
+
+  let sejour = await autoFill(rawSejour, [['title', 'titleEn'], ['imageAlt', 'imageAltEn']], lang);
+  if (sejour.tabs?.length) {
+    sejour = { ...sejour, tabs: await autoFillAll(sejour.tabs, [['title', 'titleEn']], lang) };
+  }
 
   const fullGallery = [...(sejour.gallery || []), ...(sejour.tagBrowsedImages || [])]
 
@@ -102,7 +138,8 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
     { id: 'budget', label: at('Budget'), content: sejour.budget ? translatePortableText(sejour.budget) : null },
     { id: 'infos', label: at('Infos Pratiques'), content: sejour.infosPratiques ? translatePortableText(sejour.infosPratiques) : null },
     { id: 'materiel', label: at('Matériel'), content: sejour.materiel ? translatePortableText(sejour.materiel) : null, pdf: sejour.materielPdf ?? null },
-  ].filter(tab => tab.content !== null || tab.pdf !== null)
+    ...(sejour.faqs && sejour.faqs.length > 0 ? [{ id: 'faq', label: at('FAQ'), content: null, faqs: sejour.faqs }] : []),
+  ].filter(tab => tab.content !== null || tab.pdf !== null || (tab as any).faqs?.length > 0)
 
   const tabs = [...dynamicTabs, ...legacyTabs]
   const hasTabs = tabs.length > 0
@@ -140,7 +177,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
           {sejour.image && (
             <Image
               src={sejour.image}
-              alt={at({ fr: sejour.title, en: sejour.titleEn })}
+              alt={(lang === 'en' ? (sejour.imageAltEn || sejour.imageAlt) : sejour.imageAlt) || at({ fr: sejour.title, en: sejour.titleEn })}
               fill
               sizes="100vw"
               priority
@@ -206,55 +243,56 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                 <h3 className="text-2xl font-black uppercase tracking-tight mb-8">{at('Fiche Technique')}</h3>
 
                 <div className="space-y-6 mb-10">
-                  <div className="flex justify-between items-center py-4 border-b border-border">
-                    <div className="flex items-center gap-3">
-                      <Clock size={18} className="text-accent" />
-                      <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{at('Durée')}</span>
-                    </div>
-                    <span className="font-bold">{at({ fr: sejour.duration, en: sejour.durationEn })}</span>
-                  </div>
-
-                  <div className="flex justify-between items-center py-4 border-b border-border">
-                    <div className="flex items-center gap-3">
-                      <BarChart3 size={18} className="text-accent" />
-                      <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{at('Niveau')}</span>
-                    </div>
-                    <span className="font-bold">{getLevelLabel(sejour.level)}</span>
-                  </div>
-
-                  <div className="flex justify-between items-center py-4 border-b border-border">
-                    <div className="flex items-center gap-3">
-                      <MapPin size={18} className="text-accent" />
-                      <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{at('Massif')}</span>
-                    </div>
-                    <span className="font-bold">{at(sejour.massif)}</span>
-                  </div>
-
-                  {sejour.participants && (
-                    <div className="flex justify-between items-center py-4 border-b border-border">
-                      <div className="flex items-center gap-3">
-                        <Users size={18} className="text-accent" />
-                        <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{at('Participants')}</span>
-                      </div>
-                      <span className="font-bold">{at({ fr: sejour.participants, en: sejour.participantsEn })}</span>
-                    </div>
-                  )}
-
-                  {sejour.period && (
-                    <div className="flex justify-between items-center py-4 border-b border-border">
-                      <div className="flex items-center gap-3">
-                        <CalendarDays size={18} className="text-accent" />
-                        <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{at('Période')}</span>
-                      </div>
-                      <span className="font-bold">{at({ fr: sejour.period, en: sejour.periodEn })}</span>
-                    </div>
-                  )}
+                  <FicheRow
+                    icon={<Clock size={18} className="text-accent" />}
+                    label={at('Durée')}
+                    value={at({ fr: sejour.duration, en: sejour.durationEn })}
+                    tooltip={sejour.ficheTooltips?.duration}
+                  />
+                  <FicheRow
+                    icon={<BarChart3 size={18} className="text-accent" />}
+                    label={at('Niveau technique')}
+                    value={getLevelLabel(sejour.level)}
+                    tooltip={sejour.ficheTooltips?.level}
+                  />
+                  <FicheRow
+                    icon={<BarChart3 size={18} className="text-accent" />}
+                    label={at('Niveau physique')}
+                    value={sejour.physicalLevel}
+                    tooltip={sejour.ficheTooltips?.physicalLevel}
+                  />
+                  <FicheRow
+                    icon={<MapPin size={18} className="text-accent" />}
+                    label={at('Massif')}
+                    value={at(sejour.massif)}
+                    tooltip={sejour.ficheTooltips?.massif}
+                  />
+                  <FicheRow
+                    icon={<Users size={18} className="text-accent" />}
+                    label={at('Participants')}
+                    value={sejour.participants ? at({ fr: sejour.participants, en: sejour.participantsEn }) : undefined}
+                    tooltip={sejour.ficheTooltips?.participants}
+                  />
+                  <FicheRow
+                    icon={<CalendarDays size={18} className="text-accent" />}
+                    label={at('Période')}
+                    value={sejour.period ? at({ fr: sejour.period, en: sejour.periodEn }) : undefined}
+                    tooltip={sejour.ficheTooltips?.period}
+                  />
 
                   {/* Tarifs */}
-                  <div className="py-4 border-b border-border space-y-3">
+                  <div className="group/fiche relative py-4 border-b border-border space-y-3">
                     <div className="flex items-center gap-3 mb-2">
                       <Euro size={18} className="text-accent" />
                       <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{at('Tarifs')}</span>
+                      {sejour.ficheTooltips?.tarifs && (
+                        <>
+                          <Info size={12} className="text-accent/60 shrink-0 cursor-help" />
+                          <div className="absolute left-0 bottom-full mb-2 z-30 w-64 p-3 rounded-xl glass text-xs text-foreground/80 shadow-xl border border-border opacity-0 pointer-events-none group-hover/fiche:opacity-100 group-hover/fiche:pointer-events-auto transition-all duration-200 ease-out">
+                            {sejour.ficheTooltips.tarifs}
+                          </div>
+                        </>
+                      )}
                     </div>
                     {sejour.prixToutCompris ? (
                       sejour.prixToutComprisAmount ? (
@@ -367,7 +405,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                   <div key={i} className="relative aspect-square overflow-hidden rounded-2xl group">
                     <Image
                       src={photo.url}
-                      alt={photo.alt || at(sejour.title)}
+                      alt={(lang === 'en' ? ((photo as any).altEn || photo.alt) : photo.alt) || at({ fr: sejour.title, en: sejour.titleEn })}
                       fill
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -388,14 +426,6 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                 );
               })}
             </div>
-          </div>
-        </section>
-      )}
-
-      {sejour.faqs && sejour.faqs.length > 0 && (
-        <section className="py-20 border-t border-border/10 bg-background">
-          <div className="container mx-auto px-6 max-w-4xl">
-            <FAQAccordion faqs={sejour.faqs} />
           </div>
         </section>
       )}

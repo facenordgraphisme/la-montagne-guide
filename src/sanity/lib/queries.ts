@@ -111,6 +111,8 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
   "subCategory": subCategory->slug.current,
   "subCategoryTitle": subCategory->title,
   "image": image.asset->url,
+  "imageAlt": image.alt,
+  "imageAltEn": coalesce(image.altEn, image.alt),
   priceEncadrement,
   priceFraisSejour,
   hideUpcomingSorties,
@@ -132,7 +134,7 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
     _type == "image" => { ..., "asset": asset-> }
   },
   "materielPdf": materielPdf.asset->url,
-  "gallery": gallery[]{imageName, caption, alt, "url": asset->url, "originalFilename": asset->originalFilename, "extension": asset->extension},
+  "gallery": gallery[]{imageName, caption, captionEn, alt, altEn, "url": asset->url, "originalFilename": asset->originalFilename, "extension": asset->extension},
   "upcomingSorties": *[_type == "sortie" && sejour._ref == ^._id && startDate >= now()] | order(startDate asc) {
     date,
     availableSpots,
@@ -149,17 +151,19 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
     titleEn,
     content[]{
       ...,
-      _type == "image" => { ..., "asset": asset-> }
+      _type == "image" => { ..., "asset": asset-> },
+      _type == "ctaBlock" => { ..., "cta": cta-> }
     },
     contentEn[]{
       ...,
-      _type == "image" => { ..., "asset": asset-> }
+      _type == "image" => { ..., "asset": asset-> },
+      _type == "ctaBlock" => { ..., "cta": cta-> }
     },
     "pdf": pdf.asset->url
   },
   "relatedTags": relatedTags[]->slug.current,
   "relatedTagIds": relatedTags[]._ref,
-  "tagBrowsedImages": tagBrowsedImages[]{imageName, alt, "url": asset->url, "originalFilename": asset->originalFilename, "extension": asset->extension},
+  "tagBrowsedImages": tagBrowsedImages[]{imageName, alt, altEn, "url": asset->url, "originalFilename": asset->originalFilename, "extension": asset->extension},
   relatedPostsLimit,
   hideRelatedPosts,
   "relatedPosts": relatedPosts[]->{
@@ -167,9 +171,11 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
     "slug": slug.current,
     "date": publishedAt,
     "image": mainImage.asset->url,
-    "imageAlt": mainImage.alt,
+    "imageAlt": coalesce(mainImage.alt, mainImage.asset->altText),
+    "imageAltEn": coalesce(mainImage.altEn, mainImage.alt, mainImage.asset->altText),
     "imageName": mainImage.imageName,
-    excerpt
+    excerpt,
+    excerptEn
   }
 }`
 
@@ -178,9 +184,11 @@ export const postsBySejourQuery = groq`*[_type == "post" && relatedSejour._ref =
   "slug": slug.current,
   "date": publishedAt,
   "image": mainImage.asset->url,
-  "imageAlt": mainImage.alt,
+  "imageAlt": coalesce(mainImage.alt, mainImage.asset->altText),
+  "imageAltEn": coalesce(mainImage.altEn, mainImage.alt, mainImage.asset->altText),
   "imageName": mainImage.imageName,
-  excerpt
+  excerpt,
+  excerptEn
 }`
 
 
@@ -189,9 +197,11 @@ export const postsByTagsQuery = groq`*[_type == "post" && count(tags[@._ref in $
   "slug": slug.current,
   "date": publishedAt,
   "image": mainImage.asset->url,
-  "imageAlt": mainImage.alt,
+  "imageAlt": coalesce(mainImage.alt, mainImage.asset->altText),
+  "imageAltEn": coalesce(mainImage.altEn, mainImage.alt, mainImage.asset->altText),
   "imageName": mainImage.imageName,
-  excerpt
+  excerpt,
+  excerptEn
 }`
 
 export const postsByActivityQuery = groq`*[_type == "post" && (activityType == $activityType || activityType->_ref == $activityType || activityType->type == $activityType || activityType->slug.current == $activityType) && !(relatedSejour._ref in $excludedIds)] | order(publishedAt desc)[0...$limit] {
@@ -199,9 +209,11 @@ export const postsByActivityQuery = groq`*[_type == "post" && (activityType == $
   "slug": slug.current,
   "date": publishedAt,
   "image": mainImage.asset->url,
-  "imageAlt": mainImage.alt,
+  "imageAlt": coalesce(mainImage.alt, mainImage.asset->altText),
+  "imageAltEn": coalesce(mainImage.altEn, mainImage.alt, mainImage.asset->altText),
   "imageName": mainImage.imageName,
-  excerpt
+  excerpt,
+  excerptEn
 }`
 
 export const sortieBySlugQuery = groq`*[_type == "sortie" && slug.current == $slug][0] {
@@ -216,6 +228,8 @@ export const sortieBySlugQuery = groq`*[_type == "sortie" && slug.current == $sl
   activityType,
   isFull
 }`
+
+export const activitySlugsQuery = groq`*[_type == "activity"] { "slug": slug.current }`
 
 export const activitiesQuery = groq`*[_type == "activity"] | order(title asc) {
   _id,
@@ -285,9 +299,11 @@ export const blogTeaserQuery = groq`*[_type == "post"] | order(publishedAt desc)
   "slug": slug.current,
   "date": publishedAt,
   "image": mainImage.asset->url,
-  "imageAlt": mainImage.alt,
+  "imageAlt": coalesce(mainImage.alt, mainImage.asset->altText),
+  "imageAltEn": coalesce(mainImage.altEn, mainImage.alt, mainImage.asset->altText),
   "imageName": mainImage.imageName,
-  "excerpt": pt::text(body)
+  "excerpt": coalesce(excerpt, pt::text(body)),
+  excerptEn
 }`
 
 export const guideQuery = groq`*[_type == "guide"][0] {
@@ -328,8 +344,10 @@ export const postsQuery = groq`*[_type == "post"] | order(publishedAt desc) {
   "date": publishedAt,
   "image": mainImage.asset->url,
   "imageAlt": coalesce(mainImage.alt, mainImage.asset->altText),
+  "imageAltEn": coalesce(mainImage.altEn, mainImage.alt, mainImage.asset->altText),
   "imageName": mainImage.imageName,
   excerpt,
+  excerptEn,
   "body": body[] {
     ...,
     _type == "image" => {
@@ -353,18 +371,23 @@ export const postsPageQuery = groq`{
   "posts": *[_type == "post"
     && (!defined($category) || $category in tags[]->slug.current || activityType->slug.current == $category)
     && (!defined($massif) || $massif in tags[]->slug.current)
+    && (!defined($q) || title match $q + "*" || excerpt match $q + "*")
   ] | order(publishedAt desc) [$start...$end] {
     title,
+    titleEn,
     "slug": slug.current,
     "date": publishedAt,
     "image": mainImage.asset->url,
     "imageAlt": coalesce(mainImage.alt, mainImage.asset->altText),
+    "imageAltEn": coalesce(mainImage.altEn, mainImage.alt, mainImage.asset->altText),
     "imageName": mainImage.imageName,
-    excerpt
+    excerpt,
+    excerptEn
   },
   "total": count(*[_type == "post"
     && (!defined($category) || $category in tags[]->slug.current || activityType->slug.current == $category)
     && (!defined($massif) || $massif in tags[]->slug.current)
+    && (!defined($q) || title match $q + "*" || excerpt match $q + "*")
   ])
 }`
 
@@ -375,33 +398,43 @@ export const massifTagsQuery = groq`*[_type == "tag" && tagType == "massif"] | o
 export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][0] {
   _id,
   title,
+  titleEn,
   "slug": slug.current,
   "date": publishedAt,
   "image": mainImage.asset->url,
   "imageAlt": coalesce(mainImage.alt, mainImage.asset->altText),
+  "imageAltEn": coalesce(mainImage.altEn, mainImage.alt, mainImage.asset->altText),
   "imageName": mainImage.imageName,
   excerpt,
+  excerptEn,
+  bodyEn,
   "body": body[] {
     ...,
     _type == "image" => {
       ...,
-      "alt": coalesce(alt, asset->altText)
+      "alt": coalesce(alt, asset->altText),
+      "altEn": coalesce(altEn, alt, asset->altText)
     },
     _type == "gallery" => {
       ...,
       images[] {
         ...,
         "alt": coalesce(alt, asset->altText),
+        "altEn": coalesce(altEn, alt, asset->altText),
+        captionEn,
         "url": asset->url,
         "originalFilename": asset->originalFilename,
         "extension": asset->extension
       }
-    }
+    },
+    _type == "ctaBlock" => { ..., "cta": cta-> }
   },
   "gallery": gallery[]{
     caption,
+    captionEn,
     imageName,
     "alt": coalesce(alt, asset->altText),
+    "altEn": coalesce(altEn, alt, asset->altText),
     "url": asset->url,
     "originalFilename": asset->originalFilename,
     "extension": asset->extension
@@ -433,6 +466,7 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
     "categorySlug": activityType,
     "subCategorySlug": subCategory->slug.current
   },
+  "tagBrowsedImages": tagBrowsedImages[]{imageName, alt, altEn, "url": asset->url, "originalFilename": asset->originalFilename, "extension": asset->extension},
   "comments": *[_type == "comment" && post._ref == ^._id && approved == true] | order(_createdAt asc) {
     _id,
     name,
@@ -561,18 +595,28 @@ export const resourceBySlugQuery = groq`*[_type == "resource" && slug.current ==
   intro,
   introEn,
   "image": image.asset->url,
-  content,
-  contentEn,
+  "imageAlt": image.alt,
+  "imageAltEn": coalesce(image.altEn, image.alt),
+  "content": content[]{
+    ...,
+    _type == "ctaBlock" => { ..., "cta": cta-> }
+  },
+  "contentEn": contentEn[]{
+    ...,
+    _type == "ctaBlock" => { ..., "cta": cta-> }
+  },
   tabs[]{
     title,
     titleEn,
     content[]{
       ...,
-      _type == "image" => { ..., "asset": asset-> }
+      _type == "image" => { ..., "asset": asset-> },
+      _type == "ctaBlock" => { ..., "cta": cta-> }
     },
     contentEn[]{
       ...,
-      _type == "image" => { ..., "asset": asset-> }
+      _type == "image" => { ..., "asset": asset-> },
+      _type == "ctaBlock" => { ..., "cta": cta-> }
     },
     "pdf": pdf.asset->url
   },
@@ -586,6 +630,12 @@ export const resourceBySlugQuery = groq`*[_type == "resource" && slug.current ==
     "categorySlug": activityType,
     "subCategorySlug": subCategory->slug.current
   },
-  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order}
+  "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order},
+  ctaTitle,
+  ctaText,
+  ctaLink,
+  ctaButtonLabel,
+  metaTitle,
+  metaDescription
 }`
 

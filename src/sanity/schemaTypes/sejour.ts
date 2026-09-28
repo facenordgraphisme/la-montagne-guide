@@ -75,9 +75,15 @@ export const sejourType = defineType({
     }),
     defineField({
       name: 'level',
-      title: 'Niveau',
+      title: 'Niveau technique',
       type: 'string',
       description: 'Ex: Débutant, F/PD, AD, D+, TD… Texte libre.',
+    }),
+    defineField({
+      name: 'physicalLevel',
+      title: 'Niveau physique',
+      type: 'string',
+      description: 'Ex: Bonne condition physique requise, Randonnée régulière, Sportif confirmé…',
     }),
     defineField({
       name: 'season',
@@ -181,6 +187,10 @@ export const sejourType = defineType({
       title: 'Image principale',
       type: 'image',
       options: { hotspot: true },
+      fields: [
+        defineField({ name: 'alt', type: 'string', title: 'Texte ALT (Français)', description: 'Pour le SEO et l\'accessibilité.' }),
+        defineField({ name: 'altEn', type: 'string', title: 'Texte ALT (Anglais)', description: 'Version anglaise. Si vide, le texte FR est utilisé.' }),
+      ],
     }),
     defineField({ name: 'description', title: 'Description détaillée (FR)', type: 'array', of: descriptionBlocks }),
     defineField({ name: 'descriptionEn', title: 'Description détaillée (EN)', type: 'array', of: descriptionBlocks }),
@@ -343,6 +353,7 @@ export const sejourType = defineType({
                     },
                   },
                 },
+                { type: 'object', name: 'ctaBlock', title: 'CTA / Appel à l\'action', fields: [{ name: 'cta', type: 'reference', to: [{ type: 'cta' }], title: 'Choisir un CTA' }], preview: { select: { title: 'cta.name' }, prepare({ title }: any) { return { title: `📣 CTA : ${title || '(non défini)'}` } } } },
               ]
             }),
             defineField({
@@ -405,6 +416,7 @@ export const sejourType = defineType({
                     },
                   },
                 },
+                { type: 'object', name: 'ctaBlock', title: 'CTA / Appel à l\'action', fields: [{ name: 'cta', type: 'reference', to: [{ type: 'cta' }], title: 'Choisir un CTA' }], preview: { select: { title: 'cta.name' }, prepare({ title }: any) { return { title: `📣 CTA : ${title || '(non défini)'}` } } } },
               ]
             }),
             defineField({
@@ -416,6 +428,22 @@ export const sejourType = defineType({
             }),
           ]
         }
+      ]
+    }),
+    defineField({
+      name: 'ficheTooltips',
+      title: 'Fiche Technique — Info-bulles',
+      type: 'object',
+      description: 'Info-bulles optionnelles affichées au survol de chaque ligne de la fiche technique.',
+      options: { collapsible: true, collapsed: true },
+      fields: [
+        defineField({ name: 'duration', title: 'Info-bulle — Durée', type: 'text', rows: 2 }),
+        defineField({ name: 'level', title: 'Info-bulle — Niveau technique', type: 'text', rows: 2 }),
+        defineField({ name: 'physicalLevel', title: 'Info-bulle — Niveau physique', type: 'text', rows: 2 }),
+        defineField({ name: 'massif', title: 'Info-bulle — Massif', type: 'text', rows: 2 }),
+        defineField({ name: 'participants', title: 'Info-bulle — Participants', type: 'text', rows: 2 }),
+        defineField({ name: 'period', title: 'Info-bulle — Période', type: 'text', rows: 2 }),
+        defineField({ name: 'tarifs', title: 'Info-bulle — Tarifs', type: 'text', rows: 2 }),
       ]
     }),
     defineField({
@@ -434,7 +462,8 @@ export const sejourType = defineType({
           type: 'image',
           fields: [
             defineField({ name: 'imageName', type: 'string', title: 'Nom / Titre' }),
-            defineField({ name: 'alt', type: 'string', title: 'Texte alternatif' }),
+            defineField({ name: 'alt', type: 'string', title: 'ALT (Français)' }),
+            defineField({ name: 'altEn', type: 'string', title: 'ALT (Anglais)' }),
           ],
         },
       ],
@@ -452,9 +481,11 @@ export const sejourType = defineType({
           type: 'image',
           options: { hotspot: true },
           fields: [
-            defineField({ name: 'imageName', type: 'string', title: 'Nom / Titre de l\'image', description: 'Pour organiser ou identifier l\'image dans la galerie.' }),
-            defineField({ name: 'caption', type: 'string', title: 'Légende' }),
-            defineField({ name: 'alt', type: 'string', title: 'Texte alternatif (ALT)' }),
+            defineField({ name: 'imageName', type: 'string', title: 'Nom / Titre' }),
+            defineField({ name: 'caption', type: 'string', title: 'Légende (Français)' }),
+            defineField({ name: 'captionEn', type: 'string', title: 'Légende (Anglais)' }),
+            defineField({ name: 'alt', type: 'string', title: 'ALT (Français)' }),
+            defineField({ name: 'altEn', type: 'string', title: 'ALT (Anglais)' }),
           ],
           preview: {
             select: {

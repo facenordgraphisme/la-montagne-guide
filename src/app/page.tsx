@@ -14,13 +14,14 @@ import PartnersSlider from "@/components/PartnersSlider";
 import { client } from "@/sanity/lib/client";
 import { homeQuery, sortiesQuery, testimonialsQuery, blogTeaserQuery, activitiesQuery, settingsQuery, faqsQuery } from "@/sanity/lib/queries";
 import { getServerTranslations } from '@/i18n/server';
+import { autoFillAll } from '@/lib/translate';
 import { sortActivities } from "@/utils/activity";
 
 export default async function Home() {
   const homeData = await client.fetch(homeQuery);
   const { at, translatePortableText, lang } = await getServerTranslations();
   const limit = homeData?.featuredPostsLimit || 3;
-  const [sortiesData, testimonialsData, blogTeaserData, activitiesData, settingsData, faqsData] = await Promise.all([
+  const [sortiesData, testimonialsData, rawBlogTeaserData, activitiesData, settingsData, faqsData] = await Promise.all([
     client.fetch(sortiesQuery),
     client.fetch(testimonialsQuery),
     client.fetch(blogTeaserQuery, { limit }),
@@ -28,6 +29,12 @@ export default async function Home() {
     client.fetch(settingsQuery),
     client.fetch(faqsQuery)
   ]);
+
+  const blogTeaserData = (await autoFillAll(rawBlogTeaserData || [], [
+    ['title', 'titleEn'],
+    ['excerpt', 'excerptEn'],
+    ['imageAlt', 'imageAltEn'],
+  ], lang)) as any[];
 
   const sortedActivities = sortActivities(activitiesData, settingsData?.activitiesOrder);
 

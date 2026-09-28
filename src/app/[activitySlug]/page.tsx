@@ -4,10 +4,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { client } from "@/sanity/lib/client";
-import { 
-  activityBySlugQuery, 
-  postBySlugQuery, 
-  postSlugsQuery 
+import {
+  activityBySlugQuery,
+  activitySlugsQuery,
+  postBySlugQuery,
+  postSlugsQuery
 } from "@/sanity/lib/queries";
 import { urlFor, getVanityImageUrl } from "@/sanity/lib/image";
 import { getServerTranslations } from '@/i18n/server';
@@ -18,8 +19,8 @@ import ImageGallery from '@/components/ImageGallery';
 import PostComments from '@/components/PostComments';
 import { formatFriendlyDate } from '@/utils/date';
 import { toPlainText } from '@/utils/richText';
+import { autoFill } from '@/lib/translate';
 
-const VALID_ACTIVITIES = ['alpinisme', 'ski', 'escalade', 'cascade-de-glace', 'paralpinisme', 'voyages'];
 
 function buildDownloadUrl(url: string, imageName?: string, originalFilename?: string, extension?: string): string | undefined {
   if (!url) return undefined;
@@ -62,7 +63,7 @@ const activityBlockComponents = {
 };
 
 // Portable Text components for blog articles
-const blogBlockComponents = {
+function makeBlogBlockComponents(lang: string) { return {
   block: {
     h1: ({ children }: any) => <h1 className="text-4xl md:text-5xl font-bold mb-8 mt-12 text-foreground">{children}</h1>,
     h2: ({ children }: any) => <h2 className="text-3xl md:text-4xl font-bold mb-6 mt-10 text-foreground">{children}</h2>,
@@ -117,15 +118,15 @@ const blogBlockComponents = {
           <div className="relative w-full h-[400px] md:h-[600px] rounded-[2rem] overflow-hidden border border-border">
             <Image
               src={urlFor(value).url()}
-              alt={value.alt || 'Image article'}
+              alt={(lang === 'en' ? (value.altEn || value.alt) : value.alt) || 'Image'}
               fill
               sizes="(max-width: 1024px) 100vw, 800px"
               className="object-cover"
             />
           </div>
-          {value.caption && (
+          {(value.captionEn || value.caption) && (
             <p className="mt-3 text-center text-sm text-foreground/60 italic font-medium px-4">
-              {value.caption}
+              {lang === 'en' ? (value.captionEn || value.caption) : value.caption}
             </p>
           )}
         </div>
@@ -142,8 +143,8 @@ const blogBlockComponents = {
           const vanityName = img.imageName || img.originalFilename?.split('.')[0];
           return {
             src: getVanityImageUrl(sizedUrl, vanityName),
-            alt: img.alt || img.caption || 'Image galerie',
-            caption: img.caption,
+            alt: (lang === 'en' ? (img.altEn || img.alt) : img.alt) || img.caption || 'Image',
+            caption: lang === 'en' ? (img.captionEn || img.caption) : img.caption,
             downloadUrl: buildDownloadUrl(rawUrl, img.imageName, img.originalFilename, img.extension),
           };
         });
@@ -173,18 +174,37 @@ const blogBlockComponents = {
           />
         </div>
       );
+    },
+    ctaBlock: ({ value }: any) => {
+      const cta = value.cta
+      if (!cta) return null
+      const text = lang === 'en' ? (cta.textEn || cta.text) : cta.text
+      const label = lang === 'en' ? (cta.buttonLabelEn || cta.buttonLabel) : cta.buttonLabel
+      const styleMap: Record<string, string> = {
+        primary: 'bg-accent/8 border-accent/20',
+        highlight: 'bg-highlight/8 border-highlight/20',
+        outline: 'bg-transparent border-foreground/15',
+      }
+      const btnClass = cta.style === 'highlight' ? 'btn-highlight' : cta.style === 'outline' ? 'btn-outline' : 'btn-primary'
+      return (
+        <div className={`not-prose my-10 p-8 rounded-2xl border ${styleMap[cta.style || 'primary'] || styleMap.primary} text-center`}>
+          {text && <p className="text-foreground/70 mb-6 text-base leading-relaxed">{text}</p>}
+          <Link href={cta.link || '/contact'} className={`${btnClass} inline-block !text-sm font-black uppercase tracking-widest`}>
+            {label}
+          </Link>
+        </div>
+      )
     }
   },
-};
+}; }
 
 export async function generateStaticParams() {
-  const posts = await client.fetch(postSlugsQuery);
-  const postParams = posts.map((post: any) => ({
-    activitySlug: post.slug,
-  }));
-  const activityParams = VALID_ACTIVITIES.map((act) => ({
-    activitySlug: act,
-  }));
+  const [posts, activities] = await Promise.all([
+    client.fetch(postSlugsQuery),
+    client.fetch(activitySlugsQuery),
+  ]);
+  const postParams = posts.map((post: any) => ({ activitySlug: post.slug }));
+  const activityParams = activities.map((act: any) => ({ activitySlug: act.slug }));
   return [...postParams, ...activityParams];
 }
 
@@ -192,14 +212,12 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
   const { activitySlug } = await params;
   const { at, lang } = await getServerTranslations();
 
-  if (VALID_ACTIVITIES.includes(activitySlug)) {
-    const activity = await client.fetch(activityBySlugQuery, { slug: activitySlug });
-    if (!activity) return {};
+  const activity = await client.fetch(activityBySlugQuery, { slug: activitySlug });
+  if (activity) {
     const autoTitle = `${at({ fr: activity.title, en: activity.titleEn })} | La Montagne Guide`;
     const introText = activity.introEn && lang === 'en' ? activity.introEn : activity.intro;
     const descBlocks = lang === 'en' && activity.descriptionEn?.length ? activity.descriptionEn : activity.description;
     const autoDescription = introText ? at(introText) : (descBlocks ? toPlainText(descBlocks).substring(0, 160) : '');
-
     const title = activity.metaTitle || autoTitle;
     const description = activity.metaDescription || autoDescription;
     const ogImage = activity.image || undefined;
@@ -212,33 +230,34 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
         images: ogImage ? [{ url: ogImage }] : undefined,
       },
     };
-  } else {
-    const post = await client.fetch(postBySlugQuery, { slug: activitySlug });
-    if (!post) return {};
-    const title = `${at(post.title)} | La Montagne Guide`;
-    const description = post.excerpt ? at(post.excerpt) : '';
-    const ogImage = post.image || undefined;
-    return {
+  }
+
+  let post = await client.fetch(postBySlugQuery, { slug: activitySlug });
+  if (!post) return {};
+  post = await autoFill(post, [['title', 'titleEn'], ['excerpt', 'excerptEn'], ['imageAlt', 'imageAltEn']], lang);
+  const title = `${at({ fr: post.title, en: post.titleEn })} | La Montagne Guide`;
+  const rawExcerpt = lang === 'en' ? (post.excerptEn || post.excerpt) : post.excerpt;
+  const description = rawExcerpt ? at(rawExcerpt) : '';
+  const ogImage = post.image || undefined;
+  return {
+    title,
+    description,
+    openGraph: {
       title,
       description,
-      openGraph: {
-        title,
-        description,
-        type: 'article',
-        images: ogImage ? [{ url: ogImage }] : undefined,
-      },
-    };
-  }
+      type: 'article',
+      images: ogImage ? [{ url: ogImage }] : undefined,
+    },
+  };
 }
 
 export default async function GenericRootPage({ params }: { params: Promise<{ activitySlug: string }> }) {
   const { activitySlug } = await params;
   const { at, t, lang, translatePortableText } = await getServerTranslations();
 
-  if (VALID_ACTIVITIES.includes(activitySlug)) {
+  const activity = await client.fetch(activityBySlugQuery, { slug: activitySlug });
+  if (activity) {
     // RENDER ACTIVITY LANDING PAGE
-    const activity = await client.fetch(activityBySlugQuery, { slug: activitySlug });
-    if (!activity) notFound();
     const univers = activity.univers || [];
 
     return (
@@ -347,14 +366,15 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
     );
   } else {
     // RENDER BLOG POST DETAIL PAGE
-    const post = await client.fetch(postBySlugQuery, { slug: activitySlug });
+    let post = await client.fetch(postBySlugQuery, { slug: activitySlug });
     if (!post) notFound();
+    post = await autoFill(post, [['title', 'titleEn'], ['excerpt', 'excerptEn'], ['imageAlt', 'imageAltEn']], lang);
 
     const jsonLd = {
       "@context": "https://schema.org",
       "@type": "BlogPosting",
-      "headline": at(post.title),
-      "description": post.excerpt ? at(post.excerpt) : undefined,
+      "headline": at({ fr: post.title, en: post.titleEn }),
+      "description": (lang === 'en' ? (post.excerptEn || post.excerpt) : post.excerpt) ? at(lang === 'en' ? (post.excerptEn || post.excerpt) : post.excerpt) : undefined,
       "image": post.image || undefined,
       "datePublished": post.date || undefined,
       "author": {
@@ -392,14 +412,15 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
             </div>
 
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tighter uppercase leading-[1.0] text-foreground">
-              {at(post.title)}
+              {at({ fr: post.title, en: post.titleEn })}
             </h1>
           </div>
         </section>
 
         <section className="py-16">
           <div className="container mx-auto px-6">
-            <div className="max-w-3xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 max-w-7xl mx-auto items-start">
+            <div className="lg:col-span-2">
               {(post.prevPost || post.nextPost) && (
                 <div className="flex items-center justify-between border-b border-border/40 pb-6 mb-8 gap-4">
                   {post.prevPost ? (
@@ -428,9 +449,9 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                 </div>
               )}
 
-              {post.excerpt && (
+              {(post.excerptEn || post.excerpt) && (
                 <p className="text-xl md:text-2xl text-foreground/80 font-bold leading-relaxed mb-12">
-                  {at(post.excerpt)}
+                  {lang === 'en' ? at(post.excerptEn || post.excerpt) : at(post.excerpt)}
                 </p>
               )}
 
@@ -438,7 +459,7 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                 <div className="relative aspect-video rounded-[2rem] overflow-hidden border border-border shadow-2xl mb-12">
                   <Image 
                     src={getVanityImageUrl(post.image, post.imageName || post.imageAlt || post.title)}
-                    alt={post.imageAlt ? at(post.imageAlt) : at(post.title)}
+                    alt={lang === 'en' ? (post.imageAltEn || post.imageAlt || at(post.title)) : (post.imageAlt || at(post.title))}
                     fill
                     sizes="(max-width: 1024px) 100vw, 800px"
                     className="object-cover"
@@ -450,7 +471,10 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
 
               <div className="prose-custom max-w-none">
                 {post.body ? (
-                  <PortableText value={translatePortableText(post.body)} components={blogBlockComponents} />
+                  <PortableText
+                    value={lang === 'en' && post.bodyEn?.length ? post.bodyEn : translatePortableText(post.body)}
+                    components={makeBlogBlockComponents(lang)}
+                  />
                 ) : (
                   <p className="italic text-foreground/45">{at('Pas de contenu pour le moment.')}</p>
                 )}
@@ -462,16 +486,16 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                     <FileText size={18} />
                     {lang === 'en' ? 'Practical Info / Route Topo' : 'Données Pratiques / Topo'}
                   </h3>
-                  <PortableText value={translatePortableText(post.topo)} components={blogBlockComponents} />
+                  <PortableText value={translatePortableText(post.topo)} components={makeBlogBlockComponents(lang)} />
                 </div>
               )}
 
-              {post.gallery && post.gallery.length > 0 && (
+              {(() => { const fullGallery = [...(post.gallery || []), ...(post.tagBrowsedImages || [])]; return fullGallery.length > 0 && (
                 <div className="mt-16 pt-16 border-t border-border/40">
                   <h3 className="text-xl font-bold uppercase tracking-widest text-accent mb-8">{at('Galerie Photos')}</h3>
                   <ImageGallery
                     unoptimized
-                    images={post.gallery
+                    images={fullGallery
                       .filter((img: any) => img && img.url)
                       .map((img: any) => {
                         const sizingParams = '?w=1600&q=80&auto=format&fit=max';
@@ -479,14 +503,14 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                         const vanityName = img.imageName || img.originalFilename?.split('.')[0];
                         return {
                           src: getVanityImageUrl(sizedUrl, vanityName),
-                          alt: img.alt || 'Image galerie',
-                          caption: img.caption,
+                          alt: (lang === 'en' ? (img.altEn || img.alt) : img.alt) || 'Image',
+                          caption: lang === 'en' ? (img.captionEn || img.caption) : img.caption,
                           downloadUrl: buildDownloadUrl(img.url, img.imageName, img.originalFilename, img.extension),
                         };
                       })}
                   />
                 </div>
-              )}
+              ); })()}
 
               {post.faqs && post.faqs.length > 0 && (
                 <div className="mt-16 pt-16 border-t border-border/40">
@@ -525,68 +549,13 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                 );
               })()}
 
-              {/* CTA Block */}
-              <div className="mt-16 p-8 md:p-12 rounded-[2rem] border border-accent/20 bg-linear-to-br from-accent/5 to-secondary/5 text-center shadow-xl">
-                <h3 className="text-2xl md:text-3xl font-black tracking-tight mb-4 text-foreground uppercase">
-                  {post.ctaText ? at(post.ctaText) : (lang === 'en' ? "Want to experience this type of adventure too?" : "Toi aussi tu souhaites vivre ce type d'aventure ?")}
-                </h3>
-                <p className="text-foreground/60 text-sm md:text-base mb-8 max-w-xl mx-auto">
-                  {lang === 'en' ? "Contact me to discuss and organize your next custom high-mountain project." : "Contactez-moi pour discuter de votre projet de haute montagne et organiser votre prochaine sortie sur mesure."}
-                </p>
-                <Link href={post.ctaLink || '/contact'} className="btn-primary inline-block px-8 py-4 text-sm font-black uppercase tracking-widest text-white!">
-                  {lang === 'en' ? "Contact me" : "Contactez-moi"}
-                </Link>
-              </div>
-
-              {/* Related Activities & Séjours */}
-              {post.relatedActivities && post.relatedActivities.length > 0 && (
-                <div className="mt-16 pt-16 border-t border-border/40">
-                  <h3 className="text-xl font-bold uppercase tracking-widest text-accent mb-8 flex items-center gap-2">
-                    <Compass size={18} />
-                    {at('Séjours Recommandés')}
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {post.relatedActivities.map((act: any) => {
-                      const stayLink = `/${act.categorySlug || 'alpinisme'}/${act.subCategorySlug || 'initiation'}/${act.slug}`;
-                      return (
-                        <Link
-                          key={act.slug}
-                          href={stayLink}
-                          className="group flex gap-4 items-center p-4 rounded-2xl hover:bg-foreground/5 border border-border hover:border-accent/30 transition-all duration-300"
-                        >
-                          {act.image && (
-                            <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0">
-                              <Image
-                                src={act.image}
-                                alt={at(act.title)}
-                                fill
-                                sizes="80px"
-                                className="object-cover"
-                              />
-                            </div>
-                          )}
-                          <div className="overflow-hidden">
-                            <h4 className="font-bold text-sm text-foreground group-hover:text-accent transition-colors line-clamp-2">
-                              {at(act.title)}
-                            </h4>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-highlight mt-1">
-                              {act.basePrice ? at(act.basePrice) : at('Sur devis')}
-                            </p>
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
               {/* Client Comments Block */}
               <PostComments postId={post._id} initialComments={post.comments || []} />
 
               {(post.prevPost || post.nextPost) && (
                 <div className="flex items-center justify-between border-t border-border/40 pt-8 mt-16 gap-4">
                   {post.prevPost ? (
-                    <Link 
+                    <Link
                       href={`/${post.prevPost.slug}`}
                       className="group flex flex-col gap-1 text-left max-w-[48%]"
                     >
@@ -599,9 +568,9 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                   ) : (
                     <div />
                   )}
-                  
+
                   {post.nextPost ? (
-                    <Link 
+                    <Link
                       href={`/${post.nextPost.slug}`}
                       className="group flex flex-col gap-1 text-right max-w-[48%] items-end ml-auto"
                     >
@@ -616,6 +585,68 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                   )}
                 </div>
               )}
+            </div>
+
+            {/* Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-32 space-y-6">
+                {/* CTA Block */}
+                <div className="glass p-8 rounded-[40px] border border-border shadow-xl text-center">
+                  <h3 className="text-lg font-black tracking-tight mb-3 text-foreground uppercase leading-tight">
+                    {post.ctaText ? at(post.ctaText) : (lang === 'en' ? "Want to experience this type of adventure?" : "Envie de vivre ce type d'aventure ?")}
+                  </h3>
+                  <p className="text-foreground/60 text-sm mb-6 leading-relaxed">
+                    {lang === 'en' ? "Contact me to plan your custom high-mountain project." : "Contactez-moi pour organiser votre prochaine sortie sur mesure."}
+                  </p>
+                  <Link href={post.ctaLink || '/contact'} className="btn-primary w-full block text-center !text-white text-xs font-black uppercase tracking-widest">
+                    {lang === 'en' ? "Contact me" : "Contactez-moi"}
+                  </Link>
+                </div>
+
+                {/* Related Activities & Séjours */}
+                {post.relatedActivities && post.relatedActivities.length > 0 && (
+                  <div className="glass p-8 rounded-[40px] border border-border shadow-xl">
+                    <h3 className="text-base font-black uppercase tracking-widest mb-6 flex items-center gap-2">
+                      <Compass size={16} className="text-accent" />
+                      {at('Séjours Recommandés')}
+                    </h3>
+                    <div className="space-y-4">
+                      {post.relatedActivities.map((act: any) => {
+                        const stayLink = `/${act.categorySlug || 'alpinisme'}/${act.subCategorySlug || 'initiation'}/${act.slug}`;
+                        return (
+                          <Link
+                            key={act.slug}
+                            href={stayLink}
+                            className="group flex gap-3 items-center p-3 rounded-2xl hover:bg-foreground/5 border border-transparent hover:border-border transition-all duration-300"
+                          >
+                            {act.image && (
+                              <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0">
+                                <Image
+                                  src={act.image}
+                                  alt={at(act.title)}
+                                  fill
+                                  sizes="56px"
+                                  className="object-cover"
+                                />
+                              </div>
+                            )}
+                            <div className="overflow-hidden">
+                              <h4 className="font-bold text-sm text-foreground group-hover:text-accent transition-colors line-clamp-2 leading-tight">
+                                {at(act.title)}
+                              </h4>
+                              <p className="text-[10px] font-black uppercase tracking-widest text-highlight mt-1">
+                                {act.basePrice ? at(act.basePrice) : at('Sur devis')}
+                              </p>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
             </div>
           </div>
         </section>

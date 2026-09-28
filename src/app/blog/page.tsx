@@ -30,13 +30,14 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
   const category = typeof params.category === 'string' ? params.category : undefined;
   const massif = typeof params.massif === 'string' ? params.massif : undefined;
+  const q = typeof params.q === 'string' && params.q.trim() ? params.q.trim() : undefined;
   const pageNumber = Math.max(1, Number(params.page) || 1);
 
   const start = (pageNumber - 1) * PAGE_SIZE;
   const end = start + PAGE_SIZE;
 
   const [{ posts, total }, categories, massifs] = await Promise.all([
-    client.fetch(postsPageQuery, { start, end, category: category ?? null, massif: massif ?? null }),
+    client.fetch(postsPageQuery, { start, end, category: category ?? null, massif: massif ?? null, q: q ?? null }),
     client.fetch(categoryTagsQuery),
     client.fetch(massifTagsQuery),
   ]);
@@ -60,7 +61,14 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           massifs={massifs}
           activeCategory={category}
           activeMassif={massif}
+          activeSearch={q}
         />
+
+        {q && (
+          <p className="text-sm text-foreground/40 mb-8 -mt-8">
+            {total} {at('résultat(s) pour')} <span className="text-accent font-semibold">"{q}"</span>
+          </p>
+        )}
 
         {posts.length > 0 ? (
           <>
@@ -75,9 +83,10 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
               basePath="/blog"
               category={category}
               massif={massif}
+              q={q}
             />
           </>
-        ) : (category || massif) ? (
+        ) : (category || massif || q) ? (
           <div className="glass p-12 rounded-[2rem] text-center border border-border">
             <h3 className="text-3xl font-bold mb-4">{at('Aucun article ne correspond à ces filtres')}</h3>
             <p className="text-foreground/40">{at('Essayez une autre catégorie ou un autre massif.')}</p>

@@ -10,18 +10,24 @@ import { getVanityImageUrl } from '@/sanity/lib/image';
 interface BlogCardProps {
   post: {
     title: string;
+    titleEn?: string;
     slug: string;
     date: string;
     image: string;
     imageAlt?: string;
+    imageAltEn?: string;
     imageName?: string;
     excerpt?: string;
+    excerptEn?: string;
   };
 }
 
 export default function BlogCard({ post }: BlogCardProps) {
   const { at, t, language } = useLanguage();
   const formattedDate = formatFriendlyDate(post.date, language as 'fr' | 'en');
+  const displayTitle = { fr: post.title, en: post.titleEn };
+  const displayAlt = language === 'en' ? (post.imageAltEn || post.imageAlt) : post.imageAlt;
+  const displayExcerpt = language === 'en' ? (post.excerptEn || post.excerpt) : post.excerpt;
 
   return (
     <Link href={`/${post.slug}`} className="group block">
@@ -31,7 +37,7 @@ export default function BlogCard({ post }: BlogCardProps) {
           {post.image ? (
             <Image
               src={getVanityImageUrl(post.image, post.imageName || post.imageAlt || post.title)}
-              alt={post.imageAlt ? at(post.imageAlt) : at(post.title)}
+              alt={displayAlt ? at(displayAlt) : at(displayTitle)}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -53,12 +59,12 @@ export default function BlogCard({ post }: BlogCardProps) {
           </div>
           
           <h3 className="text-2xl font-bold mb-4 group-hover:text-accent transition-colors duration-300">
-            {at(post.title)}
+            {at(displayTitle)}
           </h3>
           
-          {post.excerpt && (
+          {displayExcerpt && (
             <p className="text-foreground/60 line-clamp-3 mb-6 flex-1">
-              {at(post.excerpt)}
+              {at(displayExcerpt)}
             </p>
           )}
 

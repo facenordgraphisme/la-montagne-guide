@@ -7,15 +7,17 @@ interface PaginationProps {
   basePath: string
   category?: string
   massif?: string
+  q?: string
 }
 
-export default function Pagination({ currentPage, totalPages, basePath, category, massif }: PaginationProps) {
+export default function Pagination({ currentPage, totalPages, basePath, category, massif, q }: PaginationProps) {
   if (totalPages <= 1) return null
 
   const buildHref = (page: number) => {
     const params = new URLSearchParams()
     if (category) params.set('category', category)
     if (massif) params.set('massif', massif)
+    if (q) params.set('q', q)
     if (page > 1) params.set('page', String(page))
     const query = params.toString()
     return query ? `${basePath}?${query}` : basePath
