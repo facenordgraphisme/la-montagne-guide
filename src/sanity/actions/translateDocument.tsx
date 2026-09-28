@@ -3,6 +3,15 @@ import { useState, useCallback } from 'react'
 import { useDocumentOperation } from 'sanity'
 import type { DocumentActionProps } from 'sanity'
 
+function toSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
 // Which simple string fields to translate per document type
 const STRING_FIELDS: Record<string, [string, string][]> = {
   post: [
@@ -19,6 +28,9 @@ const STRING_FIELDS: Record<string, [string, string][]> = {
   resource: [
     ['title', 'titleEn'],
     ['intro', 'introEn'],
+  ],
+  tag: [
+    ['name', 'nameEn'],
   ],
 }
 
@@ -202,6 +214,14 @@ export function translateDocumentAction(props: DocumentActionProps) {
         })
       }
 
+      // Auto-generate slugEn from titleEn for post / sejour / resource
+      if (['post', 'sejour', 'resource'].includes(type)) {
+        const titleEnValue: string = setValues.titleEn || (doc as any).titleEn || ''
+        if (titleEnValue.trim()) {
+          setValues.slugEn = toSlug(titleEnValue)
+        }
+      }
+
       patch.execute([{ set: setValues }])
       // Give the patch time to commit, then auto-publish so the front-end sees the translation
       await new Promise(r => setTimeout(r, 800))
@@ -217,7 +237,7 @@ export function translateDocumentAction(props: DocumentActionProps) {
     }
   }, [draft, published, id, type, patch])
 
-  if (!['post', 'sejour', 'resource'].includes(type)) return null
+  if (!['post', 'sejour', 'resource', 'tag'].includes(type)) return null
 
   return {
     label:

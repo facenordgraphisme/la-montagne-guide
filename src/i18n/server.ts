@@ -21,8 +21,8 @@ export async function getLanguage() {
   return (cookieStore.get('language')?.value || 'fr') as 'fr' | 'en'
 }
 
-export async function getServerTranslations() {
-  const lang = await getLanguage()
+export async function getServerTranslations(forceLang?: 'fr' | 'en') {
+  const lang = forceLang || await getLanguage()
   
   const t = (key: string) => {
     const keys = key.split('.')

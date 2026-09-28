@@ -52,7 +52,8 @@ export async function generateMetadata(): Promise<Metadata> {
       cookies(),
     ]);
 
-    const activeLanguage = cookieStore.get('NEXT_LOCALE')?.value || 'fr';
+    const activeLanguage = cookieStore.get('language')?.value || 'fr';
+    const locale = activeLanguage === 'en' ? 'en_GB' : 'fr_FR';
 
     return {
       metadataBase: new URL('https://www.la-montagne-guide.fr'),
@@ -64,6 +65,8 @@ export async function generateMetadata(): Promise<Metadata> {
         ]
       },
       openGraph: {
+        locale,
+        alternateLocale: activeLanguage === 'en' ? 'fr_FR' : 'en_GB',
         images: settingsData?.seoImage ? [{ url: settingsData.seoImage }] : [],
       },
     };
@@ -91,6 +94,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const lang = cookieStore.get('language')?.value || 'fr';
+
   const [contactData, activitiesData, settingsData] = await Promise.all([
     client.fetch(contactQuery),
     client.fetch(activitiesQuery),
@@ -102,7 +108,7 @@ export default async function RootLayout({
   const sortedActivities = sortActivities(activitiesData, settingsData?.activitiesOrder);
 
   return (
-    <html lang="fr" suppressHydrationWarning data-scroll-behavior="smooth" className={`${outfit.variable} ${poppins.variable} ${montserrat.variable} ${playfairDisplay.variable} ${inter.variable} antialiased scroll-smooth`}>
+    <html lang={lang} suppressHydrationWarning data-scroll-behavior="smooth" className={`${outfit.variable} ${poppins.variable} ${montserrat.variable} ${playfairDisplay.variable} ${inter.variable} antialiased scroll-smooth`}>
       <body className="bg-background text-foreground transition-colors duration-300">
         <ThemeProvider
           attribute="data-theme"

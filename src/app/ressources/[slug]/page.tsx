@@ -5,7 +5,7 @@ import { urlFor } from '@/sanity/lib/image'
 import Link from 'next/link';
 import { client } from "@/sanity/lib/client";
 import { resourceBySlugQuery, resourcesQuery } from "@/sanity/lib/queries";
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { getServerTranslations } from '@/i18n/server';
 import { autoFill, autoFillAll } from '@/lib/translate';
 import { ArrowLeft, BookOpen, Clock, Compass } from 'lucide-react';
@@ -113,9 +113,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!res) return {};
   res = await autoFill(res, [['title', 'titleEn'], ['intro', 'introEn'], ['imageAlt', 'imageAltEn']], lang);
 
-  const autoTitle = `${at(res.title)} | Conseils & Guides`;
+  const autoTitle = `${at({ fr: res.title, en: res.titleEn || res.title })} | Conseils & Guides`;
   const title = res.metaTitle || autoTitle;
-  const description = res.metaDescription || (res.intro ? at(res.intro).substring(0, 160) : '');
+  const introText = lang === 'en' ? (res.introEn || res.intro) : res.intro;
+  const description = res.metaDescription || (introText ? at(introText).substring(0, 160) : '');
 
   return {
     title,
@@ -129,6 +130,12 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
   const { at, lang } = await getServerTranslations();
 
   if (!data) notFound();
+
+  // Redirect EN visitors to the English URL if slugEn exists
+  if (lang === 'en' && data.slugEn) {
+    redirect(`/en/ressources/${data.slugEn}`)
+  }
+
   data = await autoFill(data, [['title', 'titleEn'], ['intro', 'introEn'], ['imageAlt', 'imageAltEn']], lang);
   if (data.tabs?.length) {
     data = { ...data, tabs: await autoFillAll(data.tabs, [['title', 'titleEn']], lang) };

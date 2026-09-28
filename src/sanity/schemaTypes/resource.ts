@@ -21,13 +21,17 @@ export const resourceType = defineType({
     }),
     defineField({
       name: 'slug',
-      title: 'Slug',
+      title: 'Slug (Français)',
       type: 'slug',
-      options: {
-        source: 'title',
-        maxLength: 96,
-      },
+      options: { source: 'title', maxLength: 96 },
       validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'slugEn',
+      title: 'Slug (Anglais)',
+      type: 'string',
+      description: 'Généré automatiquement par "🌐 Traduire EN". URL anglaise : /en/ressources/[slug-en]',
+      readOnly: true,
     }),
     defineField({
       name: 'category',

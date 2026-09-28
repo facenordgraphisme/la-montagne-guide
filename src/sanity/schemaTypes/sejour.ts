@@ -31,12 +31,16 @@ export const sejourType = defineType({
     defineField({ name: 'titleEn', title: 'Titre du séjour (EN)', type: 'string' }),
     defineField({
       name: 'slug',
-      title: 'Slug',
+      title: 'Slug (Français)',
       type: 'slug',
-      options: {
-        source: 'title',
-        maxLength: 96,
-      },
+      options: { source: 'title', maxLength: 96 },
+    }),
+    defineField({
+      name: 'slugEn',
+      title: 'Slug (Anglais)',
+      type: 'string',
+      description: 'Généré automatiquement par "🌐 Traduire EN". URL anglaise : /en/[activitySlug]/[subCategory]/[slug-en]',
+      readOnly: true,
     }),
     defineField({
       name: 'activityType',

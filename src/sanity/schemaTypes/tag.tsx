@@ -9,9 +9,15 @@ export const tagType = defineType({
   fields: [
     defineField({
       name: 'name',
-      title: 'Nom',
+      title: 'Nom (Français)',
       type: 'string',
       validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'nameEn',
+      title: 'Nom (Anglais)',
+      type: 'string',
+      description: 'Si vide, traduit automatiquement côté site. Utilisez "🌐 Traduire EN" pour remplir.',
     }),
     defineField({
       name: 'slug',

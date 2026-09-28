@@ -40,7 +40,7 @@ export default defineConfig({
   schema,
   document: {
     actions: (prev, ctx) => {
-      if (['post', 'sejour', 'resource'].includes(ctx.schemaType)) {
+      if (['post', 'sejour', 'resource', 'tag'].includes(ctx.schemaType)) {
         return [translateDocumentAction, ...prev]
       }
       return prev

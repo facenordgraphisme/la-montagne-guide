@@ -7,6 +7,7 @@ import { useRef } from 'react'
 
 interface FilterTag {
   name: string
+  nameEn?: string
   slug: string
 }
 
@@ -115,7 +116,7 @@ export default function BlogFilters({
             }
             className={pillClass(activeCategory === cat.slug)}
           >
-            {at(cat.name)}
+            {at({ fr: cat.name, en: cat.nameEn || cat.name })}
           </button>
         ))}
       </div>
@@ -138,7 +139,7 @@ export default function BlogFilters({
             <option value="" className="bg-background text-foreground">{at('Tous les massifs')}</option>
             {massifs.map((m) => (
               <option key={m.slug} value={m.slug} className="bg-background text-foreground">
-                {at(m.name)}
+                {at({ fr: m.name, en: m.nameEn || m.name })}
               </option>
             ))}
           </select>

@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { client } from "@/sanity/lib/client";
 import { sejourBySlugQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from "@/sanity/lib/queries";
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Download, Users, CalendarDays, Info } from 'lucide-react';
 
 import { getServerTranslations } from '@/i18n/server';
@@ -80,6 +80,11 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
   const { at, t, lang, translatePortableText } = await getServerTranslations();
 
   if (!rawSejour) notFound();
+
+  // Redirect EN visitors to the English URL if slugEn exists
+  if (lang === 'en' && rawSejour.slugEn) {
+    redirect(`/en/${activitySlug}/${subCategorySlug}/${rawSejour.slugEn}`)
+  }
 
   let sejour = await autoFill(rawSejour, [['title', 'titleEn'], ['imageAlt', 'imageAltEn']], lang);
   if (sejour.tabs?.length) {

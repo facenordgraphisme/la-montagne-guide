@@ -108,6 +108,7 @@ export const sejoursByActivityQuery = groq`*[_type == "sejour" && activityType =
 
 export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $slug][0] {
   ...,
+  slugEn,
   "subCategory": subCategory->slug.current,
   "subCategoryTitle": subCategory->title,
   "image": image.asset->url,
@@ -391,15 +392,16 @@ export const postsPageQuery = groq`{
   ])
 }`
 
-export const categoryTagsQuery = groq`*[_type == "tag" && tagType == "category"] | order(name asc) { name, "slug": slug.current }`
+export const categoryTagsQuery = groq`*[_type == "tag" && tagType == "category"] | order(name asc) { name, nameEn, "slug": slug.current }`
 
-export const massifTagsQuery = groq`*[_type == "tag" && tagType == "massif"] | order(name asc) { name, "slug": slug.current }`
+export const massifTagsQuery = groq`*[_type == "tag" && tagType == "massif"] | order(name asc) { name, nameEn, "slug": slug.current }`
 
 export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][0] {
   _id,
   title,
   titleEn,
   "slug": slug.current,
+  slugEn,
   "date": publishedAt,
   "image": mainImage.asset->url,
   "imageAlt": coalesce(mainImage.alt, mainImage.asset->altText),
@@ -461,14 +463,12 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
   },
   "tags": array::compact([
     activityType->{ "name": title, "slug": slug.current, "tagType": "category" }
-  ] + tags[]->{ name, "slug": slug.current, tagType }),
+  ] + tags[]->{ name, nameEn, "slug": slug.current, tagType }),
   "prevPost": *[_type == "post" && (publishedAt < ^.publishedAt || (publishedAt == ^.publishedAt && _createdAt < ^._createdAt))] | order(publishedAt desc, _createdAt desc)[0] {
-    title,
-    "slug": slug.current
+    title, titleEn, "slug": slug.current, slugEn
   },
   "nextPost": *[_type == "post" && (publishedAt > ^.publishedAt || (publishedAt == ^.publishedAt && _createdAt > ^._createdAt))] | order(publishedAt asc, _createdAt asc)[0] {
-    title,
-    "slug": slug.current
+    title, titleEn, "slug": slug.current, slugEn
   },
   ctaText,
   ctaTextEn,
@@ -611,6 +611,7 @@ export const resourceBySlugQuery = groq`*[_type == "resource" && slug.current ==
   title,
   titleEn,
   "slug": slug.current,
+  slugEn,
   category,
   intro,
   introEn,
@@ -657,5 +658,25 @@ export const resourceBySlugQuery = groq`*[_type == "resource" && slug.current ==
   ctaButtonLabel,
   metaTitle,
   metaDescription
+}`
+
+// ── EN slug lookup queries ───────────────────────────────────────────────────
+
+export const postBySlugEnQuery = groq`*[_type == "post" && slugEn == $slug][0] { "slug": slug.current }`
+
+export const resourceBySlugEnQuery = groq`*[_type == "resource" && slugEn == $slug][0] { "slug": slug.current }`
+
+export const sejourBySlugEnQuery = groq`*[_type == "sejour" && slugEn == $slug][0] {
+  "slug": slug.current,
+  "activitySlug": activityType,
+  "subCategorySlug": subCategory->slug.current
+}`
+
+export const postSlugEnQuery = groq`*[_type == "post" && defined(slugEn)]{ slugEn }`
+export const resourceSlugEnQuery = groq`*[_type == "resource" && defined(slugEn)]{ slugEn }`
+export const sejourSlugEnQuery = groq`*[_type == "sejour" && defined(slugEn)]{
+  slugEn,
+  "activitySlug": activityType,
+  "subCategorySlug": subCategory->slug.current
 }`
 

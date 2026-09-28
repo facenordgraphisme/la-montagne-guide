@@ -12,6 +12,7 @@ import {
 } from "@/sanity/lib/queries";
 import { urlFor, getVanityImageUrl } from "@/sanity/lib/image";
 import { getServerTranslations } from '@/i18n/server';
+import { redirect } from 'next/navigation';
 import { PortableText } from '@portabletext/react';
 import FAQAccordion from "@/components/FAQAccordion";
 import { Calendar, ArrowLeft, ChevronLeft, ChevronRight, FileText, Compass } from 'lucide-react';
@@ -368,6 +369,12 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
     // RENDER BLOG POST DETAIL PAGE
     let post = await client.fetch(postBySlugQuery, { slug: activitySlug });
     if (!post) notFound();
+
+    // Redirect EN visitors to the English URL if slugEn exists
+    if (lang === 'en' && post.slugEn) {
+      redirect(`/en/${post.slugEn}`)
+    }
+
     post = await autoFill(post, [['title', 'titleEn'], ['excerpt', 'excerptEn'], ['imageAlt', 'imageAltEn']], lang);
 
     const jsonLd = {
@@ -535,10 +542,12 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                 return (
                   <div className="flex flex-wrap gap-2 mt-16 pt-8 border-t border-border/40">
                     {uniqueTags.map((tag: any, idx: number) => {
-                      const tagLabel = typeof tag === 'string' ? tag : tag.name;
+                      const tagLabel = typeof tag === 'string'
+                        ? tag
+                        : { fr: tag.name, en: tag.nameEn || tag.name };
                       return (
-                        <span 
-                          key={idx} 
+                        <span
+                          key={idx}
                           className="px-4 py-2 rounded-full text-xs font-black bg-foreground/5 text-foreground/60 uppercase tracking-widest border border-border"
                         >
                           {at(tagLabel)}

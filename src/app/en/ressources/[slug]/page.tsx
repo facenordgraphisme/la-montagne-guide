@@ -1,0 +1,232 @@
+import type { Metadata } from 'next'
+import React from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { notFound, redirect } from 'next/navigation'
+import { client } from '@/sanity/lib/client'
+import { resourceBySlugQuery, resourceBySlugEnQuery, resourceSlugEnQuery } from '@/sanity/lib/queries'
+import { getServerTranslations } from '@/i18n/server'
+import { autoFill, autoFillAll } from '@/lib/translate'
+import { ArrowLeft, BookOpen, Compass } from 'lucide-react'
+import { PortableText } from '@portabletext/react'
+import FAQAccordion from '@/components/FAQAccordion'
+import SejourTabs from '@/components/SejourTabs'
+import { urlFor } from '@/sanity/lib/image'
+
+function makeBlockComponents(lang: string) {
+  return {
+    block: {
+      normal: ({ children }: any) => {
+        const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '')
+        return <p style={{ minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? ' ' : children}</p>
+      },
+      blockCenter: ({ children }: any) => {
+        const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '')
+        return <p style={{ textAlign: 'center', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? ' ' : children}</p>
+      },
+      blockRight: ({ children }: any) => {
+        const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '')
+        return <p style={{ textAlign: 'right', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? ' ' : children}</p>
+      },
+      blockJustify: ({ children }: any) => {
+        const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '')
+        return <p style={{ textAlign: 'justify', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? ' ' : children}</p>
+      },
+      blockquote: ({ children }: any) => (
+        <blockquote className="border-l-4 border-accent pl-6 py-4 my-8 italic text-xl text-foreground/80 bg-accent/5 rounded-r-2xl text-justify">{children}</blockquote>
+      ),
+    },
+    marks: {
+      link: ({ children, value }: any) => (
+        <a href={value?.href} target={value?.blank !== false ? '_blank' : '_self'} rel="noopener noreferrer" className="text-accent underline font-semibold hover:opacity-80 transition-opacity">{children}</a>
+      ),
+    },
+    types: {
+      image: ({ value }: any) => {
+        if (!value?.asset) return null
+        const imgUrl = urlFor(value.asset).width(1200).auto('format').url()
+        const displayAlt = (lang === 'en' ? (value.altEn || value.alt) : value.alt) || ''
+        const displayCaption = lang === 'en' ? (value.captionEn || value.caption) : value.caption
+        return (
+          <figure className="my-10">
+            <div className="relative w-full overflow-hidden rounded-2xl">
+              <Image src={imgUrl} alt={displayAlt} width={1200} height={800} className="w-full h-auto object-cover" sizes="(max-width: 1024px) 100vw, 800px" />
+            </div>
+            {displayCaption && <figcaption className="text-center text-sm text-foreground/50 mt-3 italic">{displayCaption}</figcaption>}
+          </figure>
+        )
+      },
+      ctaBlock: ({ value }: any) => {
+        const cta = value.cta
+        if (!cta) return null
+        const text = lang === 'en' ? (cta.textEn || cta.text) : cta.text
+        const label = lang === 'en' ? (cta.buttonLabelEn || cta.buttonLabel) : cta.buttonLabel
+        const styleMap: Record<string, string> = { primary: 'bg-accent/8 border-accent/20', highlight: 'bg-highlight/8 border-highlight/20', outline: 'bg-transparent border-foreground/15' }
+        const btnClass = cta.style === 'highlight' ? 'btn-highlight' : cta.style === 'outline' ? 'btn-outline' : 'btn-primary'
+        return (
+          <div className={`not-prose my-10 p-8 rounded-2xl border ${styleMap[cta.style || 'primary'] || styleMap.primary} text-center`}>
+            {text && <p className="text-foreground/70 mb-6 text-base leading-relaxed">{text}</p>}
+            <Link href={cta.link || '/contact'} className={`${btnClass} inline-block !text-sm font-black uppercase tracking-widest`}>{label}</Link>
+          </div>
+        )
+      },
+    },
+  }
+}
+
+export async function generateStaticParams() {
+  const slugs = await client.fetch(resourceSlugEnQuery)
+  return (slugs || []).map((r: any) => ({ slug: r.slugEn }))
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const ref = await client.fetch(resourceBySlugEnQuery, { slug })
+  if (!ref) return {}
+  const data = await client.fetch(resourceBySlugQuery, { slug: ref.slug })
+  if (!data) return {}
+  const title = data.titleEn || data.title
+  const description = data.introEn || data.intro || ''
+  return {
+    title: `${title} | Guides & Resources`,
+    description,
+    alternates: {
+      canonical: `/en/ressources/${slug}`,
+      languages: { fr: `/ressources/${ref.slug}`, en: `/en/ressources/${slug}` },
+    },
+    openGraph: { title, description, locale: 'en_US', alternateLocale: 'fr_FR' },
+  }
+}
+
+export default async function EnResourceDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+
+  const ref = await client.fetch(resourceBySlugEnQuery, { slug })
+  if (!ref) notFound()
+
+  let data = await client.fetch(resourceBySlugQuery, { slug: ref.slug })
+  if (!data) notFound()
+
+  const { at, lang } = await getServerTranslations('en')
+  if (lang === 'fr') redirect(`/ressources/${ref.slug}`)
+
+  data = await autoFill(data, [['title', 'titleEn'], ['intro', 'introEn'], ['imageAlt', 'imageAltEn']], lang)
+  if (data.tabs?.length) {
+    data = { ...data, tabs: await autoFillAll(data.tabs, [['title', 'titleEn']], lang) }
+  }
+
+  const displayTitle = data.titleEn || data.title
+  const displayIntro = data.introEn || data.intro
+  const displayContent = data.contentEn || data.content
+
+  const tabs = (data.tabs || []).map((tab: any, idx: number) => ({
+    id: `tab-${idx}`,
+    label: tab.titleEn || tab.title,
+    content: tab.contentEn || tab.content || null,
+    pdf: tab.pdf ?? null,
+  }))
+
+  const catLabels: Record<string, string> = {
+    alpinisme: 'Alpinism',
+    ski: 'Ski Touring',
+    escalade: 'Rock Climbing',
+    'cascade-de-glace': 'Ice Climbing',
+    preparation: 'Preparation',
+    equipement: 'Gear & Equipment',
+  }
+
+  return (
+    <main className="relative min-h-screen pt-32 pb-24">
+      <div className="container mx-auto px-6 mb-12">
+        <Link href="/en/ressources" className="inline-flex items-center gap-2 text-foreground/60 hover:text-accent font-bold uppercase tracking-widest text-xs transition-colors">
+          <ArrowLeft size={16} />
+          Back to Resources
+        </Link>
+      </div>
+
+      <article className="container mx-auto px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 items-start">
+          <div className="lg:col-span-2 space-y-12">
+            <div>
+              <span className="inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-accent/10 text-accent mb-6">
+                {catLabels[data.category] || data.category}
+              </span>
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tighter leading-tight mb-8">{displayTitle}</h1>
+              {displayIntro && (
+                <p className="text-xl text-foreground/70 leading-relaxed font-medium border-l-4 border-accent pl-6 py-1 my-8">{displayIntro}</p>
+              )}
+            </div>
+
+            {data.image && (
+              <div className="relative aspect-[16/9] rounded-[40px] overflow-hidden shadow-2xl">
+                <Image src={data.image} alt={(data.imageAltEn || data.imageAlt) || displayTitle} fill sizes="(max-width: 1024px) 100vw, 800px" className="object-cover" />
+              </div>
+            )}
+
+            {displayContent && (
+              <div className="prose-custom max-w-none text-foreground/80 leading-relaxed text-lg">
+                <PortableText value={displayContent} components={makeBlockComponents('en')} />
+              </div>
+            )}
+
+            {tabs.length > 0 && <SejourTabs tabs={tabs} />}
+
+            {!displayContent && tabs.length === 0 && (
+              <p className="italic text-foreground/40">This guide is being written.</p>
+            )}
+          </div>
+
+          <div className="lg:col-span-1 space-y-8 sticky top-32">
+            {data.relatedActivities && data.relatedActivities.length > 0 ? (
+              <div className="glass p-8 rounded-[40px] border border-border shadow-xl">
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-2.5">
+                  <Compass className="text-accent w-5 h-5" />
+                  Recommended Stays
+                </h3>
+                <div className="space-y-6">
+                  {data.relatedActivities.map((act: any) => {
+                    const stayLink = act.slugEn
+                      ? `/en/${act.categorySlug || 'alpinisme'}/${act.subCategorySlug || 'initiation'}/${act.slugEn}`
+                      : `/${act.categorySlug || 'alpinisme'}/${act.subCategorySlug || 'initiation'}/${act.slug}`
+                    return (
+                      <Link key={act.slug} href={stayLink} className="group flex gap-4 items-center p-3 rounded-2xl hover:bg-foreground/5 border border-transparent hover:border-border transition-all duration-300">
+                        {act.image && (
+                          <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0">
+                            <Image src={act.image} alt={act.titleEn || act.title} fill sizes="80px" className="object-cover" />
+                          </div>
+                        )}
+                        <div className="overflow-hidden">
+                          <h4 className="font-bold text-sm text-foreground group-hover:text-accent transition-colors line-clamp-1">{act.titleEn || act.title}</h4>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-highlight mt-1">{act.basePrice || 'On request'}</p>
+                        </div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="glass p-8 rounded-[40px] border border-border shadow-xl text-center">
+                <BookOpen className="text-accent w-12 h-12 mx-auto mb-4" />
+                <h3 className="text-xl font-bold mb-2">Want to put this into practice?</h3>
+                <p className="text-foreground/60 text-sm mb-6 leading-relaxed">Contact me to plan your bespoke mountain adventure.</p>
+                <Link href="/contact" className="btn-primary w-full block text-center !text-white text-xs font-black uppercase tracking-widest">Contact me</Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </article>
+
+      {data.faqs && data.faqs.length > 0 && (
+        <section className="container mx-auto px-6 mt-32 pt-20 border-t border-foreground/5 max-w-4xl">
+          <div className="text-center mb-16">
+            <span className="text-accent font-black tracking-widest uppercase text-xs mb-4 block">FAQ</span>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tighter uppercase">
+              Frequently Asked <span className="text-accent italic">Questions</span>
+            </h2>
+          </div>
+          <FAQAccordion faqs={data.faqs} />
+        </section>
+      )}
+    </main>
+  )
+}
