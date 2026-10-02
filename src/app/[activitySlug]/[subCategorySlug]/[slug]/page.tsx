@@ -29,7 +29,7 @@ function FicheRow({ icon, label, value, tooltip }: {
         <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{label}</span>
         {tooltip && (
           <>
-            <Info size={12} className="text-accent/60 shrink-0 cursor-help" />
+            <Info size={16} className="text-accent/60 shrink-0 cursor-help" />
             <div className="absolute left-0 bottom-full mb-2 z-30 w-64 p-3 rounded-xl glass text-xs text-foreground/80 shadow-xl border border-border
               opacity-0 pointer-events-none
               group-hover/fiche:opacity-100 group-hover/fiche:pointer-events-auto
@@ -56,8 +56,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const descForMeta = lang === 'en' && sejour.descriptionEn?.length ? sejour.descriptionEn : sejour.description;
   const autoDescription = descForMeta ? toPlainText(descForMeta).substring(0, 160) : '';
 
-  const title = sejour.metaTitle || autoTitle;
-  const description = sejour.metaDescription || autoDescription;
+  const title = (lang === 'en' ? (sejour.metaTitleEn || sejour.metaTitle) : sejour.metaTitle) || autoTitle;
+  const description = (lang === 'en' ? (sejour.metaDescriptionEn || sejour.metaDescription) : sejour.metaDescription) || autoDescription;
   const ogImage = sejour.image || undefined;
 
   return {
@@ -73,10 +73,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function SejourDetail({ params }: { params: Promise<{ activitySlug: string, subCategorySlug: string, slug: string }> }) {
   const { activitySlug, subCategorySlug, slug } = await params;
-  const [rawSejour, settingsData] = await Promise.all([
+  const [rawSejourDirect, settingsData] = await Promise.all([
     client.fetch(sejourBySlugQuery, { slug }),
     client.fetch(settingsQuery)
   ]);
+
+  // Fallback: if slug has accents and doesn't match, try the normalized (no-accent) version
+  let rawSejour = rawSejourDirect
+  if (!rawSejour) {
+    const normalizedSlug = slug.normalize('NFD').replace(/[̀-ͯ]/g, '')
+    if (normalizedSlug !== slug) {
+      const fallback = await client.fetch(sejourBySlugQuery, { slug: normalizedSlug })
+      if (fallback) redirect(`/${activitySlug}/${subCategorySlug}/${fallback.slug}`)
+    }
+  }
+
   const { at, t, lang, translatePortableText } = await getServerTranslations();
 
   if (!rawSejour) notFound();
@@ -131,6 +142,14 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
     return level ? map[level] || level : ''
   }
 
+  const templateTabs = (sejour.templateTabs || []).map((tab: any, idx: number) => ({
+    id: `template-${idx}`,
+    label: at({ fr: tab.title, en: tab.titleEn }),
+    content: translatePortableText({ fr: tab.content, en: tab.contentEn }) || null,
+    pdf: tab.pdf ?? null,
+    faqs: tab.faqs || []
+  }))
+
   const dynamicTabs = (sejour.tabs || []).map((tab: any, idx: number) => ({
     id: `dynamic-${idx}`,
     label: at({ fr: tab.title, en: tab.titleEn }),
@@ -146,7 +165,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
     ...(sejour.faqs && sejour.faqs.length > 0 ? [{ id: 'faq', label: at('FAQ'), content: null, faqs: sejour.faqs }] : []),
   ].filter(tab => tab.content !== null || tab.pdf !== null || (tab as any).faqs?.length > 0)
 
-  const tabs = [...dynamicTabs, ...legacyTabs]
+  const tabs = [...templateTabs, ...dynamicTabs, ...legacyTabs]
   const hasTabs = tabs.length > 0
 
   const jsonLd = {
@@ -186,6 +205,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
               fill
               sizes="100vw"
               priority
+              quality={90}
               className="object-cover"
             />
           )}
@@ -264,7 +284,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                     icon={<BarChart3 size={18} className="text-accent" />}
                     label={at('Niveau physique')}
                     value={sejour.physicalLevel}
-                    tooltip={sejour.ficheTooltips?.physicalLevel}
+                    tooltip={sejour.physicalLevelTooltip || sejour.ficheTooltips?.physicalLevel}
                   />
                   <FicheRow
                     icon={<MapPin size={18} className="text-accent" />}
@@ -292,7 +312,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                       <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{at('Tarifs')}</span>
                       {sejour.ficheTooltips?.tarifs && (
                         <>
-                          <Info size={12} className="text-accent/60 shrink-0 cursor-help" />
+                          <Info size={16} className="text-accent/60 shrink-0 cursor-help" />
                           <div className="absolute left-0 bottom-full mb-2 z-30 w-64 p-3 rounded-xl glass text-xs text-foreground/80 shadow-xl border border-border opacity-0 pointer-events-none group-hover/fiche:opacity-100 group-hover/fiche:pointer-events-auto transition-all duration-200 ease-out">
                             {sejour.ficheTooltips.tarifs}
                           </div>
@@ -413,6 +433,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                       alt={(lang === 'en' ? ((photo as any).altEn || photo.alt) : photo.alt) || at({ fr: sejour.title, en: sejour.titleEn })}
                       fill
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      quality={85}
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
@@ -440,7 +461,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
         <section className="pb-24 bg-surface/40">
           <div className="container mx-auto px-6 pt-16">
             <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase mb-10">
-              {at('Dernières')} <span className="text-accent italic">{at('Sorties')}</span>
+              {at({ fr: 'Récits de', en: 'Related' })} <span className="text-accent italic">{at({ fr: 'Séjours', en: 'Trip Reports' })}</span>
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {relatedPosts.map((post: any) => (

@@ -1,5 +1,5 @@
 import type { StructureBuilder } from 'sanity/structure'
-import { Home, UserRound, Mail, Settings, Compass, Layers, Mountain } from 'lucide-react'
+import { Home, UserRound, Mail, Settings, Compass, Layers, Mountain, BookOpen, Tag, LayoutTemplate } from 'lucide-react'
 
 export const structure = (S: StructureBuilder) =>
   S.list()
@@ -90,10 +90,38 @@ export const structure = (S: StructureBuilder) =>
         .icon(Mountain)
         .child(S.documentTypeList('sejour').title('Tous les séjours')),
 
+      // Modèles d'onglets réutilisables
+      S.listItem()
+        .title("Modèles d'Onglets")
+        .id('tabTemplate')
+        .icon(LayoutTemplate)
+        .child(S.documentTypeList('tabTemplate').title("Modèles d'Onglets")),
+
+      S.divider(),
+
+      // Ressources & Guides
+      S.listItem()
+        .title('Ressources & Guides')
+        .icon(BookOpen)
+        .child(
+          S.list()
+            .title('Ressources & Guides')
+            .items([
+              S.listItem()
+                .title('Guides & Articles')
+                .icon(BookOpen)
+                .child(S.documentTypeList('resource').title('Guides & Articles')),
+              S.listItem()
+                .title('Catégories')
+                .icon(Tag)
+                .child(S.documentTypeList('resourceCategory').title('Catégories de ressources')),
+            ])
+        ),
+
       S.divider(),
 
       // Regular document types, filtered to exclude singletons and types already reachable via la navigation hiérarchique ci-dessus
       ...S.documentTypeListItems().filter(
-        (listItem) => !['home', 'guide', 'contact', 'settings', 'activity', 'univers', 'sejour'].includes(listItem.getId() || '')
+        (listItem) => !['home', 'guide', 'contact', 'settings', 'activity', 'univers', 'sejour', 'tabTemplate', 'resource', 'resourceCategory'].includes(listItem.getId() || '')
       ),
     ])

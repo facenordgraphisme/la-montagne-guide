@@ -18,6 +18,7 @@ interface FAQItem {
 
 interface FAQAccordionProps {
   faqs?: FAQItem[]
+  hideHeader?: boolean
 }
 
 const DEFAULT_FAQS: FAQItem[] = [
@@ -44,7 +45,7 @@ const DEFAULT_FAQS: FAQItem[] = [
   },
 ]
 
-export default function FAQAccordion({ faqs }: FAQAccordionProps) {
+export default function FAQAccordion({ faqs, hideHeader = false }: FAQAccordionProps) {
   const { language } = useLanguage()
   const [activeId, setActiveId] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
@@ -83,15 +84,17 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
   return (
     <section className="py-20 w-full relative">
       <div className="max-w-4xl mx-auto px-6">
-        <div className="text-center mb-12">
-          <span className="text-accent font-bold tracking-widest uppercase text-xs mb-3 block">
-            {language === 'en' ? 'GOT QUESTIONS?' : 'UNE QUESTION ?'}
-          </span>
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
-            {language === 'en' ? 'Frequently Asked Questions' : 'Foire Aux Questions'}
-          </h2>
-          <div className="w-16 h-1 bg-accent mx-auto rounded-full mt-4" />
-        </div>
+        {!hideHeader && (
+          <div className="text-center mb-12">
+            <span className="text-accent font-bold tracking-widest uppercase text-xs mb-3 block">
+              {language === 'en' ? 'GOT QUESTIONS?' : 'UNE QUESTION ?'}
+            </span>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground mb-4">
+              {language === 'en' ? 'Frequently Asked Questions' : 'Foire Aux Questions'}
+            </h2>
+            <div className="w-16 h-1 bg-accent mx-auto rounded-full mt-4" />
+          </div>
+        )}
 
         {/* Category tabs — only shown when 2+ categories exist */}
         {showCategories && (

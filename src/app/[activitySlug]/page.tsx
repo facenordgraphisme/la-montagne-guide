@@ -236,9 +236,11 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
   let post = await client.fetch(postBySlugQuery, { slug: activitySlug });
   if (!post) return {};
   post = await autoFill(post, [['title', 'titleEn'], ['excerpt', 'excerptEn'], ['imageAlt', 'imageAltEn']], lang);
-  const title = `${at({ fr: post.title, en: post.titleEn })} | La Montagne Guide`;
+  const autoTitle = `${at({ fr: post.title, en: post.titleEn })} | La Montagne Guide`;
   const rawExcerpt = lang === 'en' ? (post.excerptEn || post.excerpt) : post.excerpt;
-  const description = rawExcerpt ? at(rawExcerpt) : '';
+  const autoDescription = rawExcerpt ? at(rawExcerpt) : '';
+  const title = (lang === 'en' ? (post.metaTitleEn || post.metaTitle) : post.metaTitle) || autoTitle;
+  const description = (lang === 'en' ? (post.metaDescriptionEn || post.metaDescription) : post.metaDescription) || autoDescription;
   const ogImage = post.image || undefined;
   return {
     title,

@@ -15,6 +15,8 @@ import { commentType } from './comment'
 import { tagType } from './tag'
 import { resourceType } from './resource'
 import { ctaType } from './cta'
+import { resourceCategoryType } from './resourceCategory'
+import { tabTemplateType } from './tabTemplate'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -33,6 +35,8 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     faqCategoryType,
     commentType,
     resourceType,
+    resourceCategoryType,
     ctaType,
+    tabTemplateType,
   ],
 }

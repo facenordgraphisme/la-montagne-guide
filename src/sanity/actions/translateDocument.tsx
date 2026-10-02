@@ -44,6 +44,18 @@ const PT_FIELDS: Record<string, [string, string][]> = {
 const HAS_TABS = ['sejour', 'resource']
 
 type SpanRef = { blockIdx: number; spanIdx: number; text: string }
+type ImageFieldRef = { blockIdx: number; enField: 'captionEn' | 'altEn'; text: string }
+
+function extractImageFields(blocks: any[]): ImageFieldRef[] {
+  const refs: ImageFieldRef[] = []
+  if (!Array.isArray(blocks)) return refs
+  blocks.forEach((block, blockIdx) => {
+    if (block._type !== 'image') return
+    if (block.caption && !block.captionEn?.trim()) refs.push({ blockIdx, enField: 'captionEn', text: block.caption })
+    if (block.alt && !block.altEn?.trim()) refs.push({ blockIdx, enField: 'altEn', text: block.alt })
+  })
+  return refs
+}
 
 function extractSpans(blocks: any[]): SpanRef[] {
   const refs: SpanRef[] = []
@@ -125,15 +137,20 @@ export function translateDocumentAction(props: DocumentActionProps) {
         blocks: any[]
         spans: SpanRef[]
         offset: number
+        imageRefs: ImageFieldRef[]
+        imageOffset: number
       }[] = []
       for (const [frKey, enKey] of ptPairs) {
         const blocks = (doc as any)[frKey]
         if (!Array.isArray(blocks) || blocks.length === 0) continue
         const spans = extractSpans(blocks)
-        if (spans.length === 0) continue
+        const imageRefs = extractImageFields(blocks)
+        if (spans.length === 0 && imageRefs.length === 0) continue
         const offset = allTexts.length
         allTexts.push(...spans.map(s => s.text))
-        ptMeta.push({ enKey, blocks, spans, offset })
+        const imageOffset = allTexts.length
+        allTexts.push(...imageRefs.map(r => r.text))
+        ptMeta.push({ enKey, blocks, spans, offset, imageRefs, imageOffset })
       }
 
       // ── 3. Tabs (séjour / resource) ──────────────────────────────────────
@@ -189,8 +206,18 @@ export function translateDocumentAction(props: DocumentActionProps) {
       })
 
       // PT fields
-      ptMeta.forEach(({ enKey, blocks, spans, offset }) => {
-        setValues[enKey] = applySpanTranslations(blocks, spans, translations, offset)
+      ptMeta.forEach(({ enKey, blocks, spans, offset, imageRefs, imageOffset }) => {
+        let enBlocks = applySpanTranslations(blocks, spans, translations, offset)
+        if (imageRefs.length > 0) {
+          enBlocks = enBlocks.map((b, idx) => {
+            const refs = imageRefs.filter(r => r.blockIdx === idx)
+            if (refs.length === 0) return b
+            const updates: Record<string, string> = {}
+            refs.forEach(r => { updates[r.enField] = translations[imageOffset + imageRefs.indexOf(r)] })
+            return { ...b, ...updates }
+          })
+        }
+        setValues[enKey] = enBlocks
       })
 
       // Tabs

@@ -41,9 +41,15 @@ export const sortieType = defineType({
     // On garde les anciens champs optionnels au cas où on veut surcharger le modèle
     defineField({
       name: 'titleOverride',
-      title: 'Titre (Surcharge)',
+      title: 'Titre (Surcharge FR)',
       type: 'string',
       description: 'Laissez vide pour utiliser le titre du séjour de base.',
+    }),
+    defineField({
+      name: 'titleOverrideEn',
+      title: 'Titre (Surcharge EN)',
+      type: 'string',
+      description: 'Version anglaise du titre de surcharge. Laissez vide pour utiliser le titre anglais du séjour de base.',
     }),
   ],
   preview: {

@@ -23,7 +23,7 @@ function FicheRow({ icon, label, value, tooltip }: { icon: React.ReactNode; labe
         <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">{label}</span>
         {tooltip && (
           <>
-            <Info size={12} className="text-accent/60 shrink-0 cursor-help" />
+            <Info size={16} className="text-accent/60 shrink-0 cursor-help" />
             <div className="absolute left-0 bottom-full mb-2 z-30 w-64 p-3 rounded-xl glass text-xs text-foreground/80 shadow-xl border border-border opacity-0 pointer-events-none group-hover/fiche:opacity-100 group-hover/fiche:pointer-events-auto transition-all duration-200 ease-out">
               {tooltip}
             </div>
@@ -50,10 +50,12 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
   if (!ref) return {}
   const sejour = await client.fetch(sejourBySlugQuery, { slug: ref.slug })
   if (!sejour) return {}
-  const title = sejour.titleEn || sejour.title
-  const description = sejour.descriptionEn ? toPlainText(sejour.descriptionEn).substring(0, 160) : (sejour.description ? toPlainText(sejour.description).substring(0, 160) : '')
+  const titleStr = (sejour.metaTitleEn || sejour.titleEn || sejour.title)
+  const autoDesc = sejour.descriptionEn ? toPlainText(sejour.descriptionEn).substring(0, 160) : (sejour.description ? toPlainText(sejour.description).substring(0, 160) : '')
+  const title = titleStr.includes('La Montagne Guide') ? titleStr : `${titleStr} | La Montagne Guide`
+  const description = sejour.metaDescriptionEn || autoDesc
   return {
-    title: `${title} | La Montagne Guide`,
+    title,
     description,
     alternates: {
       canonical: `/en/${ref.activitySlug}/${ref.subCategorySlug}/${slug}`,
@@ -69,7 +71,11 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
 export default async function EnSejourDetail({ params }: { params: Promise<{ activitySlug: string; subCategorySlug: string; slug: string }> }) {
   const { activitySlug, subCategorySlug, slug } = await params
 
-  const ref = await client.fetch(sejourBySlugEnQuery, { slug })
+  let ref = await client.fetch(sejourBySlugEnQuery, { slug })
+  if (!ref) {
+    const normalizedSlug = slug.normalize('NFD').replace(/[̀-ͯ]/g, '')
+    if (normalizedSlug !== slug) ref = await client.fetch(sejourBySlugEnQuery, { slug: normalizedSlug })
+  }
   if (!ref) notFound()
 
   const [rawSejour, settingsData] = await Promise.all([
@@ -109,6 +115,14 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
     return level ? map[level] || level : ''
   }
 
+  const templateTabs = (sejour.templateTabs || []).map((tab: any, idx: number) => ({
+    id: `template-${idx}`,
+    label: tab.titleEn || tab.title,
+    content: translatePortableText({ fr: tab.content, en: tab.contentEn }) || null,
+    pdf: tab.pdf ?? null,
+    faqs: tab.faqs || [],
+  }))
+
   const dynamicTabs = (sejour.tabs || []).map((tab: any, idx: number) => ({
     id: `dynamic-${idx}`,
     label: tab.titleEn || tab.title,
@@ -124,7 +138,7 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
     ...(sejour.faqs && sejour.faqs.length > 0 ? [{ id: 'faq', label: 'FAQ', content: null, faqs: sejour.faqs }] : []),
   ].filter(tab => tab.content !== null || tab.pdf !== null || (tab as any).faqs?.length > 0)
 
-  const tabs = [...dynamicTabs, ...legacyTabs]
+  const tabs = [...templateTabs, ...dynamicTabs, ...legacyTabs]
   const hasTabs = tabs.length > 0
 
   const jsonLd = {
@@ -215,7 +229,7 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
                   <div className="space-y-6 mb-10">
                     <FicheRow icon={<Clock size={18} className="text-accent" />} label="Duration" value={sejour.durationEn || sejour.duration} tooltip={sejour.ficheTooltips?.duration} />
                     <FicheRow icon={<BarChart3 size={18} className="text-accent" />} label="Technical Level" value={getLevelLabel(sejour.level)} tooltip={sejour.ficheTooltips?.level} />
-                    <FicheRow icon={<BarChart3 size={18} className="text-accent" />} label="Physical Level" value={sejour.physicalLevel} tooltip={sejour.ficheTooltips?.physicalLevel} />
+                    <FicheRow icon={<BarChart3 size={18} className="text-accent" />} label="Physical Level" value={sejour.physicalLevel} tooltip={sejour.physicalLevelTooltip || sejour.ficheTooltips?.physicalLevel} />
                     <FicheRow icon={<MapPin size={18} className="text-accent" />} label="Massif" value={at(sejour.massif)} tooltip={sejour.ficheTooltips?.massif} />
                     <FicheRow icon={<Users size={18} className="text-accent" />} label="Participants" value={sejour.participantsEn || sejour.participants} tooltip={sejour.ficheTooltips?.participants} />
                     <FicheRow icon={<CalendarDays size={18} className="text-accent" />} label="Season" value={sejour.periodEn || sejour.period} tooltip={sejour.ficheTooltips?.period} />
@@ -226,7 +240,7 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
                         <span className="text-xs font-bold uppercase tracking-widest text-foreground/40">Rates</span>
                         {sejour.ficheTooltips?.tarifs && (
                           <>
-                            <Info size={12} className="text-accent/60 shrink-0 cursor-help" />
+                            <Info size={16} className="text-accent/60 shrink-0 cursor-help" />
                             <div className="absolute left-0 bottom-full mb-2 z-30 w-64 p-3 rounded-xl glass text-xs text-foreground/80 shadow-xl border border-border opacity-0 pointer-events-none group-hover/fiche:opacity-100 group-hover/fiche:pointer-events-auto transition-all duration-200 ease-out">
                               {sejour.ficheTooltips.tarifs}
                             </div>
@@ -364,7 +378,7 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
         <section className="pb-24 bg-surface/40">
           <div className="container mx-auto px-6 pt-16">
             <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase mb-10">
-              Latest <span className="text-accent italic">Outings</span>
+              Related <span className="text-accent italic">Trip Reports</span>
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {relatedPosts.map((post: any) => (

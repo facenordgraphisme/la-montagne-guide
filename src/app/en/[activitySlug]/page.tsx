@@ -16,10 +16,11 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
   if (!ref) return {}
   const post = await client.fetch(postBySlugQuery, { slug: ref.slug })
   if (!post) return {}
-  const title = post.titleEn || post.title
-  const description = post.excerptEn || post.excerpt || ''
+  const titleStr = post.metaTitleEn || post.titleEn || post.title
+  const title = titleStr.includes('La Montagne Guide') ? titleStr : `${titleStr} | La Montagne Guide`
+  const description = post.metaDescriptionEn || post.excerptEn || post.excerpt || ''
   return {
-    title: `${title} | La Montagne Guide`,
+    title,
     description,
     alternates: {
       canonical: `/en/${slug}`,

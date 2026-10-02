@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import React from 'react'
 import { client } from "@/sanity/lib/client";
-import { resourcesQuery, faqsQuery, settingsQuery } from "@/sanity/lib/queries";
+import { resourcesQuery, resourceCategoryQuery, faqsQuery, settingsQuery } from "@/sanity/lib/queries";
 import { getServerTranslations } from '@/i18n/server';
 import ResourcesListClient from './ResourcesListClient';
 import { notFound } from 'next/navigation';
@@ -42,10 +42,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RessourcesPage() {
-  const [resources, allFaqs, settingsData] = await Promise.all([
+  const [resources, allFaqs, settingsData, categoriesFromSanity] = await Promise.all([
     client.fetch(resourcesQuery),
     client.fetch(faqsQuery),
-    client.fetch(settingsQuery)
+    client.fetch(settingsQuery),
+    client.fetch(resourceCategoryQuery),
   ]);
 
   if (settingsData?.hideRessourcesPage) {
@@ -94,7 +95,7 @@ export default async function RessourcesPage() {
         </div>
 
         {/* Client component for searching and interactive filtering */}
-        <ResourcesListClient resources={resources} generalFaqs={generalFaqs} />
+        <ResourcesListClient resources={resources} generalFaqs={generalFaqs} categories={categoriesFromSanity || []} />
       </div>
     </main>
   );

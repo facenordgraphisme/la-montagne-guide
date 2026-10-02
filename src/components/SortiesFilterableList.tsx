@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -8,12 +8,15 @@ import { Calendar as CalendarIcon, MapPin, Clock, ArrowRight, BarChart3, Users, 
 
 interface Sejour {
   title: string
+  titleEn?: string
   slug: string
+  slugEn?: string
   activityType: string
   subCategory: string
+  subCategorySlug?: string
   massif: string
   level: string
-  season: string
+  season: string | string[]
   duration: string
   basePrice: string
   image: string
@@ -26,6 +29,7 @@ interface Sortie {
   availableSpots: string
   isFull: boolean
   titleOverride?: string
+  titleOverrideEn?: string
   sejour: Sejour
 }
 
@@ -284,7 +288,7 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                     {s.sejour?.image && (
                       <Image
                         src={s.sejour.image}
-                        alt={at(s.titleOverride || s.sejour.title)}
+                        alt={language === 'en' ? (s.titleOverrideEn || s.titleOverride || s.sejour.titleEn || s.sejour.title) : (s.titleOverride || s.sejour.title)}
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -314,7 +318,7 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                         <span className="text-xs uppercase tracking-[0.2em]">{at(s.date)}</span>
                       </div>
                       <h3 className="text-2xl font-black text-white uppercase tracking-tighter leading-none line-clamp-1">
-                        {at(s.titleOverride || s.sejour?.title)}
+                        {language === 'en' ? (s.titleOverrideEn || s.titleOverride || s.sejour?.titleEn || s.sejour?.title) : (s.titleOverride || s.sejour?.title)}
                       </h3>
                     </div>
                   </div>
@@ -357,10 +361,13 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                             </div>
                           );
                         }
-                        const universSlug = s.sejour?.subCategory?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+                        const subSlug = s.sejour?.subCategorySlug || s.sejour?.subCategory?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-')
+                        const href = language === 'en' && s.sejour?.slugEn && s.sejour?.subCategorySlug
+                          ? `/en/${s.sejour.activityType}/${s.sejour.subCategorySlug}/${s.sejour.slugEn}`
+                          : `/${s.sejour?.activityType}/${subSlug}/${s.sejour?.slug}`
                         return (
                           <Link 
-                            href={`/${s.sejour?.activityType}/${universSlug}/${s.sejour?.slug}`}
+                            href={href}
                             className="w-10 h-10 bg-accent rounded-xl flex items-center justify-center text-white hover:scale-110 transition-transform shadow-lg shadow-accent/20"
                           >
                             <ArrowRight size={18} />

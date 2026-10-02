@@ -583,6 +583,20 @@ export const settingsType = defineType({
 
     // DESIGN & APPARENCE
     defineField({
+      name: 'bgColorLight',
+      title: 'Couleur de fond — Mode Clair (Hex)',
+      description: 'Couleur de fond des pages en mode clair (ex: #f4f7fa). Laissez vide pour la valeur par défaut.',
+      type: 'string',
+      group: 'design',
+    }),
+    defineField({
+      name: 'bgColorDark',
+      title: 'Couleur de fond — Mode Sombre (Hex)',
+      description: 'Couleur de fond des pages en mode sombre (ex: #0b1121). Laissez vide pour la valeur par défaut.',
+      type: 'string',
+      group: 'design',
+    }),
+    defineField({
       name: 'accentColor',
       title: 'Couleur d\'accentuation (Hex)',
       description: 'Couleur principale du site (ex: #0ea5e9 pour bleu, #22c55e pour vert). Laissez vide pour la couleur par défaut.',

@@ -30,8 +30,7 @@ export const resourceType = defineType({
       name: 'slugEn',
       title: 'Slug (Anglais)',
       type: 'string',
-      description: 'Généré automatiquement par "🌐 Traduire EN". URL anglaise : /en/ressources/[slug-en]',
-      readOnly: true,
+      description: 'Généré automatiquement par "🌐 Traduire EN". URL anglaise : /en/ressources/[slug-en]. Modifiable si besoin.',
     }),
     defineField({
       name: 'category',
@@ -309,6 +308,19 @@ export const resourceType = defineType({
       type: 'text',
       rows: 3,
       description: 'Optionnel. Résumé affiché sous le titre dans Google. Idéalement 120–160 caractères.',
+    }),
+    defineField({
+      name: 'metaTitleEn',
+      title: '🔍 SEO — Titre (balise title) EN',
+      type: 'string',
+      description: 'Optionnel. Version anglaise du titre SEO.',
+    }),
+    defineField({
+      name: 'metaDescriptionEn',
+      title: '🔍 SEO — Description (meta) EN',
+      type: 'text',
+      rows: 3,
+      description: 'Optionnel. Version anglaise de la meta description.',
     }),
   ],
   preview: {

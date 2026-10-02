@@ -85,10 +85,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!ref) return {}
   const data = await client.fetch(resourceBySlugQuery, { slug: ref.slug })
   if (!data) return {}
-  const title = data.titleEn || data.title
-  const description = data.introEn || data.intro || ''
+  const titleStr = data.metaTitleEn || data.titleEn || data.title
+  const title = titleStr.includes('|') ? titleStr : `${titleStr} | Guides & Resources`
+  const description = data.metaDescriptionEn || data.introEn || data.intro || ''
   return {
-    title: `${title} | Guides & Resources`,
+    title,
     description,
     alternates: {
       canonical: `/en/ressources/${slug}`,

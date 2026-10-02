@@ -17,6 +17,7 @@ interface Post {
   imageAltEn?: string
   imageName?: string
   slug: string
+  slugEn?: string
 }
 
 interface BlogTeaserProps {
@@ -95,8 +96,9 @@ const BlogTeaser = ({
             const displayTitle = { fr: post.title, en: post.titleEn }
             const displayAlt = language === 'en' ? (post.imageAltEn || post.imageAlt) : post.imageAlt;
             const displayExcerpt = language === 'en' ? (post.excerptEn || post.excerpt) : post.excerpt;
+            const postHref = language === 'en' && post.slugEn ? `/en/${post.slugEn}` : `/${post.slug}`
             return (
-            <Link key={i} href={`/${post.slug}`} className="group block">
+            <Link key={i} href={postHref} className="group block">
               <div className="relative aspect-[16/10] rounded-[32px] overflow-hidden mb-6 shadow-lg">
                 {post.image && (
                   <Image

@@ -120,6 +120,7 @@ export default async function RootLayout({
             {settingsData && (
               <style dangerouslySetInnerHTML={{ __html: `
                 :root {
+                  ${settingsData.bgColorLight ? `--background: ${settingsData.bgColorLight} !important;` : ''}
                   ${settingsData.accentColor ? `--accent: ${settingsData.accentColor} !important;` : ''}
                   ${settingsData.highlightColor ? `--highlight: ${settingsData.highlightColor} !important;` : ''}
                   ${settingsData.btnHoverColor ? `--btn-hover: ${settingsData.btnHoverColor} !important;` : ''}
@@ -129,6 +130,7 @@ export default async function RootLayout({
                   ${settingsData.fontScale ? `--font-scale: ${settingsData.fontScale} !important;` : ''}
                 }
                 [data-theme='dark'] {
+                  ${settingsData.bgColorDark ? `--background: ${settingsData.bgColorDark} !important;` : ''}
                   ${settingsData.textColorDark ? `--foreground: ${settingsData.textColorDark} !important;` : ''}
                   ${settingsData.titleColorDark ? `--title-color: ${settingsData.titleColorDark} !important;` : ''}
                 }

@@ -147,7 +147,7 @@ export const homeType = defineType({
     defineField({ name: 'blogTitleAccentEn', title: 'Titre Blog Turquoise (EN)', type: 'string', group: 'blog' }),
 
     // LAYOUT CONTROLS
-    defineField({ name: 'hideTestimonials', title: 'Masquer la section Témoignages', type: 'boolean', initialValue: false, group: 'layout', description: "Masque le bloc d'avis clients sur la page d'accueil." }),
+    defineField({ name: 'hideTestimonials', title: 'Masquer la section Témoignages', type: 'boolean', initialValue: true, group: 'layout', description: "Masque le bloc d'avis clients sur la page d'accueil. Par défaut masqué — décochez pour afficher." }),
     defineField({ name: 'hideBlog', title: 'Masquer la section Blog', type: 'boolean', initialValue: false, group: 'layout', description: "Masque le bloc de carnet de voyage sur la page d'accueil." }),
     defineField({ name: 'hideSorties', title: 'Masquer la section Prochaines Sorties', type: 'boolean', initialValue: false, group: 'layout', description: "Masque le bloc des dates de départ planifiées sur la page d'accueil." }),
     defineField({ name: 'hideAdventure', title: 'Masquer la section Accompagnement Personnalisé', type: 'boolean', initialValue: false, group: 'layout', description: "Masque la section détaillant la philosophie et l'engagement du guide sur la page d'accueil." }),

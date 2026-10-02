@@ -19,43 +19,59 @@ interface Resource {
   relatedActivities?: Array<{ title: string; slug: string }>;
 }
 
+interface SanityCategory {
+  value: string;
+  title: string;
+  titleEn?: string;
+}
+
 interface ResourcesListClientProps {
   resources: Resource[];
   generalFaqs: any[];
+  categories?: SanityCategory[];
 }
 
-const CATEGORIES = [
-  { value: 'all', label: 'Tous les guides' },
-  { value: 'alpinisme', label: 'Alpinisme' },
-  { value: 'ski', label: 'Ski de Randonnée' },
-  { value: 'escalade', label: 'Escalade' },
-  { value: 'cascade-de-glace', label: 'Cascade de Glace' },
-  { value: 'preparation', label: 'Préparation' },
-  { value: 'equipement', label: 'Équipement & Matériel' }
+const FALLBACK_CATEGORIES = [
+  { value: 'alpinisme', label: { fr: 'Alpinisme', en: 'Alpinism' } },
+  { value: 'ski', label: { fr: 'Ski de Randonnée', en: 'Ski Touring' } },
+  { value: 'escalade', label: { fr: 'Escalade', en: 'Rock Climbing' } },
+  { value: 'cascade-de-glace', label: { fr: 'Cascade de Glace', en: 'Ice Climbing' } },
+  { value: 'preparation', label: { fr: 'Préparation', en: 'Training' } },
+  { value: 'equipement', label: { fr: 'Équipement & Matériel', en: 'Gear & Equipment' } },
 ];
 
-export default function ResourcesListClient({ resources, generalFaqs }: ResourcesListClientProps) {
+export default function ResourcesListClient({ resources, generalFaqs, categories = [] }: ResourcesListClientProps) {
   const { at, language } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Build categories list: Sanity-managed if available, else hardcoded fallback
+  const resolvedCategories = categories.length > 0
+    ? categories.map(c => ({ value: c.value, label: { fr: c.title, en: c.titleEn || c.title } }))
+    : FALLBACK_CATEGORIES
+  const allCategories = [
+    { value: 'all', label: { fr: 'Tous les guides', en: 'All guides' } },
+    ...resolvedCategories,
+  ]
 
   // Filtrer les guides
   const filteredResources = resources.filter(res => {
     const title = language === 'en' ? (res.titleEn || res.title) : res.title;
     const intro = language === 'en' ? (res.introEn || res.intro) : res.intro;
-    
-    const matchesSearch = 
-      title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+
+    const matchesSearch =
+      title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       intro?.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
     const matchesCategory = selectedCategory === 'all' || res.category === selectedCategory;
-    
+
     return matchesSearch && matchesCategory;
   });
 
   const getCategoryLabel = (catValue: string) => {
-    return CATEGORIES.find(c => c.value === catValue)?.label || catValue;
+    return allCategories.find(c => c.value === catValue)?.label || { fr: catValue, en: catValue };
   };
+
 
   return (
     <div className="space-y-16">
@@ -63,7 +79,7 @@ export default function ResourcesListClient({ resources, generalFaqs }: Resource
       <div className="flex flex-col lg:flex-row gap-6 justify-between items-stretch lg:items-center">
         {/* Categories Pills */}
         <div className="flex flex-wrap gap-2.5 max-w-4xl">
-          {CATEGORIES.map((cat) => (
+          {allCategories.map((cat) => (
             <button
               key={cat.value}
               onClick={() => setSelectedCategory(cat.value)}

@@ -9,9 +9,12 @@ import { useLanguage } from '@/context/LanguageContext'
 interface SejourCardProps {
   sejour: {
     title: string
+    titleEn?: string
     slug: string
+    slugEn?: string
     activityType: string
     subCategory: string
+    subCategorySlug?: string
     massif?: string
     level?: string
     duration?: string
@@ -22,7 +25,7 @@ interface SejourCardProps {
 }
 
 const SejourCard = ({ sejour, activitySlug }: SejourCardProps) => {
-  const { at, t } = useLanguage()
+  const { at, language } = useLanguage()
 
   const getLevelLabel = (level?: string) => {
     const map: Record<string, string> = {
@@ -44,10 +47,14 @@ const SejourCard = ({ sejour, activitySlug }: SejourCardProps) => {
     return map[type] || at(type)
   }
 
-  const universSlug = sejour.subCategory?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+  const universSlug = sejour.subCategorySlug || sejour.subCategory?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-')
+  const isEn = language === 'en'
+  const href = isEn && sejour.slugEn && sejour.subCategorySlug
+    ? `/en/${activitySlug}/${sejour.subCategorySlug}/${sejour.slugEn}`
+    : `/${activitySlug}/${universSlug}/${sejour.slug}`
 
   return (
-    <Link href={`/${activitySlug}/${universSlug}/${sejour.slug}`} className="group block h-full">
+    <Link href={href} className="group block h-full">
       <div className="glass overflow-hidden rounded-[40px] border border-border bg-card/5 transition-all duration-500 hover:bg-card/10 hover:border-accent/40 hover:scale-[1.02] h-full flex flex-col shadow-xl">
         {/* Header Badge & Level */}
         <div className="absolute top-6 left-6 right-6 z-20 flex justify-between items-center pointer-events-none">
@@ -93,7 +100,7 @@ const SejourCard = ({ sejour, activitySlug }: SejourCardProps) => {
               </div>
             )}
             <h3 className="text-2xl font-black text-foreground uppercase tracking-tighter leading-none mb-6">
-              {at(sejour.title)}
+              {at({ fr: sejour.title, en: sejour.titleEn || sejour.title })}
             </h3>
             
             <div className="flex items-center justify-between">

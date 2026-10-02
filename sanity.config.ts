@@ -11,6 +11,8 @@ import { StudioLogo } from './src/sanity/components/StudioLogo'
 import { studioTheme } from './src/sanity/theme'
 import { BulkTagTool } from './src/sanity/components/BulkTagTool'
 import { translateDocumentAction } from './src/sanity/actions/translateDocument'
+import { CopyAltToCaptionAction } from './src/sanity/actions/copyAltToCaption'
+import { ApplyTagsToImagesAction } from './src/sanity/actions/applyTagsToImages'
 
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'your-project-id'
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production'
@@ -40,10 +42,17 @@ export default defineConfig({
   schema,
   document: {
     actions: (prev, ctx) => {
+      const actions = [...prev]
       if (['post', 'sejour', 'resource', 'tag'].includes(ctx.schemaType)) {
-        return [translateDocumentAction, ...prev]
+        actions.unshift(translateDocumentAction)
       }
-      return prev
+      if (['post', 'sejour', 'resource'].includes(ctx.schemaType)) {
+        actions.unshift(CopyAltToCaptionAction as any)
+      }
+      if (ctx.schemaType === 'post') {
+        actions.unshift(ApplyTagsToImagesAction as any)
+      }
+      return actions
     },
   },
 })

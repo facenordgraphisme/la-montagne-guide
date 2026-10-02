@@ -125,7 +125,7 @@ export default async function Home() {
           titleAccent={at({ fr: homeData?.contactTitleAccent, en: homeData?.contactTitleAccentEn })}
           description={translatePortableText({ fr: homeData?.contactDescription, en: homeData?.contactDescriptionEn })}
         />
-        {!homeData?.hideTestimonials && (
+        {homeData?.hideTestimonials === false && (
           <Testimonials
             data={testimonialsData}
             badge={at({ fr: homeData?.testimonialsBadge, en: homeData?.testimonialsBadgeEn })}

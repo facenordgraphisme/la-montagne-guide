@@ -1,6 +1,7 @@
-import { defineField, defineType } from 'sanity'
+﻿import { defineField, defineType } from 'sanity'
 import { FileText } from 'lucide-react'
 import { TagImagePickerInput } from '../components/TagImagePicker'
+import { FAQPickerInput } from '../components/FAQPickerInput'
 
 export const postType = defineType({
   name: 'post',
@@ -10,18 +11,18 @@ export const postType = defineType({
   fields: [
     defineField({
       name: 'title',
-      title: 'Titre (Français)',
+      title: 'Titre (FranÃ§ais)',
       type: 'string',
     }),
     defineField({
       name: 'titleEn',
       title: 'Titre (Anglais)',
       type: 'string',
-      description: 'Si vide, traduit automatiquement côté site. Utilisez "🌐 Traduire EN" pour remplir.',
+      description: 'Si vide, traduit automatiquement cÃ´tÃ© site. Utilisez "ðŸŒ Traduire EN" pour remplir.',
     }),
     defineField({
       name: 'slug',
-      title: 'Slug (Français)',
+      title: 'Slug (FranÃ§ais)',
       type: 'slug',
       options: { source: 'title', maxLength: 96 },
     }),
@@ -29,21 +30,20 @@ export const postType = defineType({
       name: 'slugEn',
       title: 'Slug (Anglais)',
       type: 'string',
-      description: 'Généré automatiquement par "🌐 Traduire EN". URL anglaise : /en/[slug-en]',
-      readOnly: true,
+      description: 'GÃ©nÃ©rÃ© automatiquement par "ðŸŒ Traduire EN". URL anglaise : /en/[slug-en]. Modifiable si besoin.',
     }),
     defineField({
       name: 'excerpt',
-      title: 'Extrait (Français)',
+      title: 'Extrait (FranÃ§ais)',
       type: 'text',
-      description: 'Un court résumé de l\'article pour la liste des blogs.',
+      description: 'Un court rÃ©sumÃ© de l\'article pour la liste des blogs.',
       validation: (Rule) => Rule.max(200),
     }),
     defineField({
       name: 'excerptEn',
       title: 'Extrait (Anglais)',
       type: 'text',
-      description: 'Version anglaise de l\'extrait. Si vide, l\'extrait FR est utilisé.',
+      description: 'Version anglaise de l\'extrait. Si vide, l\'extrait FR est utilisÃ©.',
       validation: (Rule) => Rule.max(200),
     }),
     defineField({
@@ -57,20 +57,20 @@ export const postType = defineType({
         {
           name: 'imageName',
           type: 'string',
-          title: 'Nom personnalisé / Titre de l\'image',
+          title: 'Nom personnalisÃ© / Titre de l\'image',
           description: 'Pour organiser ou nommer l\'image.',
         },
         {
           name: 'alt',
           type: 'string',
-          title: 'Texte alternatif ALT (Français)',
-          description: 'Pour le SEO et l\'accessibilité.',
+          title: 'Texte alternatif ALT (FranÃ§ais)',
+          description: 'Pour le SEO et l\'accessibilitÃ©.',
         },
         {
           name: 'altEn',
           type: 'string',
           title: 'Texte alternatif ALT (Anglais)',
-          description: 'Version anglaise du texte alt. Si vide, le texte FR est utilisé.',
+          description: 'Version anglaise du texte alt. Si vide, le texte FR est utilisÃ©.',
         }
       ]
     }),
@@ -90,8 +90,8 @@ export const postType = defineType({
             { title: 'Normal', value: 'normal' },
             { title: 'H2', value: 'h2' },
             { title: 'H3', value: 'h3' },
-            { title: 'Centré', value: 'blockCenter' },
-            { title: 'Justifié', value: 'blockJustify' },
+            { title: 'CentrÃ©', value: 'blockCenter' },
+            { title: 'JustifiÃ©', value: 'blockJustify' },
             { title: 'Droite', value: 'blockRight' },
             { title: 'Citation', value: 'blockquote' }
           ]
@@ -101,9 +101,9 @@ export const postType = defineType({
           options: { hotspot: true },
           fields: [
             { name: 'imageName', type: 'string', title: 'Nom / Titre' },
-            { name: 'caption', type: 'string', title: 'Légende (Français)' },
-            { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' },
-            { name: 'alt', type: 'string', title: 'ALT (Français)' },
+            { name: 'caption', type: 'string', title: 'LÃ©gende (FranÃ§ais)' },
+            { name: 'captionEn', type: 'string', title: 'LÃ©gende (Anglais)' },
+            { name: 'alt', type: 'string', title: 'ALT (FranÃ§ais)' },
             { name: 'altEn', type: 'string', title: 'ALT (Anglais)' },
           ],
         },
@@ -121,9 +121,9 @@ export const postType = defineType({
                 options: { hotspot: true },
                 fields: [
                   { name: 'imageName', type: 'string', title: 'Nom / Titre' },
-                  { name: 'caption', type: 'string', title: 'Légende (Français)' },
-                  { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' },
-                  { name: 'alt', type: 'string', title: 'ALT (Français)' },
+                  { name: 'caption', type: 'string', title: 'LÃ©gende (FranÃ§ais)' },
+                  { name: 'captionEn', type: 'string', title: 'LÃ©gende (Anglais)' },
+                  { name: 'alt', type: 'string', title: 'ALT (FranÃ§ais)' },
                   { name: 'altEn', type: 'string', title: 'ALT (Anglais)' },
                 ],
               }]
@@ -133,26 +133,26 @@ export const postType = defineType({
         {
           name: 'video',
           type: 'object',
-          title: 'Vidéo',
+          title: 'VidÃ©o',
           fields: [
             {
               name: 'url',
               type: 'url',
-              title: 'URL de la vidéo (YouTube, Vimeo, etc.)'
+              title: 'URL de la vidÃ©o (YouTube, Vimeo, etc.)'
             }
           ]
         },
         {
           type: 'object',
           name: 'ctaBlock',
-          title: 'CTA / Appel à l\'action',
+          title: 'CTA / Appel Ã  l\'action',
           fields: [
-            { name: 'cta', type: 'reference', to: [{ type: 'cta' }], title: 'Choisir un CTA de la bibliothèque' }
+            { name: 'cta', type: 'reference', to: [{ type: 'cta' }], title: 'Choisir un CTA de la bibliothÃ¨que' }
           ],
           preview: {
             select: { title: 'cta.name' },
             prepare({ title }: any) {
-              return { title: `📣 CTA : ${title || '(non défini)'}` }
+              return { title: `ðŸ“£ CTA : ${title || '(non dÃ©fini)'}` }
             }
           }
         }
@@ -162,7 +162,7 @@ export const postType = defineType({
       name: 'bodyEn',
       title: 'Corps (Anglais)',
       type: 'array',
-      description: 'Version anglaise du corps de l\'article. Si vide, l\'article s\'affiche en français. Utilisez "🌐 Traduire EN".',
+      description: 'Version anglaise du corps de l\'article. Si vide, l\'article s\'affiche en franÃ§ais. Utilisez "ðŸŒ Traduire EN".',
       of: [
         {
           type: 'block',
@@ -170,8 +170,8 @@ export const postType = defineType({
             { title: 'Normal', value: 'normal' },
             { title: 'H2', value: 'h2' },
             { title: 'H3', value: 'h3' },
-            { title: 'Centré', value: 'blockCenter' },
-            { title: 'Justifié', value: 'blockJustify' },
+            { title: 'CentrÃ©', value: 'blockCenter' },
+            { title: 'JustifiÃ©', value: 'blockJustify' },
             { title: 'Droite', value: 'blockRight' },
             { title: 'Citation', value: 'blockquote' }
           ]
@@ -181,9 +181,9 @@ export const postType = defineType({
           options: { hotspot: true },
           fields: [
             { name: 'imageName', type: 'string', title: 'Nom / Titre' },
-            { name: 'caption', type: 'string', title: 'Légende (Français)' },
-            { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' },
-            { name: 'alt', type: 'string', title: 'ALT (Français)' },
+            { name: 'caption', type: 'string', title: 'LÃ©gende (FranÃ§ais)' },
+            { name: 'captionEn', type: 'string', title: 'LÃ©gende (Anglais)' },
+            { name: 'alt', type: 'string', title: 'ALT (FranÃ§ais)' },
             { name: 'altEn', type: 'string', title: 'ALT (Anglais)' },
           ],
         },
@@ -201,9 +201,9 @@ export const postType = defineType({
                 options: { hotspot: true },
                 fields: [
                   { name: 'imageName', type: 'string', title: 'Nom / Titre' },
-                  { name: 'caption', type: 'string', title: 'Légende (Français)' },
-                  { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' },
-                  { name: 'alt', type: 'string', title: 'ALT (Français)' },
+                  { name: 'caption', type: 'string', title: 'LÃ©gende (FranÃ§ais)' },
+                  { name: 'captionEn', type: 'string', title: 'LÃ©gende (Anglais)' },
+                  { name: 'alt', type: 'string', title: 'ALT (FranÃ§ais)' },
                   { name: 'altEn', type: 'string', title: 'ALT (Anglais)' },
                 ],
               }]
@@ -213,26 +213,26 @@ export const postType = defineType({
         {
           name: 'video',
           type: 'object',
-          title: 'Vidéo',
+          title: 'VidÃ©o',
           fields: [
             {
               name: 'url',
               type: 'url',
-              title: 'URL de la vidéo (YouTube, Vimeo, etc.)'
+              title: 'URL de la vidÃ©o (YouTube, Vimeo, etc.)'
             }
           ]
         },
         {
           type: 'object',
           name: 'ctaBlock',
-          title: 'CTA / Appel à l\'action',
+          title: 'CTA / Appel Ã  l\'action',
           fields: [
-            { name: 'cta', type: 'reference', to: [{ type: 'cta' }], title: 'Choisir un CTA de la bibliothèque' }
+            { name: 'cta', type: 'reference', to: [{ type: 'cta' }], title: 'Choisir un CTA de la bibliothÃ¨que' }
           ],
           preview: {
             select: { title: 'cta.name' },
             prepare({ title }: any) {
-              return { title: `📣 CTA : ${title || '(non défini)'}` }
+              return { title: `ðŸ“£ CTA : ${title || '(non dÃ©fini)'}` }
             }
           }
         }
@@ -240,24 +240,24 @@ export const postType = defineType({
     }),
     defineField({
       name: 'activityType',
-      title: 'Catégorie (Type d\'activité)',
+      title: 'CatÃ©gorie (Type d\'activitÃ©)',
       type: 'reference',
       to: [{ type: 'activity' }],
-      description: 'Catégorie principale de cet article — utilisée pour afficher les articles pertinents sur les pages séjour.',
+      description: 'CatÃ©gorie principale de cet article â€” utilisÃ©e pour afficher les articles pertinents sur les pages sÃ©jour.',
     }),
     defineField({
       name: 'relatedSejour',
-      title: 'Séjour lié',
+      title: 'SÃ©jour liÃ©',
       type: 'reference',
       to: [{ type: 'sejour' }],
-      description: 'Associer cet article à un séjour pour l\'afficher sur la page du séjour',
+      description: 'Associer cet article Ã  un sÃ©jour pour l\'afficher sur la page du sÃ©jour',
     }),
     defineField({
       name: 'tags',
-      title: 'Tags / Catégories',
+      title: 'Tags / CatÃ©gories',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'tag' }], weak: true }],
-      description: 'Tags et catégories associés à cet article'
+      description: 'Tags et catÃ©gories associÃ©s Ã  cet article'
     }),
     defineField({
       name: 'gallery',
@@ -272,9 +272,9 @@ export const postType = defineType({
           options: { hotspot: true },
           fields: [
             { name: 'imageName', type: 'string', title: 'Nom / Titre' },
-            { name: 'caption', type: 'string', title: 'Légende (Français)' },
-            { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' },
-            { name: 'alt', type: 'string', title: 'ALT (Français)' },
+            { name: 'caption', type: 'string', title: 'LÃ©gende (FranÃ§ais)' },
+            { name: 'captionEn', type: 'string', title: 'LÃ©gende (Anglais)' },
+            { name: 'alt', type: 'string', title: 'ALT (FranÃ§ais)' },
             { name: 'altEn', type: 'string', title: 'ALT (Anglais)' },
           ],
         },
@@ -283,15 +283,15 @@ export const postType = defineType({
     }),
     defineField({
       name: 'tagBrowsedImages',
-      title: 'Galerie — Sélection par tag',
-      description: 'Choisissez un Media Tag ou un tag d\'article, parcourez les photos et cliquez pour les sélectionner.',
+      title: 'Galerie â€” SÃ©lection par tag',
+      description: 'Choisissez un Media Tag ou un tag d\'article, parcourez les photos et cliquez pour les sÃ©lectionner.',
       type: 'array',
       of: [
         {
           type: 'image',
           fields: [
             defineField({ name: 'imageName', type: 'string', title: 'Nom / Titre' }),
-            defineField({ name: 'alt', type: 'string', title: 'ALT (Français)' }),
+            defineField({ name: 'alt', type: 'string', title: 'ALT (FranÃ§ais)' }),
             defineField({ name: 'altEn', type: 'string', title: 'ALT (Anglais)' }),
           ],
         },
@@ -300,7 +300,7 @@ export const postType = defineType({
     }),
     defineField({
       name: 'mediaManager',
-      title: 'Gestion des textes ALT & Légendes',
+      title: 'Gestion des textes ALT & LÃ©gendes',
       type: 'object',
       fields: [
         defineField({
@@ -308,7 +308,7 @@ export const postType = defineType({
           title: 'Notice',
           type: 'string',
           readOnly: true,
-          description: 'Module d\'administration des médias'
+          description: 'Module d\'administration des mÃ©dias'
         })
       ],
       components: {
@@ -317,8 +317,8 @@ export const postType = defineType({
     }),
     defineField({
       name: 'topo',
-      title: 'Données pratiques / Topo',
-      description: 'Données techniques, topos de la course, informations pratiques.',
+      title: 'DonnÃ©es pratiques / Topo',
+      description: 'DonnÃ©es techniques, topos de la course, informations pratiques.',
       type: 'array',
       of: [
         {
@@ -327,8 +327,8 @@ export const postType = defineType({
             { title: 'Normal', value: 'normal' },
             { title: 'H2', value: 'h2' },
             { title: 'H3', value: 'h3' },
-            { title: 'Centré', value: 'blockCenter' },
-            { title: 'Justifié', value: 'blockJustify' },
+            { title: 'CentrÃ©', value: 'blockCenter' },
+            { title: 'JustifiÃ©', value: 'blockJustify' },
             { title: 'Droite', value: 'blockRight' },
             { title: 'Citation', value: 'blockquote' }
           ]
@@ -338,9 +338,9 @@ export const postType = defineType({
           options: { hotspot: true },
           fields: [
             { name: 'imageName', type: 'string', title: 'Nom / Titre' },
-            { name: 'caption', type: 'string', title: 'Légende (Français)' },
-            { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' },
-            { name: 'alt', type: 'string', title: 'ALT (Français)' },
+            { name: 'caption', type: 'string', title: 'LÃ©gende (FranÃ§ais)' },
+            { name: 'captionEn', type: 'string', title: 'LÃ©gende (Anglais)' },
+            { name: 'alt', type: 'string', title: 'ALT (FranÃ§ais)' },
             { name: 'altEn', type: 'string', title: 'ALT (Anglais)' },
           ]
         }
@@ -349,42 +349,69 @@ export const postType = defineType({
     defineField({
       name: 'faqs',
       title: 'FAQ de l\'article',
-      description: 'Sélectionnez des FAQ spécifiques à afficher sur cet article de blog.',
+      description: 'SÃ©lectionnez des FAQ spÃ©cifiques Ã  afficher sur cet article de blog. Filtrez par catÃ©gorie pour retrouver vos questions plus facilement.',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
+      components: { input: FAQPickerInput },
     }),
     defineField({
       name: 'relatedActivities',
-      title: 'Activités & Séjours associés',
-      description: 'Liez des séjours recommandés pour faire du maillage interne (affiché après le CTA).',
+      title: 'ActivitÃ©s & SÃ©jours associÃ©s',
+      description: 'Liez des sÃ©jours recommandÃ©s pour faire du maillage interne (affichÃ© aprÃ¨s le CTA).',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'sejour' }] }],
     }),
     defineField({
       name: 'ctaText',
-      title: 'Texte d\'appel à l\'action (Français)',
+      title: 'Texte d\'appel Ã  l\'action (FranÃ§ais)',
       type: 'string',
-      description: 'Optionnel. Laisse par défaut si vide : "Toi aussi tu souhaites vivre ce type d\'aventure ? Contacte-moi !"',
+      description: 'Optionnel. Laisse par dÃ©faut si vide : "Toi aussi tu souhaites vivre ce type d\'aventure ? Contacte-moi !"',
     }),
     defineField({
       name: 'ctaTextEn',
-      title: 'Texte d\'appel à l\'action (Anglais)',
+      title: 'Texte d\'appel Ã  l\'action (Anglais)',
       type: 'string',
-      description: 'Optionnel. Laisse par défaut si vide : "Want to experience this type of adventure too? Contact me!"',
+      description: 'Optionnel. Laisse par dÃ©faut si vide : "Want to experience this type of adventure too? Contact me!"',
     }),
     defineField({
       name: 'ctaLink',
-      title: 'Lien d\'appel à l\'action',
+      title: 'Lien d\'appel Ã  l\'action',
       type: 'string',
       initialValue: '/contact',
-      description: 'Le lien vers lequel redirige le bouton d\'appel à l\'action.',
+      description: 'Le lien vers lequel redirige le bouton d\'appel Ã  l\'action.',
+    }),
+    defineField({
+      name: 'metaTitle',
+      title: 'ðŸ” SEO â€” Titre (balise title) FR',
+      type: 'string',
+      description: 'Optionnel. Remplace le titre auto-gÃ©nÃ©rÃ© dans Google. IdÃ©alement < 60 caractÃ¨res.',
+    }),
+    defineField({
+      name: 'metaDescription',
+      title: 'ðŸ” SEO â€” Description (meta) FR',
+      type: 'text',
+      rows: 3,
+      description: 'Optionnel. RÃ©sumÃ© affichÃ© sous le titre dans Google. IdÃ©alement 120â€“160 caractÃ¨res.',
+    }),
+    defineField({
+      name: 'metaTitleEn',
+      title: 'ðŸ” SEO â€” Titre (balise title) EN',
+      type: 'string',
+      description: 'Optionnel. Version anglaise du titre SEO.',
+    }),
+    defineField({
+      name: 'metaDescriptionEn',
+      title: 'ðŸ” SEO â€” Description (meta) EN',
+      type: 'text',
+      rows: 3,
+      description: 'Optionnel. Version anglaise de la meta description.',
     }),
     defineField({
       name: 'reviewed',
-      title: '✅ Article relu / validé',
+      title: 'âœ… Article relu / validÃ©',
       type: 'boolean',
       initialValue: false,
-      description: 'Cochez quand l\'article a été relu et validé pour publication.',
+      description: 'Cochez quand l\'article a Ã©tÃ© relu et validÃ© pour publication.',
     }),
   ],
   orderings: [
@@ -397,7 +424,7 @@ export const postType = defineType({
       ],
     },
     {
-      title: 'Date (récent en premier)',
+      title: 'Date (rÃ©cent en premier)',
       name: 'publishedAtDesc',
       by: [{ field: 'publishedAt', direction: 'desc' }],
     },
@@ -412,7 +439,7 @@ export const postType = defineType({
     prepare({ title, media, reviewed, date }: any) {
       const dateStr = date ? new Date(date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) : ''
       return {
-        title: `${reviewed ? '✅' : '⬜'} ${title || 'Sans titre'}`,
+        title: `${reviewed ? 'âœ…' : 'â¬œ'} ${title || 'Sans titre'}`,
         subtitle: dateStr,
         media,
       }
@@ -425,6 +452,13 @@ import { Card, Stack, Text, TextInput, Label, Flex } from '@sanity/ui'
 import { useFormValue, set, unset, useClient, PatchEvent } from 'sanity'
 import { useEffect, useState } from 'react'
 import { urlFor } from '@/sanity/lib/image'
+
+function safeImgUrl(asset: any, w: number, h: number): string | null {
+  try {
+    if (!asset?._ref) return null
+    return urlFor(asset).width(w).height(h).url()
+  } catch { return null }
+}
 
 function PostMediaManagerInput(props: any) {
   const client = useClient({ apiVersion: '2023-01-01' })
@@ -530,23 +564,21 @@ function PostMediaManagerInput(props: any) {
   return (
     <Card padding={4} radius={3} shadow={1} tone="inherit" border>
       <Stack space={4}>
-        <Text size={2} weight="bold">📸 Gestion des Textes Alternatifs & Légendes de l'Article</Text>
-        <Text size={1} muted>Modifiez rapidement les textes descriptifs (ALT) et légendes de toutes les images utilisées dans cet article pour optimiser votre SEO.</Text>
+        <Text size={2} weight="bold">ðŸ“¸ Gestion des Textes Alternatifs & LÃ©gendes de l'Article</Text>
+        <Text size={1} muted>Modifiez rapidement les textes descriptifs (ALT) et lÃ©gendes de toutes les images utilisÃ©es dans cet article pour optimiser votre SEO.</Text>
 
         {/* 2. Images du corps de l'article */}
         <Card border padding={3} radius={2}>
           <Stack space={3}>
-            <Text size={1} weight="bold">📝 Images du corps de l'article (Texte riche)</Text>
+            <Text size={1} weight="bold">ðŸ“ Images du corps de l'article (Texte riche)</Text>
             {bodyImages.length === 0 ? (
-              <Text size={1} muted>Aucune image insérée dans le texte de l'article.</Text>
+              <Text size={1} muted>Aucune image insÃ©rÃ©e dans le texte de l'article.</Text>
             ) : (
               <Stack space={4}>
                 {bodyImages.map((img: any, idx: number) => (
                   <Flex key={img._key || idx} gap={3} align="center" style={{ borderBottom: '1px solid var(--card-border-color)', paddingBottom: '12px' }}>
                     <div style={{ width: '80px', height: '60px', position: 'relative', overflow: 'hidden', borderRadius: '4px', background: '#000' }}>
-                      {img.asset && (
-                        <img 
-                          src={urlFor(img.asset).width(160).height(120).url()} 
+                      {safeImgUrl(img.asset, 160, 120) && (<img src={safeImgUrl(img.asset, 160, 120) || ''} 
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                         />
                       )}
@@ -561,11 +593,11 @@ function PostMediaManagerInput(props: any) {
                         />
                       </div>
                       <div>
-                        <Label size={0}>Légende :</Label>
+                        <Label size={0}>LÃ©gende :</Label>
                         <TextInput
                           value={localValues[`${img._key}_caption`] ?? (img.caption || '')}
                           onChange={(e: any) => handleUpdate(`${img._key}_caption`, e.target.value, ['body', { _key: img._key }, 'caption'])}
-                          placeholder="Légende affichée sous la photo..."
+                          placeholder="LÃ©gende affichÃ©e sous la photo..."
                         />
                       </div>
                       <div>
@@ -587,9 +619,9 @@ function PostMediaManagerInput(props: any) {
         {/* 3. Images des Galeries du corps de l'article */}
         <Card border padding={3} radius={2}>
           <Stack space={3}>
-            <Text size={1} weight="bold">📚 Images des Galeries du corps de l'article (Texte riche)</Text>
+            <Text size={1} weight="bold">ðŸ“š Images des Galeries du corps de l'article (Texte riche)</Text>
             {bodyGalleryImages.length === 0 ? (
-              <Text size={1} muted>Aucune galerie d'images insérée dans le texte de l'article.</Text>
+              <Text size={1} muted>Aucune galerie d'images insÃ©rÃ©e dans le texte de l'article.</Text>
             ) : (
               <Stack space={4}>
                 {bodyGalleryImages.map((img: any, idx: number) => {
@@ -597,9 +629,7 @@ function PostMediaManagerInput(props: any) {
                   return (
                     <Flex key={img._key || idx} gap={3} align="center" style={{ borderBottom: '1px solid var(--card-border-color)', paddingBottom: '12px' }}>
                       <div style={{ width: '80px', height: '60px', position: 'relative', overflow: 'hidden', borderRadius: '4px', background: '#000' }}>
-                        {img.asset && (
-                          <img 
-                            src={urlFor(img.asset).width(160).height(120).url()} 
+                        {safeImgUrl(img.asset, 160, 120) && (<img src={safeImgUrl(img.asset, 160, 120) || ''} 
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                           />
                         )}
@@ -614,11 +644,11 @@ function PostMediaManagerInput(props: any) {
                           />
                         </div>
                         <div>
-                          <Label size={0}>Légende :</Label>
+                          <Label size={0}>LÃ©gende :</Label>
                           <TextInput
                             value={localValues[`bgi_${img._key}_caption`] ?? (img.caption || '')}
                             onChange={(e: any) => handleUpdate(`bgi_${img._key}_caption`, e.target.value, [...imagePath, 'caption'])}
-                            placeholder="Légende de la photo dans la galerie..."
+                            placeholder="LÃ©gende de la photo dans la galerie..."
                           />
                         </div>
                         <div>
@@ -641,7 +671,7 @@ function PostMediaManagerInput(props: any) {
         {/* 4. Galerie Photos (Bas d'article) */}
         <Card border padding={3} radius={2}>
           <Stack space={3}>
-            <Text size={1} weight="bold">🖼️ Images de la Galerie (Bas d'article)</Text>
+            <Text size={1} weight="bold">ðŸ–¼ï¸ Images de la Galerie (Bas d'article)</Text>
             {galleryImages.length === 0 ? (
               <Text size={1} muted>Aucune image dans la galerie de bas d'article.</Text>
             ) : (
@@ -649,9 +679,7 @@ function PostMediaManagerInput(props: any) {
                 {galleryImages.map((img: any, idx: number) => (
                   <Flex key={img._key || idx} gap={3} align="center" style={{ borderBottom: '1px solid var(--card-border-color)', paddingBottom: '12px' }}>
                     <div style={{ width: '80px', height: '60px', position: 'relative', overflow: 'hidden', borderRadius: '4px', background: '#000' }}>
-                      {img.asset && (
-                        <img 
-                          src={urlFor(img.asset).width(160).height(120).url()} 
+                      {safeImgUrl(img.asset, 160, 120) && (<img src={safeImgUrl(img.asset, 160, 120) || ''} 
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                         />
                       )}
@@ -666,11 +694,11 @@ function PostMediaManagerInput(props: any) {
                         />
                       </div>
                       <div>
-                        <Label size={0}>Légende :</Label>
+                        <Label size={0}>LÃ©gende :</Label>
                         <TextInput
                           value={localValues[`gal_${img._key}_caption`] ?? (img.caption || '')}
                           onChange={(e: any) => handleUpdate(`gal_${img._key}_caption`, e.target.value, ['gallery', { _key: img._key }, 'caption'])}
-                          placeholder="Légende affichée sous la photo..."
+                          placeholder="LÃ©gende affichÃ©e sous la photo..."
                         />
                       </div>
                       <div>
@@ -693,3 +721,5 @@ function PostMediaManagerInput(props: any) {
     </Card>
   )
 }
+
+

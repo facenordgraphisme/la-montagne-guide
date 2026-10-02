@@ -147,7 +147,7 @@ export default function SejourTabs({ tabs }: SejourTabsProps) {
           )}
 
           {current.faqs && current.faqs.length > 0 && (
-            <FAQAccordion faqs={current.faqs} />
+            <FAQAccordion faqs={current.faqs} hideHeader />
           )}
 
           {current.pdf && (
@@ -156,7 +156,7 @@ export default function SejourTabs({ tabs }: SejourTabsProps) {
                 href={current.pdf}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-3 px-6 py-4 bg-highlight/10 hover:bg-highlight/20 border border-highlight/30 hover:border-highlight/60 text-highlight rounded-2xl font-bold text-sm uppercase tracking-widest transition-all duration-300 group"
+                className="btn-primary inline-flex items-center gap-3"
               >
                 <FileText size={18} className="shrink-0" />
                 {at('Télécharger la liste de matériel (PDF)')}

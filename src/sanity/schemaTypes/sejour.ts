@@ -1,6 +1,7 @@
 import { defineField, defineType } from 'sanity'
 import { Mountain } from 'lucide-react'
 import { TagImagePickerInput } from '../components/TagImagePicker'
+import { FAQPickerInput } from '../components/FAQPickerInput'
 
 const descriptionBlocks = [
   {
@@ -39,8 +40,7 @@ export const sejourType = defineType({
       name: 'slugEn',
       title: 'Slug (Anglais)',
       type: 'string',
-      description: 'Généré automatiquement par "🌐 Traduire EN". URL anglaise : /en/[activitySlug]/[subCategory]/[slug-en]',
-      readOnly: true,
+      description: 'Généré automatiquement par "🌐 Traduire EN". URL anglaise : /en/[activitySlug]/[subCategory]/[slug-en]. Modifiable si besoin.',
     }),
     defineField({
       name: 'activityType',
@@ -90,13 +90,23 @@ export const sejourType = defineType({
       description: 'Ex: Bonne condition physique requise, Randonnée régulière, Sportif confirmé…',
     }),
     defineField({
+      name: 'physicalLevelTooltip',
+      title: 'Niveau physique — Texte au survol',
+      type: 'text',
+      rows: 2,
+      description: 'Texte affiché en tooltip au survol du "?" à côté du niveau physique. Ex: "Être capable de marcher 5-6h en montée avec sac à dos de 15kg."',
+    }),
+    defineField({
       name: 'season',
-      title: 'Saison (filtre "Prochains Départs")',
-      type: 'string',
-      description: 'Utilisé pour filtrer les sorties dans le bloc "Prochains Départs". Ne s\'affiche pas dans la fiche technique.',
+      title: 'Saisons (filtre "Prochains Départs")',
+      type: 'array',
+      description: 'Sélectionnez une ou plusieurs saisons. Utilisé pour filtrer les sorties. Ne s\'affiche pas dans la fiche technique.',
+      of: [{ type: 'string' }],
       options: {
         list: [
+          { title: 'Printemps', value: 'printemps' },
           { title: 'Été', value: 'ete' },
+          { title: 'Automne', value: 'automne' },
           { title: 'Hiver', value: 'hiver' },
           { title: 'Toutes saisons', value: 'toutes' },
         ],
@@ -435,6 +445,13 @@ export const sejourType = defineType({
       ]
     }),
     defineField({
+      name: 'templateTabs',
+      title: 'Onglets modèles (réutilisables)',
+      description: 'Ajoutez des onglets créés dans "Modèles d\'Onglets". Ils apparaissent en premier, avant les onglets personnalisés ci-dessus.',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'tabTemplate' }] }],
+    }),
+    defineField({
       name: 'ficheTooltips',
       title: 'Fiche Technique — Info-bulles',
       type: 'object',
@@ -531,9 +548,10 @@ export const sejourType = defineType({
     defineField({
       name: 'faqs',
       title: 'Questions fréquentes (FAQ)',
-      description: 'Sélectionnez des FAQ spécifiques à afficher sur la page de ce séjour.',
+      description: 'Sélectionnez des FAQ spécifiques à afficher sur la page de ce séjour. Filtrez par catégorie pour retrouver vos questions plus facilement.',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
+      components: { input: FAQPickerInput },
     }),
     defineField({
       name: 'relatedPosts',
@@ -579,6 +597,19 @@ export const sejourType = defineType({
       type: 'text',
       rows: 3,
       description: 'Optionnel. Remplace la description auto-générée dans les résultats Google. Idéalement entre 120 et 160 caractères.',
+    }),
+    defineField({
+      name: 'metaTitleEn',
+      title: '🔍 SEO — Titre (balise title) EN',
+      type: 'string',
+      description: 'Optionnel. Version anglaise du titre SEO.',
+    }),
+    defineField({
+      name: 'metaDescriptionEn',
+      title: '🔍 SEO — Description (meta) EN',
+      type: 'text',
+      rows: 3,
+      description: 'Optionnel. Version anglaise de la meta description.',
     }),
   ],
 })

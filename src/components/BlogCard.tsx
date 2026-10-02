@@ -12,6 +12,7 @@ interface BlogCardProps {
     title: string;
     titleEn?: string;
     slug: string;
+    slugEn?: string;
     date: string;
     image: string;
     imageAlt?: string;
@@ -29,8 +30,10 @@ export default function BlogCard({ post }: BlogCardProps) {
   const displayAlt = language === 'en' ? (post.imageAltEn || post.imageAlt) : post.imageAlt;
   const displayExcerpt = language === 'en' ? (post.excerptEn || post.excerpt) : post.excerpt;
 
+  const href = language === 'en' && post.slugEn ? `/en/${post.slugEn}` : `/${post.slug}`
+
   return (
-    <Link href={`/${post.slug}`} className="group block">
+    <Link href={href} className="group block">
       <div className="glass overflow-hidden rounded-[2rem] border border-border bg-card/5 transition-all duration-500 hover:bg-card/10 hover:border-accent/40 hover:scale-[1.02] h-full flex flex-col">
         {/* Image Container */}
         <div className="relative h-64 overflow-hidden">
@@ -69,7 +72,7 @@ export default function BlogCard({ post }: BlogCardProps) {
           )}
 
           <div className="flex items-center gap-2 text-sm font-bold tracking-wider text-foreground group-hover:gap-4 transition-all duration-300">
-            {at("LIRE L'ARTICLE")}
+            {at({ fr: "LIRE L'ARTICLE", en: 'READ THE ARTICLE' })}
             <span className="text-accent">→</span>
           </div>
         </div>

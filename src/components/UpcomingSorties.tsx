@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -8,12 +8,15 @@ import { Calendar, Users, MapPin, Clock } from 'lucide-react'
 
 interface Sejour {
   title: string
+  titleEn?: string
   slug: string
+  slugEn?: string
   activityType: string
   subCategory: string
+  subCategorySlug?: string
   massif: string
   level: string
-  season: string
+  season: string | string[]
   duration: string
   basePrice: string
   image: string
@@ -25,6 +28,7 @@ interface Sortie {
   availableSpots: string
   isFull: boolean
   titleOverride?: string
+  titleOverrideEn?: string
   sejour: Sejour
 }
 
@@ -40,21 +44,21 @@ interface UpcomingSortiesProps {
 
 import { useLanguage } from '@/context/LanguageContext'
 
-const UpcomingSorties = ({ 
-  initialFilter = 'Tous les séjours', 
-  showFilters = true, 
+const UpcomingSorties = ({
+  initialFilter = 'Tous les séjours',
+  showFilters = true,
   data = [],
   badge = "Prochaines sorties",
   title = "REJOIGNEZ",
   titleAccent = "L'AVENTURE",
   className = "bg-background"
 }: UpcomingSortiesProps) => {
-  const { at, t } = useLanguage()
+  const { at, t, language } = useLanguage()
   const [filter, setFilter] = useState(initialFilter)
   const [seasonFilter, setSeasonFilter] = useState('Toutes saisons')
 
   const categories = ['Tous les séjours', 'Alpinisme', 'Ski', 'Escalade']
-  const seasons = ['Toutes saisons', 'Été', 'Hiver']
+  const seasons = ['Toutes saisons', 'Printemps', 'Été', 'Automne', 'Hiver']
 
   // Mapping activities to display names
   const getCategoryDisplay = (type: string) => {
@@ -84,10 +88,13 @@ const UpcomingSorties = ({
     const currentCat = filter === 'Tous les séjours' ? 'all' : filter;
     const matchesCat = currentCat === 'all' || s.sejour.activityType.toLowerCase().includes(filter.toLowerCase());
 
-    const matchesSeason = seasonFilter === 'Toutes saisons' || 
-                         (seasonFilter === 'Été' && s.sejour.season === 'ete') ||
-                         (seasonFilter === 'Hiver' && s.sejour.season === 'hiver') ||
-                         s.sejour.season === 'toutes';
+    const seasons: string[] = Array.isArray(s.sejour.season) ? s.sejour.season : (s.sejour.season ? [s.sejour.season] : [])
+    const matchesSeason = seasonFilter === 'Toutes saisons' ||
+                         (seasonFilter === 'Été' && seasons.includes('ete')) ||
+                         (seasonFilter === 'Hiver' && seasons.includes('hiver')) ||
+                         (seasonFilter === 'Printemps' && seasons.includes('printemps')) ||
+                         (seasonFilter === 'Automne' && seasons.includes('automne')) ||
+                         seasons.includes('toutes');
 
     return matchesCat && matchesSeason;
   });
@@ -181,7 +188,9 @@ const UpcomingSorties = ({
                       {at(s.date)}
                     </div>
                     <h3 className="text-3xl font-black text-foreground uppercase tracking-tighter leading-none">
-                      {at(s.titleOverride || s.sejour?.title)}
+                      {language === 'en'
+                        ? (s.titleOverrideEn || s.titleOverride || s.sejour?.titleEn || s.sejour?.title)
+                        : (s.titleOverride || s.sejour?.title)}
                     </h3>
                     <div className="flex flex-wrap gap-4 text-[10px] font-bold uppercase tracking-widest text-foreground/60">
                       <div className="flex items-center gap-1">
@@ -200,13 +209,16 @@ const UpcomingSorties = ({
                   </div>
 
                   {(() => {
-                    const universSlug = s.sejour?.subCategory?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+                    const subSlug = s.sejour?.subCategorySlug || s.sejour?.subCategory?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-')
+                    const href = language === 'en' && s.sejour?.slugEn && s.sejour?.subCategorySlug
+                      ? `/en/${s.sejour.activityType}/${s.sejour.subCategorySlug}/${s.sejour.slugEn}`
+                      : `/${s.sejour?.activityType}/${subSlug}/${s.sejour?.slug}`
                     return (
                       <Link
-                        href={`/${s.sejour?.activityType}/${universSlug}/${s.sejour?.slug}`}
+                        href={href}
                         className="w-full py-4 bg-foreground text-background hover:bg-accent hover:text-white transition-all rounded-2xl text-center text-xs font-black uppercase tracking-widest"
                       >
-                        {at('Découvrir la sortie')}
+                        {at({ fr: 'Découvrir la sortie', en: 'View departure' })}
                       </Link>
                     );
                   })()}
