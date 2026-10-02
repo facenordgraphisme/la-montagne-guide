@@ -42,17 +42,17 @@ export default defineConfig({
   schema,
   document: {
     actions: (prev, ctx) => {
-      const actions = [...prev]
+      const extra: any[] = []
       if (['post', 'sejour', 'resource', 'tag'].includes(ctx.schemaType)) {
-        actions.unshift(translateDocumentAction)
+        extra.push(translateDocumentAction)
       }
       if (['post', 'sejour', 'resource'].includes(ctx.schemaType)) {
-        actions.unshift(CopyAltToCaptionAction as any)
+        extra.push(CopyAltToCaptionAction as any)
       }
       if (ctx.schemaType === 'post') {
-        actions.unshift(ApplyTagsToImagesAction as any)
+        extra.push(ApplyTagsToImagesAction as any)
       }
-      return actions
+      return [...prev, ...extra]
     },
   },
 })
