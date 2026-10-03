@@ -67,7 +67,7 @@ export function ApplyTagsToImagesAction(props: { id: string; type: string }) {
         }
 
         // 4. Patch each image asset to include the new media tags
-        const newTagObjs = mediaTagRefs.map(_ref => ({ _type: 'reference', _ref, _weak: true }))
+        const newTagObjs = mediaTagRefs.map(_ref => ({ _type: 'reference', _key: Math.random().toString(36).slice(2, 14), _ref, _weak: true }))
 
         for (const assetRef of assetRefs) {
           const asset = await client.fetch(
@@ -79,7 +79,7 @@ export function ApplyTagsToImagesAction(props: { id: string; type: string }) {
           if (toAdd.length > 0) {
             await client
               .patch(assetRef)
-              .setIfMissing({ opt: { media: { tags: [] } } })
+              .setIfMissing({ 'opt.media.tags': [] })
               .append('opt.media.tags', toAdd)
               .commit()
           }

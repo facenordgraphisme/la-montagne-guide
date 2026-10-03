@@ -34,7 +34,11 @@ export const sejourType = defineType({
       name: 'slug',
       title: 'Slug (Français)',
       type: 'slug',
-      options: { source: 'title', maxLength: 96 },
+      options: {
+        source: 'title',
+        maxLength: 96,
+        slugify: (input: string) => input.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 96),
+      },
     }),
     defineField({
       name: 'slugEn',

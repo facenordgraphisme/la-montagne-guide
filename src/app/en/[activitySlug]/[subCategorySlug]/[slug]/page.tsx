@@ -44,8 +44,12 @@ export async function generateStaticParams() {
   }))
 }
 
+function decodeSlug(slug: string) {
+  try { return decodeURIComponent(slug).normalize('NFC') } catch { return slug }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ activitySlug: string; subCategorySlug: string; slug: string }> }): Promise<Metadata> {
-  const { slug } = await params
+  const slug = decodeSlug((await params).slug)
   const ref = await client.fetch(sejourBySlugEnQuery, { slug })
   if (!ref) return {}
   const sejour = await client.fetch(sejourBySlugQuery, { slug: ref.slug })
@@ -69,7 +73,8 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
 }
 
 export default async function EnSejourDetail({ params }: { params: Promise<{ activitySlug: string; subCategorySlug: string; slug: string }> }) {
-  const { activitySlug, subCategorySlug, slug } = await params
+  const { activitySlug, subCategorySlug, slug: rawSlug } = await params
+  const slug = decodeSlug(rawSlug)
 
   let ref = await client.fetch(sejourBySlugEnQuery, { slug })
   if (!ref) {

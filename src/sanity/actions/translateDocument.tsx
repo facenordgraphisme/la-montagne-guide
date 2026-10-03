@@ -107,7 +107,7 @@ async function batchTranslate(texts: string[]): Promise<string[]> {
 
 export function translateDocumentAction(props: DocumentActionProps) {
   const { id, type, draft, published } = props
-  const { patch, publish } = useDocumentOperation(id, type)
+  const { patch } = useDocumentOperation(id, type)
   const [status, setStatus] = useState<'idle' | 'running' | 'done' | 'error'>('idle')
 
   const handleTranslate = useCallback(async () => {
@@ -249,12 +249,8 @@ export function translateDocumentAction(props: DocumentActionProps) {
         }
       }
 
+      // No auto-publish: publishing while this patch is in flight deletes the draft under it and crashes the Studio
       patch.execute([{ set: setValues }])
-      // Give the patch time to commit, then auto-publish so the front-end sees the translation
-      await new Promise(r => setTimeout(r, 800))
-      if (!publish.disabled) {
-        publish.execute()
-      }
       setStatus('done')
       setTimeout(() => setStatus('idle'), 3000)
     } catch (e) {

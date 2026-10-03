@@ -44,8 +44,12 @@ function FicheRow({ icon, label, value, tooltip }: {
   )
 }
 
+function decodeSlug(slug: string) {
+  try { return decodeURIComponent(slug).normalize('NFC') } catch { return slug }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
+  const slug = decodeSlug((await params).slug);
   let sejour = await client.fetch(sejourBySlugQuery, { slug });
   const { at, lang } = await getServerTranslations();
 
@@ -72,7 +76,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function SejourDetail({ params }: { params: Promise<{ activitySlug: string, subCategorySlug: string, slug: string }> }) {
-  const { activitySlug, subCategorySlug, slug } = await params;
+  const { activitySlug, subCategorySlug, slug: rawSlug } = await params;
+  const slug = decodeSlug(rawSlug);
   const [rawSejourDirect, settingsData] = await Promise.all([
     client.fetch(sejourBySlugQuery, { slug }),
     client.fetch(settingsQuery)
