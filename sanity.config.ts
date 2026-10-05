@@ -13,6 +13,7 @@ import { BulkTagTool } from './src/sanity/components/BulkTagTool'
 import { translateDocumentAction } from './src/sanity/actions/translateDocument'
 import { CopyAltToCaptionAction } from './src/sanity/actions/copyAltToCaption'
 import { ApplyTagsToImagesAction } from './src/sanity/actions/applyTagsToImages'
+import { StudioLayoutWithScrollButtons } from './src/sanity/components/ScrollButtons'
 
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'your-project-id'
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production'
@@ -23,6 +24,7 @@ export default defineConfig({
   dataset,
   icon: StudioLogo,
   theme: studioTheme,
+  studio: { components: { layout: StudioLayoutWithScrollButtons } },
   plugins: [
     structureTool({ structure }),
     visionTool(),

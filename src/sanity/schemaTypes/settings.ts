@@ -41,6 +41,7 @@ export const settingsType = defineType({
     { name: 'sejoursSettings', title: 'Page Séjours' },
     { name: 'homepage', title: "Page d'Accueil" },
     { name: 'design', title: 'Design & Apparence' },
+    { name: 'levels', title: 'Icônes de niveau' },
   ],
   fields: [
     // GENERAL & LOGO
@@ -678,5 +679,57 @@ export const settingsType = defineType({
         ],
       },
     }),
+
+    // ICÔNES DE NIVEAU
+    defineField({
+      name: 'technicalLevelIcons',
+      title: 'Niveau technique — Icônes',
+      description: 'Associez une icône à chaque niveau. Si le "Niveau technique" d\'un séjour correspond exactement au libellé (majuscules et accents ignorés), l\'icône s\'affiche dans la fiche technique. Sinon, le texte reste affiché.',
+      type: 'array',
+      group: 'levels',
+      of: [{ type: 'levelIcon' }],
+    }),
+    defineField({
+      name: 'physicalLevelIcons',
+      title: 'Niveau physique — Icônes',
+      description: 'Même principe pour le "Niveau physique".',
+      type: 'array',
+      group: 'levels',
+      of: [{ type: 'levelIcon' }],
+    }),
+    defineField({
+      name: 'levelIconsShowText',
+      title: 'Afficher aussi le texte à côté de l\'icône',
+      type: 'boolean',
+      group: 'levels',
+      initialValue: true,
+    }),
   ],
+})
+
+export const levelIconType = defineType({
+  name: 'levelIcon',
+  title: 'Niveau',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'label',
+      title: 'Libellé du niveau (FR)',
+      type: 'string',
+      description: 'Exactement comme saisi dans les séjours. Ex : Initié',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({ name: 'labelEn', title: 'Libellé affiché (EN)', type: 'string', description: 'Ex : Beginner. Si vide, le libellé FR est utilisé.' }),
+    defineField({
+      name: 'icon',
+      title: 'Icône',
+      type: 'image',
+      description: 'SVG ou PNG à fond transparent, de préférence carré.',
+      options: { accept: 'image/svg+xml,image/png,image/webp' },
+      validation: (Rule) => Rule.required(),
+    }),
+  ],
+  preview: {
+    select: { title: 'label', subtitle: 'labelEn', media: 'icon' },
+  },
 })

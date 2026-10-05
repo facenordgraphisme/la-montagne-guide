@@ -100,7 +100,7 @@ export default function SejourTabs({ tabs }: SejourTabsProps) {
         const btnClass = cta.style === 'highlight' ? 'btn-highlight' : cta.style === 'outline' ? 'btn-outline' : 'btn-primary'
         return (
           <div className={`not-prose my-8 p-8 rounded-2xl border ${styleMap[cta.style || 'primary'] || styleMap.primary} text-center`}>
-            {text && <p className="text-foreground/70 mb-6 text-base leading-relaxed">{text}</p>}
+            {text && <p className="text-foreground/70 mb-6 text-base leading-relaxed text-center">{text}</p>}
             <Link href={cta.link || '/contact'} className={`${btnClass} inline-block !text-sm font-black uppercase tracking-widest`}>
               {label}
             </Link>

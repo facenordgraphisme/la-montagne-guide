@@ -25,6 +25,7 @@ export function FAQPickerInput({ value, onChange }: any) {
   const [faqs, setFaqs] = useState<FAQItem[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [loading, setLoading] = useState(true)
+  const [open, setOpen] = useState(false)
 
   const currentValue: any[] = value || []
 
@@ -63,8 +64,31 @@ export function FAQPickerInput({ value, onChange }: any) {
 
   if (loading) return <Text size={1} muted>Chargement des FAQ…</Text>
 
+  const selectedFaqs = currentValue
+    .map((v: any) => faqs.find(f => f._id === v._ref))
+    .filter(Boolean) as FAQItem[]
+
+  if (!open) {
+    return (
+      <Card border padding={3} radius={2}>
+        <Flex align="center" justify="space-between" gap={3}>
+          <Stack space={2} flex={1}>
+            <Text size={1} weight="semibold">
+              {currentValue.length ? `${currentValue.length} FAQ sélectionnée${currentValue.length > 1 ? 's' : ''}` : 'Aucune FAQ sélectionnée'}
+            </Text>
+            {selectedFaqs.map(f => <Text key={f._id} size={1} muted>• {f.question}</Text>)}
+          </Stack>
+          <Button text="Choisir les FAQ" mode="ghost" fontSize={1} padding={2} onClick={() => setOpen(true)} />
+        </Flex>
+      </Card>
+    )
+  }
+
   return (
     <Stack space={4}>
+      <Flex justify="flex-end">
+        <Button text="Replier la liste" mode="bleed" fontSize={1} padding={2} onClick={() => setOpen(false)} />
+      </Flex>
       {/* Category filter */}
       <Stack space={2}>
         <Label size={1}>Filtrer par catégorie</Label>

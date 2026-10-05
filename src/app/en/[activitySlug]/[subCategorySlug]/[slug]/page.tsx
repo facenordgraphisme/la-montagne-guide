@@ -12,6 +12,7 @@ import SejourTabs from '@/components/SejourTabs'
 import RichContent from '@/components/RichContent'
 import BlogCard from '@/components/BlogCard'
 import FAQAccordion from '@/components/FAQAccordion'
+import { LevelValue } from '@/components/LevelValue'
 import { renderRichText, toPlainText } from '@/utils/richText'
 
 function FicheRow({ icon, label, value, tooltip }: { icon: React.ReactNode; label: string; value: React.ReactNode; tooltip?: string }) {
@@ -115,6 +116,8 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
     relatedPosts = [...directPosts, ...activityPosts.filter((p: any) => !seenSlugs.has(p.slug))].slice(0, postsLimit)
   }
 
+  relatedPosts = await autoFillAll(relatedPosts, [['title', 'titleEn'], ['excerpt', 'excerptEn'], ['imageAlt', 'imageAltEn']], 'en')
+
   const getLevelLabel = (level?: string) => {
     const map: Record<string, string> = { debutant: 'Beginner', intermediaire: 'Intermediate', confirme: 'Advanced', expert: 'Expert' }
     return level ? map[level] || level : ''
@@ -133,6 +136,7 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
     label: tab.titleEn || tab.title,
     content: translatePortableText({ fr: tab.content, en: tab.contentEn }) || null,
     pdf: tab.pdf ?? null,
+    faqs: tab.faqs || [],
   }))
 
   const legacyTabs = [
@@ -233,8 +237,8 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
 
                   <div className="space-y-6 mb-10">
                     <FicheRow icon={<Clock size={18} className="text-accent" />} label="Duration" value={sejour.durationEn || sejour.duration} tooltip={sejour.ficheTooltips?.duration} />
-                    <FicheRow icon={<BarChart3 size={18} className="text-accent" />} label="Technical Level" value={getLevelLabel(sejour.level)} tooltip={sejour.ficheTooltips?.level} />
-                    <FicheRow icon={<BarChart3 size={18} className="text-accent" />} label="Physical Level" value={sejour.physicalLevel} tooltip={sejour.physicalLevelTooltip || sejour.ficheTooltips?.physicalLevel} />
+                    <FicheRow icon={<BarChart3 size={18} className="text-accent" />} label="Technical Level" value={sejour.level ? <LevelValue raw={sejour.level} text={getLevelLabel(sejour.level)} icons={settingsData?.technicalLevelIcons} showText={settingsData?.levelIconsShowText} lang="en" /> : null} tooltip={sejour.ficheTooltips?.level} />
+                    <FicheRow icon={<BarChart3 size={18} className="text-accent" />} label="Physical Level" value={sejour.physicalLevel ? <LevelValue raw={sejour.physicalLevel} text={sejour.physicalLevel} icons={settingsData?.physicalLevelIcons} showText={settingsData?.levelIconsShowText} lang="en" /> : null} tooltip={sejour.physicalLevelTooltip || sejour.ficheTooltips?.physicalLevel} />
                     <FicheRow icon={<MapPin size={18} className="text-accent" />} label="Massif" value={at(sejour.massif)} tooltip={sejour.ficheTooltips?.massif} />
                     <FicheRow icon={<Users size={18} className="text-accent" />} label="Participants" value={sejour.participantsEn || sejour.participants} tooltip={sejour.ficheTooltips?.participants} />
                     <FicheRow icon={<CalendarDays size={18} className="text-accent" />} label="Season" value={sejour.periodEn || sejour.period} tooltip={sejour.ficheTooltips?.period} />

@@ -119,13 +119,15 @@ export default async function RootLayout({
           <LanguageProvider>
             {settingsData && (
               <style dangerouslySetInnerHTML={{ __html: `
-                :root {
+                :root:not([data-theme='dark']) {
                   ${settingsData.bgColorLight ? `--background: ${settingsData.bgColorLight} !important;` : ''}
+                  ${settingsData.textColorLight ? `--foreground: ${settingsData.textColorLight} !important;` : ''}
+                  ${settingsData.titleColorLight ? `--title-color: ${settingsData.titleColorLight} !important;` : ''}
+                }
+                :root {
                   ${settingsData.accentColor ? `--accent: ${settingsData.accentColor} !important;` : ''}
                   ${settingsData.highlightColor ? `--highlight: ${settingsData.highlightColor} !important;` : ''}
                   ${settingsData.btnHoverColor ? `--btn-hover: ${settingsData.btnHoverColor} !important;` : ''}
-                  ${settingsData.textColorLight ? `--foreground: ${settingsData.textColorLight} !important;` : ''}
-                  ${settingsData.titleColorLight ? `--title-color: ${settingsData.titleColorLight} !important;` : ''}
                   ${settingsData.fontFamily && FONT_VARIABLES[settingsData.fontFamily] ? `--font-body: var(${FONT_VARIABLES[settingsData.fontFamily]}) !important;` : ''}
                   ${settingsData.fontScale ? `--font-scale: ${settingsData.fontScale} !important;` : ''}
                 }

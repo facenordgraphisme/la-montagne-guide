@@ -157,21 +157,39 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
   duration, durationEn,
   participants,
   period,
-  tabs[]{
-    title,
-    titleEn,
-    content[]{
-      ...,
-      _type == "image" => { ..., "asset": asset-> },
-      _type == "ctaBlock" => { ..., "cta": cta-> }
+  "tabs": tabs[]{
+    _type == "reference" => @->{
+      title,
+      titleEn,
+      content[]{
+        ...,
+        _type == "image" => { ..., "asset": asset-> },
+        _type == "ctaBlock" => { ..., "cta": cta-> }
+      },
+      contentEn[]{
+        ...,
+        _type == "image" => { ..., "asset": asset-> },
+        _type == "ctaBlock" => { ..., "cta": cta-> }
+      },
+      "pdf": pdf.asset->url,
+      "faqs": faqs[]->{_id, question, questionEn, answer, answerEn}
     },
-    contentEn[]{
-      ...,
-      _type == "image" => { ..., "asset": asset-> },
-      _type == "ctaBlock" => { ..., "cta": cta-> }
-    },
-    "pdf": pdf.asset->url
-  },
+    _type != "reference" => {
+      title,
+      titleEn,
+      content[]{
+        ...,
+        _type == "image" => { ..., "asset": asset-> },
+        _type == "ctaBlock" => { ..., "cta": cta-> }
+      },
+      contentEn[]{
+        ...,
+        _type == "image" => { ..., "asset": asset-> },
+        _type == "ctaBlock" => { ..., "cta": cta-> }
+      },
+      "pdf": pdf.asset->url
+    }
+  }[defined(title)],
   "templateTabs": templateTabs[]->{
     title,
     titleEn,
@@ -194,8 +212,8 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
   relatedPostsLimit,
   hideRelatedPosts,
   "relatedPosts": relatedPosts[]->{
-    title,
-    "slug": slug.current,
+    title, titleEn,
+    "slug": slug.current, slugEn,
     "date": publishedAt,
     "image": mainImage.asset->url,
     "imageAlt": coalesce(mainImage.alt, mainImage.asset->altText),
@@ -527,6 +545,9 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
 }`
 
 export const settingsQuery = groq`*[_type == "settings"][0]{
+  "technicalLevelIcons": technicalLevelIcons[]{ label, labelEn, "icon": icon.asset->url },
+  "physicalLevelIcons": physicalLevelIcons[]{ label, labelEn, "icon": icon.asset->url },
+  levelIconsShowText,
   siteName,
   clientPasscode,
   "logoLight": logoLight.asset->url,

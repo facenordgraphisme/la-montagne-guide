@@ -8,7 +8,7 @@ import { testimonialType } from './testimonial'
 import { sejourType } from './sejour'
 import { universType } from './univers'
 import { sortieType } from './sortie'
-import { settingsType } from './settings'
+import { settingsType, levelIconType } from './settings'
 import { faqType } from './faq'
 import { faqCategoryType } from './faqCategory'
 import { commentType } from './comment'
@@ -21,6 +21,7 @@ import { tabTemplateType } from './tabTemplate'
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
     settingsType,
+    levelIconType,
     activityType,
     postType,
     tagType,

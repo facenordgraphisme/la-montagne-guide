@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
   if (!post) return {}
   const titleStr = post.metaTitleEn || post.titleEn || post.title
   const title = titleStr.includes('La Montagne Guide') ? titleStr : `${titleStr} | La Montagne Guide`
-  const description = post.metaDescriptionEn || post.excerptEn || post.excerpt || ''
+  const description = post.excerptEn || post.excerpt || post.metaDescriptionEn || post.metaDescription || ''
   return {
     title,
     description,

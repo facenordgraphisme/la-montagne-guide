@@ -13,6 +13,7 @@ import SejourTabs from '@/components/SejourTabs';
 import RichContent from '@/components/RichContent';
 import BlogCard from '@/components/BlogCard';
 import FAQAccordion from '@/components/FAQAccordion';
+import { LevelValue } from '@/components/LevelValue';
 import { renderRichText, toPlainText } from '@/utils/richText';
 
 function FicheRow({ icon, label, value, tooltip }: {
@@ -137,6 +138,8 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
     relatedPosts = [...directPosts, ...extraPosts].slice(0, postsLimit);
   }
 
+  relatedPosts = await autoFillAll(relatedPosts, [['title', 'titleEn'], ['excerpt', 'excerptEn'], ['imageAlt', 'imageAltEn']], lang);
+
   const getLevelLabel = (level?: string) => {
     const map: Record<string, string> = {
       'debutant': at('Débutant'),
@@ -159,7 +162,8 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
     id: `dynamic-${idx}`,
     label: at({ fr: tab.title, en: tab.titleEn }),
     content: translatePortableText({ fr: tab.content, en: tab.contentEn }) || null,
-    pdf: tab.pdf ?? null
+    pdf: tab.pdf ?? null,
+    faqs: tab.faqs || []
   }))
 
   const legacyTabs = [
@@ -282,13 +286,13 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                   <FicheRow
                     icon={<BarChart3 size={18} className="text-accent" />}
                     label={at('Niveau technique')}
-                    value={getLevelLabel(sejour.level)}
+                    value={sejour.level ? <LevelValue raw={sejour.level} text={getLevelLabel(sejour.level)} icons={settingsData?.technicalLevelIcons} showText={settingsData?.levelIconsShowText} lang={lang} /> : null}
                     tooltip={sejour.ficheTooltips?.level}
                   />
                   <FicheRow
                     icon={<BarChart3 size={18} className="text-accent" />}
                     label={at('Niveau physique')}
-                    value={sejour.physicalLevel}
+                    value={sejour.physicalLevel ? <LevelValue raw={sejour.physicalLevel} text={sejour.physicalLevel} icons={settingsData?.physicalLevelIcons} showText={settingsData?.levelIconsShowText} lang={lang} /> : null}
                     tooltip={sejour.physicalLevelTooltip || sejour.ficheTooltips?.physicalLevel}
                   />
                   <FicheRow
