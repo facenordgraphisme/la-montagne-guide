@@ -5,11 +5,12 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { client } from '@/sanity/lib/client'
 import { resourceBySlugQuery, resourceBySlugEnQuery, resourceSlugEnQuery } from '@/sanity/lib/queries'
-import { getServerTranslations } from '@/i18n/server'
+import { getServerTranslations, prefersFrench } from '@/i18n/server'
 import { autoFill, autoFillAll } from '@/lib/translate'
 import { ArrowLeft, BookOpen, Compass } from 'lucide-react'
 import { PortableText } from '@portabletext/react'
 import FAQAccordion from '@/components/FAQAccordion'
+import FaqJsonLd from '@/components/FaqJsonLd'
 import SejourTabs from '@/components/SejourTabs'
 import { urlFor } from '@/sanity/lib/image'
 
@@ -109,7 +110,7 @@ export default async function EnResourceDetailPage({ params }: { params: Promise
   if (!data) notFound()
 
   const { at, lang } = await getServerTranslations('en')
-  if (lang === 'fr') redirect(`/ressources/${ref.slug}`)
+  if (await prefersFrench()) redirect(`/ressources/${ref.slug}`)
 
   data = await autoFill(data, [['title', 'titleEn'], ['intro', 'introEn'], ['imageAlt', 'imageAltEn']], lang)
   if (data.tabs?.length) {
@@ -217,7 +218,7 @@ export default async function EnResourceDetailPage({ params }: { params: Promise
         </div>
       </article>
 
-      {data.faqs && data.faqs.length > 0 && (
+      {data.faqs?.some(Boolean) && (
         <section className="container mx-auto px-6 mt-32 pt-20 border-t border-foreground/5 max-w-4xl">
           <div className="text-center mb-16">
             <span className="text-accent font-black tracking-widest uppercase text-xs mb-4 block">FAQ</span>
@@ -225,6 +226,7 @@ export default async function EnResourceDetailPage({ params }: { params: Promise
               Frequently Asked <span className="text-accent italic">Questions</span>
             </h2>
           </div>
+          <FaqJsonLd faqs={data.faqs} lang={lang} />
           <FAQAccordion faqs={data.faqs} />
         </section>
       )}

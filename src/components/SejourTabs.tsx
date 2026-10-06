@@ -5,6 +5,8 @@ import { PortableText } from '@portabletext/react'
 import type { PortableTextComponents } from '@portabletext/react'
 import { Download, FileText } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { urlFor } from '@/sanity/lib/image'
 import { useLanguage } from '@/context/LanguageContext'
 import FAQAccordion from './FAQAccordion'
 
@@ -70,6 +72,26 @@ export default function SejourTabs({ tabs }: SejourTabsProps) {
       ),
     },
     types: {
+      image: ({ value }) => {
+        if (!value?.asset) return null
+        const alt = (language === 'en' ? (value.altEn || value.alt) : value.alt) || ''
+        const caption = (language === 'en' ? (value.captionEn || value.caption) : value.caption) || value.asset?.description
+        return (
+          <figure className="not-prose my-8">
+            <Image
+              src={urlFor(value).width(1200).auto('format').url()}
+              alt={alt}
+              width={1200}
+              height={800}
+              sizes="(max-width: 1024px) 100vw, 800px"
+              className="w-full h-auto rounded-2xl object-cover"
+            />
+            {caption && (
+              <figcaption className="mt-3 text-center text-sm text-foreground/50 italic">{caption}</figcaption>
+            )}
+          </figure>
+        )
+      },
       mapEmbed: ({ value }) => {
         if (!value?.url) return null;
         return (
@@ -111,7 +133,7 @@ export default function SejourTabs({ tabs }: SejourTabsProps) {
   }
 
   const visibleTabs = tabs.filter(tab =>
-    (tab.content && tab.content.length > 0) || tab.pdf || (tab.faqs && tab.faqs.length > 0)
+    (tab.content && tab.content.length > 0) || tab.pdf || tab.faqs?.some(Boolean)
   )
 
   const [activeTab, setActiveTab] = useState(visibleTabs[0]?.id ?? '')
@@ -146,7 +168,7 @@ export default function SejourTabs({ tabs }: SejourTabsProps) {
             <PortableText value={current.content} components={portableTextComponents} />
           )}
 
-          {current.faqs && current.faqs.length > 0 && (
+          {current.faqs?.some(Boolean) && (
             <FAQAccordion faqs={current.faqs} hideHeader />
           )}
 

@@ -5,6 +5,7 @@ import { client } from "@/sanity/lib/client";
 import { contactQuery, faqsQuery } from "@/sanity/lib/queries";
 import ContactForm from "@/components/ContactForm";
 import FAQAccordion from "@/components/FAQAccordion";
+import FaqJsonLd from '@/components/FaqJsonLd';
 import ObfuscatedContact from "@/components/ObfuscatedContact";
 
 import { getServerTranslations } from '@/i18n/server';
@@ -29,7 +30,7 @@ export default async function ContactPage() {
     client.fetch(contactQuery),
     client.fetch(faqsQuery)
   ]);
-  const { at, t } = await getServerTranslations();
+  const { at, t, lang } = await getServerTranslations();
 
   const contact = data || {
     title: at("CONTACT"),
@@ -74,6 +75,7 @@ export default async function ContactPage() {
           </div>
           
           <div className="mt-24 border-t border-white/5 pt-12">
+            <FaqJsonLd faqs={faqsData} lang={lang} />
             <FAQAccordion faqs={faqsData} />
           </div>
         </div>

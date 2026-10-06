@@ -8,6 +8,7 @@ import ContactHome from "@/components/ContactHome";
 import Testimonials from "@/components/Testimonials";
 import BlogTeaser from "@/components/BlogTeaser";
 import FAQAccordion from "@/components/FAQAccordion";
+import FaqJsonLd from '@/components/FaqJsonLd';
 import Footer from "@/components/Footer";
 import PartnersSlider from "@/components/PartnersSlider";
 
@@ -50,12 +51,15 @@ export default async function Home() {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": settingsData?.siteName || "La Montagne Guide | Nicolas Draperi",
-    "image": settingsData?.seoImage || undefined,
+    "url": "https://www.la-montagne-guide.fr",
+    "image": settingsData?.seoImage || settingsData?.logoLight || undefined,
     "telephone": settingsData?.phone || undefined,
     "email": settingsData?.email || undefined,
     "address": settingsData?.address ? {
       "@type": "PostalAddress",
-      "streetAddress": settingsData.address
+      "addressLocality": settingsData.address.split(',')[0].trim(),
+      "addressRegion": settingsData.address.split(',').slice(1).join(',').trim() || undefined,
+      "addressCountry": "FR"
     } : undefined,
     "priceRange": "$$",
     "sameAs": [
@@ -125,7 +129,7 @@ export default async function Home() {
           titleAccent={at({ fr: homeData?.contactTitleAccent, en: homeData?.contactTitleAccentEn })}
           description={translatePortableText({ fr: homeData?.contactDescription, en: homeData?.contactDescriptionEn })}
         />
-        {homeData?.hideTestimonials === false && (
+        {homeData?.hideTestimonials === false && testimonialsData?.length > 0 && (
           <Testimonials
             data={testimonialsData}
             badge={at({ fr: homeData?.testimonialsBadge, en: homeData?.testimonialsBadgeEn })}
@@ -143,6 +147,7 @@ export default async function Home() {
             className="bg-background"
           />
         )}
+        <FaqJsonLd faqs={filteredFaqs} lang={lang} />
         <FAQAccordion faqs={filteredFaqs} />
         {!settingsData?.hidePartners && (
           <PartnersSlider partners={settingsData?.partners} />

@@ -15,6 +15,7 @@ import { getServerTranslations } from '@/i18n/server';
 import { redirect } from 'next/navigation';
 import { PortableText } from '@portabletext/react';
 import FAQAccordion from "@/components/FAQAccordion";
+import FaqJsonLd from '@/components/FaqJsonLd';
 import { Calendar, ArrowLeft, ChevronLeft, ChevronRight, FileText, Compass } from 'lucide-react';
 import ImageGallery from '@/components/ImageGallery';
 import PostComments from '@/components/PostComments';
@@ -358,9 +359,10 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
           </div>
         </section>
 
-        {activity.faqs && activity.faqs.length > 0 && (
+        {activity.faqs?.some(Boolean) && (
           <section className="py-20 border-t border-border/10 bg-background">
             <div className="container mx-auto px-6 max-w-4xl">
+              <FaqJsonLd faqs={activity.faqs} lang={lang} />
               <FAQAccordion faqs={activity.faqs} />
             </div>
           </section>
@@ -383,6 +385,8 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
       "@context": "https://schema.org",
       "@type": "BlogPosting",
       "headline": at({ fr: post.title, en: post.titleEn }),
+      "url": `https://www.la-montagne-guide.fr/${post.slug}`,
+      "mainEntityOfPage": `https://www.la-montagne-guide.fr/${post.slug}`,
       "description": (lang === 'en' ? (post.excerptEn || post.excerpt) : post.excerpt) ? at(lang === 'en' ? (post.excerptEn || post.excerpt) : post.excerpt) : undefined,
       "image": post.image || undefined,
       "datePublished": post.date || undefined,
@@ -521,9 +525,10 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                 </div>
               ); })()}
 
-              {post.faqs && post.faqs.length > 0 && (
+              {post.faqs?.some(Boolean) && (
                 <div className="mt-16 pt-16 border-t border-border/40">
                   <h3 className="text-xl font-bold uppercase tracking-widest text-accent mb-8">{at('FAQ de la course')}</h3>
+                  <FaqJsonLd faqs={post.faqs} lang={lang} />
                   <FAQAccordion faqs={post.faqs} />
                 </div>
               )}

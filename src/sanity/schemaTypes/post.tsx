@@ -23,7 +23,6 @@ export const postType = defineType({
       name: 'titleEn', fieldset: 'fsTitle',
       title: 'Titre (Anglais)',
       type: 'string',
-      description: 'Si vide, traduit automatiquement côté site. Utilisez "🌐 Traduire EN" pour remplir.',
     }),
     defineField({
       name: 'slug',
@@ -35,20 +34,17 @@ export const postType = defineType({
       name: 'slugEn',
       title: 'Slug (Anglais)',
       type: 'string',
-      description: 'Généré automatiquement par "🌐 Traduire EN". URL anglaise : /en/[slug-en]. Modifiable si besoin.',
     }),
     defineField({
       name: 'excerpt', fieldset: 'fsExcerpt',
       title: 'Extrait (Français)',
       type: 'text',
-      description: 'Court résumé affiché dans la liste des articles, et utilisé comme description Google (meta). Idéalement 120–160 caractères.',
       validation: (Rule) => [Rule.max(200), Rule.max(160).warning('Au-delà de 160 caractères, Google tronque la description.')],
     }),
     defineField({
       name: 'excerptEn', fieldset: 'fsExcerpt',
       title: 'Extrait (Anglais)',
       type: 'text',
-      description: 'Version anglaise de l\'extrait (sert aussi de meta description EN). Si vide, l\'extrait FR est utilisé.',
       validation: (Rule) => [Rule.max(200), Rule.max(160).warning('Au-delà de 160 caractères, Google tronque la description.')],
     }),
     defineField({
@@ -63,20 +59,17 @@ export const postType = defineType({
           name: 'imageName',
           type: 'string',
           title: 'Nom personnalisé / Titre de l\'image',
-          description: 'Pour organiser ou nommer l\'image.',
           hidden: true,
         },
         {
           name: 'alt',
           type: 'string',
           title: 'Texte alternatif ALT (Français)',
-          description: 'Pour le SEO et l\'accessibilité.',
         },
         {
           name: 'altEn',
           type: 'string',
           title: 'Texte alternatif ALT (Anglais)',
-          description: 'Version anglaise du texte alt. Si vide, le texte FR est utilisé.',
         }
       ]
     }),
@@ -168,7 +161,6 @@ export const postType = defineType({
       name: 'bodyEn',
       title: 'Corps (Anglais)',
       type: 'array',
-      description: 'Version anglaise du corps de l\'article. Si vide, l\'article s\'affiche en français. Utilisez "🌐 Traduire EN".',
       of: [
         {
           type: 'block',
@@ -249,21 +241,18 @@ export const postType = defineType({
       title: 'Catégorie (Type d\'activité)',
       type: 'reference',
       to: [{ type: 'activity' }],
-      description: 'Catégorie principale de cet article — utilisée pour afficher les articles pertinents sur les pages séjour.',
     }),
     defineField({
       name: 'relatedSejour',
       title: 'Séjour lié',
       type: 'reference',
       to: [{ type: 'sejour' }],
-      description: 'Associer cet article à un séjour pour l\'afficher sur la page du séjour',
     }),
     defineField({
       name: 'tags',
       title: 'Tags / Catégories',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'tag' }], weak: true }],
-      description: 'Tags et catégories associés à cet article'
     }),
     defineField({
       name: 'gallery',
@@ -285,12 +274,10 @@ export const postType = defineType({
           ],
         },
       ],
-      description: 'Optionnel. Galerie de photos qui s\'affichera automatiquement en bas de l\'article.',
     }),
     defineField({
       name: 'tagBrowsedImages',
       title: 'Galerie — Sélection par tag',
-      description: 'Choisissez un Media Tag ou un tag d\'article, parcourez les photos et cliquez pour les sélectionner.',
       type: 'array',
       of: [
         {
@@ -302,6 +289,7 @@ export const postType = defineType({
           ],
         },
       ],
+      options: { layout: 'grid' },
       components: { input: TagImagePickerInput },
     }),
     defineField({
@@ -314,7 +302,6 @@ export const postType = defineType({
           title: 'Notice',
           type: 'string',
           readOnly: true,
-          description: 'Module d\'administration des médias'
         })
       ],
       components: {
@@ -324,7 +311,36 @@ export const postType = defineType({
     defineField({
       name: 'topo',
       title: 'Données pratiques / Topo',
-      description: 'Données techniques, topos de la course, informations pratiques.',
+      type: 'array',
+      of: [
+        {
+          type: 'block',
+          styles: [
+            { title: 'Normal', value: 'normal' },
+            { title: 'H2', value: 'h2' },
+            { title: 'H3', value: 'h3' },
+            { title: 'Centré', value: 'blockCenter' },
+            { title: 'Justifié', value: 'blockJustify' },
+            { title: 'Droite', value: 'blockRight' },
+            { title: 'Citation', value: 'blockquote' }
+          ]
+        },
+        {
+          type: 'image',
+          options: { hotspot: true },
+          fields: [
+            { name: 'imageName', type: 'string', title: 'Nom / Titre' },
+            { name: 'caption', type: 'string', title: 'Légende (Français)' },
+            { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' },
+            { name: 'alt', type: 'string', title: 'ALT (Français)' },
+            { name: 'altEn', type: 'string', title: 'ALT (Anglais)' },
+          ]
+        }
+      ]
+    }),
+    defineField({
+      name: 'topoEn',
+      title: 'Données pratiques / Topo (Anglais)',
       type: 'array',
       of: [
         {
@@ -355,7 +371,6 @@ export const postType = defineType({
     defineField({
       name: 'faqs',
       title: 'FAQ de l\'article',
-      description: 'Sélectionnez des FAQ spécifiques à afficher sur cet article de blog. Filtrez par catégorie pour retrouver vos questions plus facilement.',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
       components: { input: FAQPickerInput },
@@ -364,7 +379,6 @@ export const postType = defineType({
     defineField({
       name: 'relatedActivities',
       title: 'Activités & Séjours associés',
-      description: 'Liez des séjours recommandés pour faire du maillage interne (affiché après le CTA).',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'sejour' }] }],
     }),
@@ -372,26 +386,22 @@ export const postType = defineType({
       name: 'ctaText',
       title: 'Texte d\'appel à l\'action (Français)',
       type: 'string',
-      description: 'Optionnel. Laisse par défaut si vide : "Toi aussi tu souhaites vivre ce type d\'aventure ? Contacte-moi !"',
     }),
     defineField({
       name: 'ctaTextEn',
       title: 'Texte d\'appel à l\'action (Anglais)',
       type: 'string',
-      description: 'Optionnel. Laisse par défaut si vide : "Want to experience this type of adventure too? Contact me!"',
     }),
     defineField({
       name: 'ctaLink',
       title: 'Lien d\'appel à l\'action',
       type: 'string',
       initialValue: '/contact',
-      description: 'Le lien vers lequel redirige le bouton d\'appel à l\'action.',
     }),
     defineField({
       name: 'metaTitle', fieldset: 'fsSeoTitle',
       title: '🔍 SEO — Titre (balise title) FR',
       type: 'string',
-      description: 'Optionnel. Remplace le titre auto-généré dans Google. Idéalement < 60 caractères.',
     }),
     defineField({
       name: 'metaDescription',
@@ -399,13 +409,11 @@ export const postType = defineType({
       title: '🔍 SEO — Description (meta) FR',
       type: 'text',
       rows: 3,
-      description: 'Optionnel. Résumé affiché sous le titre dans Google. Idéalement 120–160 caractères.',
     }),
     defineField({
       name: 'metaTitleEn', fieldset: 'fsSeoTitle',
       title: '🔍 SEO — Titre (balise title) EN',
       type: 'string',
-      description: 'Optionnel. Version anglaise du titre SEO.',
     }),
     defineField({
       name: 'metaDescriptionEn',
@@ -413,14 +421,12 @@ export const postType = defineType({
       title: '🔍 SEO — Description (meta) EN',
       type: 'text',
       rows: 3,
-      description: 'Optionnel. Version anglaise de la meta description.',
     }),
     defineField({
       name: 'reviewed',
       title: '✅ Article relu / validé',
       type: 'boolean',
       initialValue: false,
-      description: 'Cochez quand l\'article a été relu et validé pour publication.',
     }),
   ],
   orderings: [

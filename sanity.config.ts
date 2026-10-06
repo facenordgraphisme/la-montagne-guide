@@ -14,6 +14,8 @@ import { translateDocumentAction } from './src/sanity/actions/translateDocument'
 import { CopyAltToCaptionAction } from './src/sanity/actions/copyAltToCaption'
 import { ApplyTagsToImagesAction } from './src/sanity/actions/applyTagsToImages'
 import { StudioLayoutWithScrollButtons } from './src/sanity/components/ScrollButtons'
+import { MediaDetails } from './src/sanity/components/MediaDetails'
+import { DeleteTagEverywhereAction } from './src/sanity/actions/deleteTagEverywhere'
 
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'your-project-id'
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production'
@@ -29,7 +31,7 @@ export default defineConfig({
     structureTool({ structure }),
     visionTool(),
     frFRLocale(),
-    media(),
+    media({ components: { details: MediaDetails as any } }),
     imageAssetPickerPlugin(),
   ],
   tools: (prev) => [
@@ -53,6 +55,9 @@ export default defineConfig({
       }
       if (ctx.schemaType === 'post') {
         extra.push(ApplyTagsToImagesAction as any)
+      }
+      if (ctx.schemaType === 'tag') {
+        extra.push(DeleteTagEverywhereAction)
       }
       return [...prev, ...extra]
     },

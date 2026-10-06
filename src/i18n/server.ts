@@ -21,6 +21,12 @@ export async function getLanguage() {
   return (cookieStore.get('language')?.value || 'fr') as 'fr' | 'en'
 }
 
+// True only when the visitor explicitly chose French; crawlers send no cookie and must get /en/ pages in English
+export async function prefersFrench() {
+  const cookieStore = await cookies()
+  return cookieStore.get('language')?.value === 'fr'
+}
+
 export async function getServerTranslations(forceLang?: 'fr' | 'en') {
   const lang = forceLang || await getLanguage()
   

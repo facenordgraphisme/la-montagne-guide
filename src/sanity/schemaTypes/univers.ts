@@ -11,7 +11,6 @@ export const universType = defineType({
       name: 'title',
       title: 'Nom de l\'univers (FR)',
       type: 'string',
-      description: 'Ex: Initiation, Pente Raide, Course de légende...',
     }),
     defineField({
       name: 'titleEn',
@@ -32,7 +31,6 @@ export const universType = defineType({
       title: 'Activité parente',
       type: 'reference',
       to: [{ type: 'activity' }],
-      description: 'À quelle activité appartient cet univers ?',
     }),
     defineField({
       name: 'description',
@@ -78,7 +76,6 @@ export const universType = defineType({
       name: 'catalogTitle',
       title: 'Titre du catalogue de séjours (FR)',
       type: 'string',
-      description: 'Optionnel. Par défaut: "Catalogue Séjours".',
     }),
     defineField({
       name: 'catalogTitleEn',
@@ -88,7 +85,6 @@ export const universType = defineType({
     defineField({
       name: 'faqs',
       title: 'Questions fréquentes (FAQ)',
-      description: 'Sélectionnez des FAQ spécifiques à afficher sur la page de cet univers.',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
     }),
@@ -96,14 +92,12 @@ export const universType = defineType({
       name: 'metaTitle',
       title: '🔍 SEO — Titre (balise title)',
       type: 'string',
-      description: 'Optionnel. Remplace le titre auto-généré dans les résultats Google. Idéalement < 60 caractères.',
     }),
     defineField({
       name: 'metaDescription',
       title: '🔍 SEO — Description (meta description)',
       type: 'text',
       rows: 3,
-      description: 'Optionnel. Remplace la description auto-générée dans les résultats Google. Idéalement entre 120 et 160 caractères.',
     }),
   ],
 })

@@ -7,6 +7,7 @@ import { getServerTranslations } from '@/i18n/server'
 import { autoFill } from '@/lib/translate'
 import { formatFriendlyDate } from '@/utils/date'
 import FAQAccordion from '@/components/FAQAccordion'
+import FaqJsonLd from '@/components/FaqJsonLd'
 import ImageGallery from '@/components/ImageGallery'
 import PostComments from '@/components/PostComments'
 
@@ -121,6 +122,9 @@ export default async function PostDetail({ post: rawPost, forceLang }: Props) {
   const { at, lang, translatePortableText } = await getServerTranslations(forceLang)
 
   const post = await autoFill(rawPost, [['title', 'titleEn'], ['excerpt', 'excerptEn'], ['imageAlt', 'imageAltEn']], lang)
+  if (lang === 'en' && post.tags?.length) {
+    post.tags = await Promise.all(post.tags.map((tag: any) => (tag && typeof tag === 'object' ? autoFill(tag, [['name', 'nameEn']], lang) : tag)))
+  }
 
   const formattedDate = formatFriendlyDate(post.date, lang as 'fr' | 'en')
 
@@ -132,6 +136,8 @@ export default async function PostDetail({ post: rawPost, forceLang }: Props) {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: at({ fr: post.title, en: post.titleEn }),
+    url: `https://www.la-montagne-guide.fr${postLink(post)}`,
+    mainEntityOfPage: `https://www.la-montagne-guide.fr${postLink(post)}`,
     description: lang === 'en' ? (post.excerptEn || post.excerpt) : post.excerpt,
     image: post.image || undefined,
     datePublished: post.date || undefined,
@@ -227,7 +233,7 @@ export default async function PostDetail({ post: rawPost, forceLang }: Props) {
                     <FileText size={18} />
                     {lang === 'en' ? 'Practical Info / Route Topo' : 'Données Pratiques / Topo'}
                   </h3>
-                  <PortableText value={translatePortableText(post.topo)} components={makeBlogBlockComponents(lang)} />
+                  <PortableText value={translatePortableText({ fr: post.topo, en: post.topoEn })} components={makeBlogBlockComponents(lang)} />
                 </div>
               )}
 
@@ -247,9 +253,10 @@ export default async function PostDetail({ post: rawPost, forceLang }: Props) {
                 </div>
               )}
 
-              {post.faqs && post.faqs.length > 0 && (
+              {post.faqs?.some(Boolean) && (
                 <div className="mt-16 pt-16 border-t border-border/40">
                   <h3 className="text-xl font-bold uppercase tracking-widest text-accent mb-8">{at('FAQ de la course')}</h3>
+                  <FaqJsonLd faqs={post.faqs} lang={lang} />
                   <FAQAccordion faqs={post.faqs} />
                 </div>
               )}

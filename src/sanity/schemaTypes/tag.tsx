@@ -17,7 +17,6 @@ export const tagType = defineType({
       name: 'nameEn',
       title: 'Nom (Anglais)',
       type: 'string',
-      description: 'Si vide, traduit automatiquement côté site. Utilisez "🌐 Traduire EN" pour remplir.',
     }),
     defineField({
       name: 'slug',
@@ -41,7 +40,6 @@ export const tagType = defineType({
         ],
       },
       initialValue: 'other',
-      description: 'Utilisé pour les filtres de la page blog.',
     }),
     defineField({
       name: 'referredPosts',

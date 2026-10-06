@@ -39,14 +39,12 @@ export const faqType = defineType({
       type: 'reference',
       to: [{ type: 'faqCategory' }],
       weak: true,
-      description: 'Sélectionnez une catégorie dynamique ou laissez vide.',
     }),
     defineField({
       name: 'order',
       title: "Ordre d'affichage",
       type: 'number',
       initialValue: 0,
-      description: 'Plus le chiffre est bas, plus la question apparaît en premier (ex: 0, 1, 2...).',
     }),
   ],
   preview: {

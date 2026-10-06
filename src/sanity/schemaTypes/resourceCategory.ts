@@ -17,7 +17,6 @@ export const resourceCategoryType = defineType({
       name: 'titleEn',
       title: 'Titre (Anglais)',
       type: 'string',
-      description: 'Version anglaise du titre affiché dans le filtre. Si vide, le titre FR est utilisé.',
     }),
     defineField({
       name: 'slug',
@@ -25,14 +24,12 @@ export const resourceCategoryType = defineType({
       type: 'slug',
       options: { source: 'title', maxLength: 96 },
       validation: (Rule) => Rule.required(),
-      description: 'Identifiant unique. Doit correspondre exactement à la valeur "Catégorie" choisie dans les ressources associées.',
     }),
     defineField({
       name: 'order',
       title: 'Ordre d\'affichage',
       type: 'number',
       initialValue: 10,
-      description: 'Les catégories sont triées du plus petit au plus grand. La catégorie "Tous les guides" est toujours en premier.',
     }),
   ],
   orderings: [

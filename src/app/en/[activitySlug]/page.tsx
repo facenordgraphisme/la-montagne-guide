@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 import { client } from '@/sanity/lib/client'
 import { postBySlugEnQuery, postBySlugQuery, postSlugEnQuery } from '@/sanity/lib/queries'
-import { getServerTranslations } from '@/i18n/server'
+import { prefersFrench } from '@/i18n/server'
 import PostDetail from '@/components/PostDetail'
 
 export async function generateStaticParams() {
@@ -44,8 +44,7 @@ export default async function EnPostPage({ params }: { params: Promise<{ activit
   const post = await client.fetch(postBySlugQuery, { slug: ref.slug })
   if (!post) notFound()
 
-  const { lang } = await getServerTranslations()
-  if (lang === 'fr') redirect(`/${ref.slug}`)
+  if (await prefersFrench()) redirect(`/${ref.slug}`)
 
   return <PostDetail post={post} forceLang="en" />
 }

@@ -19,6 +19,14 @@ export const blockAlignComponents = {
       const isEmpty = !children || children.length === 0 || (children.length === 1 && children[0] === '');
       return <p style={{ textAlign: 'justify', minHeight: isEmpty ? '1.5em' : undefined }}>{isEmpty ? '\u00a0' : children}</p>;
     },
+    encart: ({ children }: any) => (
+      <div className="not-prose relative my-10 overflow-hidden rounded-[2rem] border border-highlight/30 bg-linear-to-br from-highlight/10 via-highlight/5 to-orange-400/10 px-8 py-6 shadow-xl">
+        <div className="absolute -right-4 -top-4 w-32 h-32 bg-highlight/10 rounded-full blur-3xl" />
+        <p className="relative text-xl md:text-2xl font-black leading-[1.1] tracking-tighter text-foreground uppercase text-left [&_strong]:font-black">
+          {children}
+        </p>
+      </div>
+    ),
   },
   marks: {
     link: ({ children, value }: any) => (

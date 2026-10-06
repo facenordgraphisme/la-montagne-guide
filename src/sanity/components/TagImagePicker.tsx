@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useClient } from 'sanity'
 import { set, unset } from 'sanity'
-import { Card, Stack, Text, Select, Flex, Button } from '@sanity/ui'
+import { Stack, Text, Select, Flex, Button } from '@sanity/ui'
 
 function generateKey() {
   return Math.random().toString(36).slice(2, 10)
@@ -9,7 +9,8 @@ function generateKey() {
 
 type FilterMode = 'article' | 'media'
 
-export function TagImagePickerInput({ value, onChange }: any) {
+export function TagImagePickerInput(props: any) {
+  const { value, onChange } = props
   const client = useClient({ apiVersion: '2023-01-01' })
   const [mode, setMode] = useState<FilterMode>('media')
 
@@ -19,7 +20,7 @@ export function TagImagePickerInput({ value, onChange }: any) {
   const [selectedTagId, setSelectedTagId] = useState('')
   const [availableImages, setAvailableImages] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
-  const [imageCache, setImageCache] = useState<Record<string, any>>({})
+  const [lastClicked, setLastClicked] = useState<number | null>(null)
 
   const currentValue: any[] = value || []
 
@@ -115,11 +116,7 @@ export function TagImagePickerInput({ value, onChange }: any) {
     query
       .then((images: any[]) => {
         setAvailableImages(images)
-        setImageCache(prev => {
-          const next = { ...prev }
-          for (const img of images) next[img.assetId] = img
-          return next
-        })
+        setLastClicked(null)
       })
       .finally(() => setLoading(false))
   }, [selectedTagId, mode, client])
@@ -128,27 +125,29 @@ export function TagImagePickerInput({ value, onChange }: any) {
     return currentValue.some((v: any) => v.asset?._ref === assetId)
   }
 
-  function toggleImage(img: any) {
+  function handleClick(index: number, shiftKey: boolean) {
+    const img = availableImages[index]
+    const select = !isSelected(img.assetId)
+    const range = shiftKey && lastClicked !== null
+      ? availableImages.slice(Math.min(lastClicked, index), Math.max(lastClicked, index) + 1)
+      : [img]
+    const ids = new Set(range.map(i => i.assetId))
     let next: any[]
-    if (isSelected(img.assetId)) {
-      next = currentValue.filter((v: any) => v.asset?._ref !== img.assetId)
-    } else {
-      next = [
-        ...currentValue,
-        {
+    if (select) {
+      const toAdd = range
+        .filter(i => !isSelected(i.assetId))
+        .map(i => ({
           _type: 'image',
           _key: generateKey(),
-          asset: { _type: 'reference', _ref: img.assetId },
-          alt: img.alt || '',
-          imageName: img.imageName || '',
-        },
-      ]
+          asset: { _type: 'reference', _ref: i.assetId },
+          alt: i.alt || '',
+          imageName: i.imageName || '',
+        }))
+      next = [...currentValue, ...toAdd]
+    } else {
+      next = currentValue.filter((v: any) => !ids.has(v.asset?._ref))
     }
-    onChange(next.length ? set(next) : unset())
-  }
-
-  function removeImage(assetId: string) {
-    const next = currentValue.filter((v: any) => v.asset?._ref !== assetId)
+    setLastClicked(index)
     onChange(next.length ? set(next) : unset())
   }
 
@@ -200,7 +199,7 @@ export function TagImagePickerInput({ value, onChange }: any) {
       {!loading && availableImages.length > 0 && (
         <Stack space={3}>
           <Text size={1} weight="semibold">
-            {availableImages.length} photo{availableImages.length > 1 ? 's' : ''} disponible{availableImages.length > 1 ? 's' : ''} — cliquez pour sélectionner / désélectionner
+            {availableImages.length} photo{availableImages.length > 1 ? 's' : ''} disponible{availableImages.length > 1 ? 's' : ''} — cliquez pour sélectionner, Maj + clic pour une plage
           </Text>
           <div
             style={{
@@ -209,12 +208,12 @@ export function TagImagePickerInput({ value, onChange }: any) {
               gap: 8,
             }}
           >
-            {availableImages.map(img => {
+            {availableImages.map((img, index) => {
               const selected = isSelected(img.assetId)
               return (
                 <div
                   key={img.assetId}
-                  onClick={() => toggleImage(img)}
+                  onClick={e => handleClick(index, e.shiftKey)}
                   title={img.imageName || img.alt || ''}
                   style={{
                     position: 'relative',
@@ -264,91 +263,15 @@ export function TagImagePickerInput({ value, onChange }: any) {
         <Text size={1} muted>Aucune photo trouvée pour ce tag.</Text>
       )}
 
-      {/* Selected images summary */}
       {currentValue.length > 0 && (
-        <Card padding={3} radius={2} tone="primary" border>
-          <Stack space={3}>
-            <Flex align="center" justify="space-between">
-              <Text size={1} weight="semibold">
-                {currentValue.length} photo{currentValue.length > 1 ? 's' : ''} sélectionnée{currentValue.length > 1 ? 's' : ''}
-              </Text>
-              <Button
-                text="Tout retirer"
-                tone="critical"
-                mode="ghost"
-                fontSize={1}
-                padding={2}
-                onClick={() => onChange(unset())}
-              />
-            </Flex>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {currentValue.map((v: any) => {
-                const assetId = v.asset?._ref
-                const cached = imageCache[assetId]
-                return (
-                  <div
-                    key={v._key || assetId}
-                    onClick={() => removeImage(assetId)}
-                    title={`Retirer : ${v.imageName || v.alt || ''}`}
-                    style={{
-                      position: 'relative',
-                      width: 56,
-                      height: 56,
-                      borderRadius: 4,
-                      overflow: 'hidden',
-                      cursor: 'pointer',
-                      flexShrink: 0,
-                      background: '#2276fc22',
-                    }}
-                  >
-                    {cached ? (
-                      <img
-                        src={`${cached.url}?w=112&h=112&fit=crop`}
-                        alt={v.alt || ''}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: 10,
-                          color: '#2276fc',
-                          textAlign: 'center',
-                          padding: 4,
-                        }}
-                      >
-                        {v.imageName || v.alt || '📷'}
-                      </div>
-                    )}
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: 2,
-                        right: 2,
-                        background: 'rgba(0,0,0,0.6)',
-                        borderRadius: '50%',
-                        width: 16,
-                        height: 16,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'white',
-                        fontSize: 10,
-                      }}
-                    >
-                      ✕
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </Stack>
-        </Card>
+        <Flex align="center" justify="space-between">
+          <Text size={1} weight="semibold">
+            {currentValue.length} photo{currentValue.length > 1 ? 's' : ''} sélectionnée{currentValue.length > 1 ? 's' : ''} — glissez-déposez ci-dessous pour changer l'ordre
+          </Text>
+          <Button text="Tout retirer" tone="critical" mode="ghost" fontSize={1} padding={2} onClick={() => onChange(unset())} />
+        </Flex>
       )}
+      {currentValue.length > 0 && props.renderDefault(props)}
     </Stack>
   )
 }

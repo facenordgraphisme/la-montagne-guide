@@ -37,7 +37,7 @@ const tabContentOf = [
     name: 'mapEmbed',
     title: 'Carte Google Maps',
     fields: [
-      defineField({ name: 'url', type: 'url', title: 'URL d\'intégration', description: 'Dans Google Maps → Partager → Intégrer une carte → copier l\'URL du src.', validation: (Rule: any) => Rule.required() }),
+      defineField({ name: 'url', type: 'url', title: 'URL d\'intégration', validation: (Rule: any) => Rule.required() }),
       defineField({ name: 'height', type: 'number', title: 'Hauteur (px)', initialValue: 400 }),
     ],
     preview: {
@@ -64,21 +64,18 @@ export const tabTemplateType = defineType({
   title: 'Modèles d\'Onglets',
   type: 'document',
   icon: LayoutTemplate,
-  description: 'Créez des onglets réutilisables à partager entre plusieurs séjours (ex: liste de matériel commune, CGV, infos départ).',
   fields: [
     defineField({
       name: 'name',
       title: 'Nom interne (Studio)',
       type: 'string',
       validation: (Rule) => Rule.required(),
-      description: 'Nom affiché uniquement dans le Studio pour identifier ce modèle.',
     }),
     defineField({
       name: 'title',
       title: 'Titre de l\'onglet (Français)',
       type: 'string',
       validation: (Rule) => Rule.required(),
-      description: 'Label affiché sur l\'onglet côté site.',
     }),
     defineField({
       name: 'titleEn',
@@ -101,13 +98,11 @@ export const tabTemplateType = defineType({
       name: 'pdf',
       type: 'file',
       title: 'PDF téléchargeable (optionnel)',
-      description: 'Un bouton de téléchargement apparaîtra dans l\'onglet.',
       options: { accept: '.pdf' },
     }),
     defineField({
       name: 'faqs',
       title: 'FAQ à afficher dans cet onglet',
-      description: 'Filtrez par catégorie pour retrouver vos questions plus facilement.',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
       components: { input: FAQPickerInput },

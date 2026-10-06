@@ -8,6 +8,7 @@ import { PortableText } from "@portabletext/react";
 import PartnersSlider from "@/components/PartnersSlider";
 import { urlFor } from "@/sanity/lib/image";
 import FAQAccordion from "@/components/FAQAccordion";
+import FaqJsonLd from '@/components/FaqJsonLd';
 
 import { getServerTranslations } from '@/i18n/server';
 
@@ -58,7 +59,7 @@ export default async function GuidePage() {
     client.fetch(guideQuery),
     client.fetch(settingsQuery)
   ]);
-  const { at, t, translatePortableText } = await getServerTranslations();
+  const { at, t, lang, translatePortableText } = await getServerTranslations();
 
   const fallback = {
     badge: at("Votre Guide"),
@@ -226,9 +227,10 @@ export default async function GuidePage() {
         </section>
       )}
 
-      {guide.faqs && guide.faqs.length > 0 && (
+      {guide.faqs?.some(Boolean) && (
         <section className="py-20 border-t border-border/10">
           <div className="container mx-auto px-6">
+            <FaqJsonLd faqs={guide.faqs} lang={lang} />
             <FAQAccordion faqs={guide.faqs} />
           </div>
         </section>

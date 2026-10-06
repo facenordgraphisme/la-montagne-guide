@@ -11,6 +11,7 @@ import { autoFill, autoFillAll } from '@/lib/translate';
 import { ArrowLeft, BookOpen, Clock, Compass } from 'lucide-react';
 import { PortableText } from '@portabletext/react';
 import FAQAccordion from "@/components/FAQAccordion";
+import FaqJsonLd from '@/components/FaqJsonLd';
 import SejourTabs from "@/components/SejourTabs";
 
 function makeBlockAlignComponents(lang: string) { return {
@@ -288,7 +289,7 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
       </article>
 
       {/* Custom FAQs related to this resource */}
-      {data.faqs && data.faqs.length > 0 && (
+      {data.faqs?.some(Boolean) && (
         <section className="container mx-auto px-6 mt-32 pt-20 border-t border-foreground/5 max-w-4xl">
           <div className="text-center mb-16">
             <span className="text-accent font-black tracking-widest uppercase text-xs mb-4 block">FAQ</span>
@@ -296,6 +297,7 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
               {at('Questions')} <span className="text-accent italic">{at('Fréquentes')}</span>
             </h2>
           </div>
+          <FaqJsonLd faqs={data.faqs} lang={lang} />
           <FAQAccordion faqs={data.faqs} />
         </section>
       )}

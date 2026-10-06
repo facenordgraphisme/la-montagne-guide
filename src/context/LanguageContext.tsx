@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 
 import { sanityTranslations } from '@/i18n/translations'
 import en from '@/i18n/dictionaries/en.json'
@@ -33,7 +34,11 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
-  const [language, setLanguageState] = useState<Language>('fr')
+  const pathname = usePathname()
+  // /en/ URLs are always English, even on first render (crawlers have no localStorage)
+  const routeLang: Language | null = pathname === '/en' || pathname?.startsWith('/en/') ? 'en' : null
+  const [storedLanguage, setLanguageState] = useState<Language>('fr')
+  const language = routeLang ?? storedLanguage
 
   useEffect(() => {
     const savedLang = localStorage.getItem('language') as Language

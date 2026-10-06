@@ -53,7 +53,7 @@ export const homeType = defineType({
   ],
   fields: [
     // HERO SECTION
-    defineField({ name: 'heroTitle', title: 'Titre Hero (FR)', type: 'text', description: 'Utilisez la touche Entrée pour passer à la ligne', rows: 2, group: 'hero' }),
+    defineField({ name: 'heroTitle', title: 'Titre Hero (FR)', type: 'text', rows: 2, group: 'hero' }),
     defineField({ name: 'heroTitleEn', title: 'Titre Hero (EN)', type: 'text', rows: 2, group: 'hero' }),
     defineField({ name: 'heroSubtitle', title: 'Sous-titre Hero (FR)', type: 'string', group: 'hero' }),
     defineField({ name: 'heroSubtitleEn', title: 'Sous-titre Hero (EN)', type: 'string', group: 'hero' }),
@@ -147,10 +147,10 @@ export const homeType = defineType({
     defineField({ name: 'blogTitleAccentEn', title: 'Titre Blog Turquoise (EN)', type: 'string', group: 'blog' }),
 
     // LAYOUT CONTROLS
-    defineField({ name: 'hideTestimonials', title: 'Masquer la section Témoignages', type: 'boolean', initialValue: true, group: 'layout', description: "Masque le bloc d'avis clients sur la page d'accueil. Par défaut masqué — décochez pour afficher." }),
-    defineField({ name: 'hideBlog', title: 'Masquer la section Blog', type: 'boolean', initialValue: false, group: 'layout', description: "Masque le bloc de carnet de voyage sur la page d'accueil." }),
-    defineField({ name: 'hideSorties', title: 'Masquer la section Prochaines Sorties', type: 'boolean', initialValue: false, group: 'layout', description: "Masque le bloc des dates de départ planifiées sur la page d'accueil." }),
-    defineField({ name: 'hideAdventure', title: 'Masquer la section Accompagnement Personnalisé', type: 'boolean', initialValue: false, group: 'layout', description: "Masque la section détaillant la philosophie et l'engagement du guide sur la page d'accueil." }),
-    defineField({ name: 'featuredPostsLimit', title: "Limite d'articles de blog", type: 'number', initialValue: 3, group: 'layout', description: "Le nombre maximum d'articles à afficher dans la grille du blog.", validation: (Rule) => Rule.min(1).max(9) }),
+    defineField({ name: 'hideTestimonials', title: 'Masquer la section Témoignages', type: 'boolean', initialValue: true, group: 'layout' }),
+    defineField({ name: 'hideBlog', title: 'Masquer la section Blog', type: 'boolean', initialValue: false, group: 'layout' }),
+    defineField({ name: 'hideSorties', title: 'Masquer la section Prochaines Sorties', type: 'boolean', initialValue: false, group: 'layout' }),
+    defineField({ name: 'hideAdventure', title: 'Masquer la section Accompagnement Personnalisé', type: 'boolean', initialValue: false, group: 'layout' }),
+    defineField({ name: 'featuredPostsLimit', title: "Limite d'articles de blog", type: 'number', initialValue: 3, group: 'layout', validation: (Rule) => Rule.min(1).max(9) }),
   ],
 })

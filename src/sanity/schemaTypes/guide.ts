@@ -80,7 +80,6 @@ export const guideType = defineType({
       name: 'sections',
       title: 'Sections de la biographie',
       type: 'array',
-      description: 'Ajoutez des blocs de contenu alternés (image à gauche ou à droite) pour structurer le texte.',
       of: [
         {
           type: 'object',
@@ -114,7 +113,6 @@ export const guideType = defineType({
     defineField({
       name: 'faqs',
       title: 'Questions fréquentes (FAQ)',
-      description: 'Sélectionnez des FAQ spécifiques à afficher sur la page À Propos.',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
     }),

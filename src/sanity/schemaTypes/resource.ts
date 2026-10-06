@@ -30,7 +30,6 @@ export const resourceType = defineType({
       name: 'slugEn',
       title: 'Slug (Anglais)',
       type: 'string',
-      description: 'Généré automatiquement par "🌐 Traduire EN". URL anglaise : /en/ressources/[slug-en]. Modifiable si besoin.',
     }),
     defineField({
       name: 'category',
@@ -54,7 +53,6 @@ export const resourceType = defineType({
       title: 'Introduction / Chapô (Français)',
       type: 'text',
       rows: 3,
-      description: 'Un court résumé affiché dans les listes.',
     }),
     defineField({
       name: 'introEn',
@@ -68,8 +66,8 @@ export const resourceType = defineType({
       type: 'image',
       options: { hotspot: true },
       fields: [
-        defineField({ name: 'alt', type: 'string', title: 'Texte ALT (Français)', description: 'Pour le SEO et l\'accessibilité.' }),
-        defineField({ name: 'altEn', type: 'string', title: 'Texte ALT (Anglais)', description: 'Version anglaise. Si vide, le texte FR est utilisé.' }),
+        defineField({ name: 'alt', type: 'string', title: 'Texte ALT (Français)' }),
+        defineField({ name: 'altEn', type: 'string', title: 'Texte ALT (Anglais)' }),
       ],
     }),
     defineField({
@@ -117,7 +115,6 @@ export const resourceType = defineType({
     defineField({
       name: 'tabs',
       title: 'Onglets personnalisés',
-      description: 'Créez des onglets pour organiser le contenu (Programme, Matériel, etc.).',
       type: 'array',
       of: [
         {
@@ -171,7 +168,6 @@ export const resourceType = defineType({
                       name: 'url',
                       type: 'url',
                       title: 'URL d\'intégration Google Maps',
-                      description: 'Dans Google Maps → Partager → Intégrer une carte → copier l\'URL du src.',
                       validation: (Rule) => Rule.required(),
                     }),
                     defineField({ name: 'height', type: 'number', title: 'Hauteur (px)', initialValue: 400 }),
@@ -230,7 +226,6 @@ export const resourceType = defineType({
                       name: 'url',
                       type: 'url',
                       title: 'URL d\'intégration Google Maps',
-                      description: 'Dans Google Maps → Partager → Intégrer une carte → copier l\'URL du src.',
                       validation: (Rule) => Rule.required(),
                     }),
                     defineField({ name: 'height', type: 'number', title: 'Hauteur (px)', initialValue: 400 }),
@@ -249,7 +244,6 @@ export const resourceType = defineType({
               name: 'pdf',
               type: 'file',
               title: 'PDF téléchargeable (optionnel)',
-              description: 'Ex: liste de matériel. Un bouton de téléchargement apparaîtra dans cet onglet.',
               options: { accept: '.pdf' },
             }),
           ],
@@ -259,14 +253,12 @@ export const resourceType = defineType({
     defineField({
       name: 'relatedActivities',
       title: 'Activités & Séjours associés',
-      description: 'Liez des séjours recommandés pour faire du maillage interne.',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'sejour' }] }],
     }),
     defineField({
       name: 'faqs',
       title: 'FAQ Associées',
-      description: 'Questions/Réponses spécifiques à afficher en bas de ce guide.',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
     }),
@@ -274,53 +266,45 @@ export const resourceType = defineType({
       name: 'ctaTitle',
       title: 'CTA Sidebar — Titre',
       type: 'string',
-      description: 'Titre affiché dans le bloc CTA de la sidebar. Laisser vide pour le texte par défaut.',
     }),
     defineField({
       name: 'ctaText',
       title: 'CTA Sidebar — Texte',
       type: 'text',
       rows: 2,
-      description: 'Texte descriptif dans le bloc CTA. Laisser vide pour le texte par défaut.',
     }),
     defineField({
       name: 'ctaLink',
       title: 'CTA Sidebar — Lien',
       type: 'string',
       initialValue: '/contact',
-      description: 'URL de destination du bouton CTA.',
     }),
     defineField({
       name: 'ctaButtonLabel',
       title: 'CTA Sidebar — Libellé du bouton',
       type: 'string',
-      description: 'Texte du bouton. Laisser vide pour "Me contacter".',
     }),
     defineField({
       name: 'metaTitle',
       title: '🔍 SEO — Titre (balise title)',
       type: 'string',
-      description: 'Optionnel. Remplace le titre auto-généré dans les résultats Google. Idéalement < 60 caractères.',
     }),
     defineField({
       name: 'metaDescription',
       title: '🔍 SEO — Description (meta description)',
       type: 'text',
       rows: 3,
-      description: 'Optionnel. Résumé affiché sous le titre dans Google. Idéalement 120–160 caractères.',
     }),
     defineField({
       name: 'metaTitleEn',
       title: '🔍 SEO — Titre (balise title) EN',
       type: 'string',
-      description: 'Optionnel. Version anglaise du titre SEO.',
     }),
     defineField({
       name: 'metaDescriptionEn',
       title: '🔍 SEO — Description (meta) EN',
       type: 'text',
       rows: 3,
-      description: 'Optionnel. Version anglaise de la meta description.',
     }),
   ],
   preview: {

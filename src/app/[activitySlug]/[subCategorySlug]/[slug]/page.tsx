@@ -13,6 +13,7 @@ import SejourTabs from '@/components/SejourTabs';
 import RichContent from '@/components/RichContent';
 import BlogCard from '@/components/BlogCard';
 import FAQAccordion from '@/components/FAQAccordion';
+import FaqJsonLd from '@/components/FaqJsonLd';
 import { LevelValue } from '@/components/LevelValue';
 import { renderRichText, toPlainText } from '@/utils/richText';
 
@@ -171,11 +172,14 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
     { id: 'budget', label: at('Budget'), content: sejour.budget ? translatePortableText(sejour.budget) : null },
     { id: 'infos', label: at('Infos Pratiques'), content: sejour.infosPratiques ? translatePortableText(sejour.infosPratiques) : null },
     { id: 'materiel', label: at('Matériel'), content: sejour.materiel ? translatePortableText(sejour.materiel) : null, pdf: sejour.materielPdf ?? null },
-    ...(sejour.faqs && sejour.faqs.length > 0 ? [{ id: 'faq', label: at('FAQ'), content: null, faqs: sejour.faqs }] : []),
+    ...(sejour.faqs?.some(Boolean) ? [{ id: 'faq', label: at('FAQ'), content: null, faqs: sejour.faqs }] : []),
   ].filter(tab => tab.content !== null || tab.pdf !== null || (tab as any).faqs?.length > 0)
 
   const tabs = [...templateTabs, ...dynamicTabs, ...legacyTabs]
   const hasTabs = tabs.length > 0
+
+  // First amount only, so ranges like "1 500€ - 2 000€" don't merge into one number
+  const basePriceValue = sejour.basePrice?.replace(/(\d)[\s\u00a0\u202f.](?=\d{3}(\D|$))/g, '$1').match(/\d+/)?.[0]
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -184,9 +188,10 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
     "description": sejour.description ? toPlainText(sejour.description) : undefined,
     "image": sejour.image || undefined,
     "touristType": sejour.activityType ? at(sejour.activityType) : undefined,
-    "offers": sejour.basePrice ? {
+    "url": encodeURI(`https://www.la-montagne-guide.fr/${activitySlug}/${subCategorySlug}/${slug}`),
+    "offers": basePriceValue ? {
       "@type": "Offer",
-      "price": sejour.basePrice.replace(/[^0-9]/g, ''),
+      "price": basePriceValue,
       "priceCurrency": "EUR",
       "description": at("Tarif de base")
     } : undefined,
@@ -203,6 +208,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <FaqJsonLd faqs={tabs.flatMap((tab: any) => tab.faqs || [])} lang={lang} />
 
       {/* Hero Header */}
       <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">

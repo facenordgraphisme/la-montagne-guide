@@ -8,6 +8,7 @@ import { getServerTranslations } from '@/i18n/server';
 
 import UpcomingSorties from "@/components/UpcomingSorties";
 import FAQAccordion from "@/components/FAQAccordion";
+import FaqJsonLd from '@/components/FaqJsonLd';
 import { PortableText } from '@portabletext/react';
 import { renderRichText } from '@/utils/richText';
 
@@ -112,7 +113,7 @@ export default async function PrestationDetail({ params }: { params: Promise<{ s
   const { slug } = await params;
   const sanityData = await client.fetch(activityBySlugQuery, { slug });
   const data = sanityData || prestationsFallback[slug];
-  const { at, t, translatePortableText } = await getServerTranslations();
+  const { at, t, lang, translatePortableText } = await getServerTranslations();
 
   if (!data) notFound();
 
@@ -243,9 +244,10 @@ export default async function PrestationDetail({ params }: { params: Promise<{ s
         />
       )}
 
-      {data.faqs && data.faqs.length > 0 && (
+      {data.faqs?.some(Boolean) && (
         <section className="py-20 border-t border-border/10 bg-background">
           <div className="container mx-auto px-6 max-w-4xl">
+            <FaqJsonLd faqs={data.faqs} lang={lang} />
             <FAQAccordion faqs={data.faqs} />
           </div>
         </section>

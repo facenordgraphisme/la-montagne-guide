@@ -11,7 +11,6 @@ export const ctaType = defineType({
       name: 'name',
       title: 'Nom interne',
       type: 'string',
-      description: 'Identifiant pour retrouver ce CTA dans la bibliothèque.',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
@@ -19,7 +18,6 @@ export const ctaType = defineType({
       title: 'Texte descriptif (FR)',
       type: 'text',
       rows: 2,
-      description: 'Texte affiché au-dessus du bouton.',
     }),
     defineField({
       name: 'textEn',
@@ -42,7 +40,6 @@ export const ctaType = defineType({
       name: 'link',
       title: 'Lien URL',
       type: 'string',
-      description: 'URL interne (ex: /contact) ou externe.',
       initialValue: '/contact',
     }),
     defineField({

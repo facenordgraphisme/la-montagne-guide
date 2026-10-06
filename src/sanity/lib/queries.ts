@@ -145,7 +145,7 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
     _type == "image" => { ..., "asset": asset-> }
   },
   "materielPdf": materielPdf.asset->url,
-  "gallery": gallery[]{imageName, caption, captionEn, alt, altEn, "url": asset->url, "originalFilename": asset->originalFilename, "extension": asset->extension},
+  "gallery": gallery[]{imageName, "caption": coalesce(caption, asset->description), captionEn, alt, altEn, "url": asset->url, "originalFilename": asset->originalFilename, "extension": asset->extension},
   "upcomingSorties": *[_type == "sortie" && sejour._ref == ^._id && startDate >= now()] | order(startDate asc) {
     date,
     availableSpots,
@@ -208,7 +208,7 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
   },
   "relatedTags": relatedTags[]->slug.current,
   "relatedTagIds": relatedTags[]._ref,
-  "tagBrowsedImages": tagBrowsedImages[]{imageName, alt, altEn, "url": asset->url, "originalFilename": asset->originalFilename, "extension": asset->extension},
+  "tagBrowsedImages": tagBrowsedImages[]{imageName, "caption": coalesce(caption, asset->description), alt, altEn, "url": asset->url, "originalFilename": asset->originalFilename, "extension": asset->extension},
   relatedPostsLimit,
   hideRelatedPosts,
   "relatedPosts": relatedPosts[]->{
@@ -458,6 +458,7 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
     _type == "image" => {
       ...,
       "alt": coalesce(alt, asset->altText),
+      "caption": coalesce(caption, asset->description),
       "altEn": coalesce(altEn, alt, asset->altText)
     },
     _type == "gallery" => {
@@ -465,6 +466,7 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
       images[] {
         ...,
         "alt": coalesce(alt, asset->altText),
+        "caption": coalesce(caption, asset->description),
         "altEn": coalesce(altEn, alt, asset->altText),
         captionEn,
         "url": asset->url,
@@ -479,6 +481,7 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
     _type == "image" => {
       ...,
       "alt": coalesce(alt, asset->altText),
+      "caption": coalesce(caption, asset->description),
       "altEn": coalesce(altEn, alt, asset->altText)
     },
     _type == "gallery" => {
@@ -486,6 +489,7 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
       images[] {
         ...,
         "alt": coalesce(alt, asset->altText),
+        "caption": coalesce(caption, asset->description),
         "altEn": coalesce(altEn, alt, asset->altText),
         captionEn,
         "url": asset->url,
@@ -496,10 +500,10 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
     _type == "ctaBlock" => { ..., "cta": cta-> }
   },
   "gallery": gallery[]{
-    caption,
     captionEn,
     imageName,
     "alt": coalesce(alt, asset->altText),
+    "caption": coalesce(caption, asset->description),
     "altEn": coalesce(altEn, alt, asset->altText),
     "url": asset->url,
     "originalFilename": asset->originalFilename,
@@ -525,6 +529,10 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
     ...,
     _type == "image" => { ..., "asset": asset-> }
   },
+  topoEn[]{
+    ...,
+    _type == "image" => { ..., "asset": asset-> }
+  },
   "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": category->slug.current, "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order},
   "relatedActivities": relatedActivities[]-> {
     title,
@@ -534,7 +542,7 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
     "categorySlug": activityType,
     "subCategorySlug": subCategory->slug.current
   },
-  "tagBrowsedImages": tagBrowsedImages[]{imageName, alt, altEn, "url": asset->url, "originalFilename": asset->originalFilename, "extension": asset->extension},
+  "tagBrowsedImages": tagBrowsedImages[]{imageName, "caption": coalesce(caption, asset->description), alt, altEn, "url": asset->url, "originalFilename": asset->originalFilename, "extension": asset->extension},
   "comments": *[_type == "comment" && post._ref == ^._id && approved == true] | order(_createdAt asc) {
     _id,
     name,

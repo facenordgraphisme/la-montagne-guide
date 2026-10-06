@@ -11,6 +11,7 @@ const descriptionBlocks = [
       { title: 'Centré', value: 'blockCenter' },
       { title: 'Justifié', value: 'blockJustify' },
       { title: 'Droite', value: 'blockRight' },
+      { title: 'Encart', value: 'encart' },
     ],
     lists: [],
     marks: {
@@ -56,7 +57,6 @@ export const sejourType = defineType({
       name: 'slugEn',
       title: 'Slug (Anglais)',
       type: 'string',
-      description: 'Généré automatiquement par "🌐 Traduire EN". URL anglaise : /en/[activitySlug]/[subCategory]/[slug-en]. Modifiable si besoin.',
     }),
     defineField({
       name: 'activityType',
@@ -87,38 +87,32 @@ export const sejourType = defineType({
           };
         }
       },
-      description: 'Choisissez d\'abord le type d\'activité pour filtrer les univers disponibles.',
     }),
     defineField({
       name: 'massif',
       title: 'Massif',
       type: 'string',
-      description: 'Ex: Écrins, Queyras, Mont-Blanc...',
     }),
     defineField({
       name: 'level',
       title: 'Niveau technique',
       type: 'string',
-      description: 'Ex: Débutant, F/PD, AD, D+, TD… Texte libre.',
     }),
     defineField({
       name: 'physicalLevel',
       title: 'Niveau physique',
       type: 'string',
-      description: 'Ex: Bonne condition physique requise, Randonnée régulière, Sportif confirmé…',
     }),
     defineField({
       name: 'physicalLevelTooltip',
       title: 'Niveau physique — Texte au survol',
       type: 'text',
       rows: 2,
-      description: 'Texte affiché en tooltip au survol du "?" à côté du niveau physique. Ex: "Être capable de marcher 5-6h en montée avec sac à dos de 15kg."',
     }),
     defineField({
       name: 'season',
       title: 'Saisons (filtre "Prochains Départs")',
       type: 'array',
-      description: 'Sélectionnez une ou plusieurs saisons. Utilisé pour filtrer les sorties. Ne s\'affiche pas dans la fiche technique.',
       of: [{ type: 'string' }],
       options: {
         list: [
@@ -134,32 +128,27 @@ export const sejourType = defineType({
       name: 'duration', fieldset: 'fsDuration',
       title: 'Durée (FR)',
       type: 'string',
-      description: 'Ex: 1 jour, 3 jours, 1 semaine',
     }),
-    defineField({ name: 'durationEn', fieldset: 'fsDuration', title: 'Durée (EN)', type: 'string', description: 'Ex: 1 day, 3 days, 1 week' }),
+    defineField({ name: 'durationEn', fieldset: 'fsDuration', title: 'Durée (EN)', type: 'string' }),
     defineField({
       name: 'participants', fieldset: 'fsParticipants',
       title: 'Nombre de participants (FR)',
       type: 'string',
-      description: 'Ex: 2 à 4 personnes, Max 6 personnes…',
     }),
     defineField({
       name: 'participantsEn', fieldset: 'fsParticipants',
       title: 'Nombre de participants (EN)',
       type: 'string',
-      description: 'Ex: 2 to 4 people, Max 6 people…',
     }),
     defineField({
       name: 'period', fieldset: 'fsPeriod',
       title: 'Période (FR)',
       type: 'string',
-      description: 'Ex: Juin à Septembre, Décembre à Avril…',
     }),
     defineField({
       name: 'periodEn', fieldset: 'fsPeriod',
       title: 'Période (EN)',
       type: 'string',
-      description: 'Ex: June to September, December to April…',
     }),
     defineField({
       name: 'basePrice', fieldset: 'fsBasePrice',
@@ -176,43 +165,36 @@ export const sejourType = defineType({
       title: 'Mode tarifaire',
       type: 'boolean',
       initialValue: false,
-      description: 'Activez pour afficher un "Prix tout compris" au lieu de la décomposition Encadrement / Frais de séjour.',
     }),
     defineField({
       name: 'prixToutComprisAmount', fieldset: 'fsAllIn',
       title: 'Prix tout compris (FR)',
       type: 'string',
-      description: 'Ex: 1 490€/personne — affiché uniquement si le mode "tout compris" est activé.',
     }),
     defineField({
       name: 'prixToutComprisAmountEn', fieldset: 'fsAllIn',
       title: 'Prix tout compris (EN)',
       type: 'string',
-      description: 'Ex: €1,490/person',
     }),
     defineField({
       name: 'priceEncadrement', fieldset: 'fsGuiding',
       title: 'Tarif encadrement (FR)',
       type: 'string',
-      description: 'Ex: 450€/personne — affiché si le mode "tout compris" est désactivé.',
     }),
     defineField({
       name: 'priceEncadrementEn', fieldset: 'fsGuiding',
       title: 'Tarif encadrement (EN)',
       type: 'string',
-      description: 'Ex: €450/person',
     }),
     defineField({
       name: 'priceFraisSejour', fieldset: 'fsCosts',
       title: 'Frais de séjour (FR)',
       type: 'string',
-      description: 'Ex: 180€/personne (hébergement, repas) — affiché si le mode "tout compris" est désactivé.',
     }),
     defineField({
       name: 'priceFraisSejourEn', fieldset: 'fsCosts',
       title: 'Frais de séjour (EN)',
       type: 'string',
-      description: 'Ex: €180/person (accommodation, meals)',
     }),
     defineField({
       name: 'image',
@@ -220,8 +202,8 @@ export const sejourType = defineType({
       type: 'image',
       options: { hotspot: true },
       fields: [
-        defineField({ name: 'alt', type: 'string', title: 'Texte ALT (Français)', description: 'Pour le SEO et l\'accessibilité.' }),
-        defineField({ name: 'altEn', type: 'string', title: 'Texte ALT (Anglais)', description: 'Version anglaise. Si vide, le texte FR est utilisé.' }),
+        defineField({ name: 'alt', type: 'string', title: 'Texte ALT (Français)' }),
+        defineField({ name: 'altEn', type: 'string', title: 'Texte ALT (Anglais)' }),
       ],
     }),
     defineField({ name: 'description', title: 'Description détaillée (FR)', type: 'array', of: descriptionBlocks }),
@@ -315,7 +297,6 @@ export const sejourType = defineType({
     defineField({
       name: 'tabs',
       title: 'Onglets personnalisés',
-      description: 'Créez vos onglets ou insérez un onglet modèle (Ajouter → Onglet modèle), puis glissez-déposez pour choisir leur ordre.',
       type: 'array',
       of: [
         {
@@ -368,7 +349,6 @@ export const sejourType = defineType({
                       name: 'url',
                       type: 'url',
                       title: 'URL d\'intégration Google Maps',
-                      description: 'Dans Google Maps → Partager → Intégrer une carte → copier l\'URL du src dans le code iframe.',
                       validation: (Rule) => Rule.required(),
                     }),
                     defineField({
@@ -431,7 +411,6 @@ export const sejourType = defineType({
                       name: 'url',
                       type: 'url',
                       title: 'URL d\'intégration Google Maps',
-                      description: 'Dans Google Maps → Partager → Intégrer une carte → copier l\'URL du src dans le code iframe.',
                       validation: (Rule) => Rule.required(),
                     }),
                     defineField({
@@ -455,7 +434,6 @@ export const sejourType = defineType({
               name: 'pdf',
               type: 'file',
               title: 'PDF téléchargeable (optionnel)',
-              description: 'Ex: liste de matériel à télécharger. Un bouton de téléchargement apparaîtra dans cet onglet.',
               options: { accept: '.pdf' },
             }),
           ]
@@ -470,7 +448,6 @@ export const sejourType = defineType({
     defineField({
       name: 'templateTabs',
       title: 'Onglets modèles (ancien emplacement)',
-      description: 'Les onglets modèles s\'ajoutent maintenant directement dans "Onglets personnalisés" (bouton Ajouter → Onglet modèle), où vous pouvez choisir leur position. Ceux listés ici s\'affichent toujours en premier.',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'tabTemplate' }] }],
       hidden: ({ value }) => !(value as unknown[])?.length,
@@ -479,7 +456,6 @@ export const sejourType = defineType({
       name: 'ficheTooltips',
       title: 'Fiche Technique — Info-bulles',
       type: 'object',
-      description: 'Info-bulles optionnelles affichées au survol de chaque ligne de la fiche technique.',
       options: { collapsible: true, collapsed: true },
       fields: [
         defineField({ name: 'duration', title: 'Info-bulle — Durée', type: 'text', rows: 2 }),
@@ -500,7 +476,6 @@ export const sejourType = defineType({
     defineField({
       name: 'tagBrowsedImages',
       title: 'Galerie — Sélection par tag',
-      description: 'Choisissez un tag, parcourez les photos des articles associés et cliquez pour les sélectionner.',
       type: 'array',
       of: [
         {
@@ -512,6 +487,7 @@ export const sejourType = defineType({
           ],
         },
       ],
+      options: { layout: 'grid' },
       components: { input: TagImagePickerInput },
     }),
     defineField({
@@ -554,25 +530,21 @@ export const sejourType = defineType({
       title: 'Masquer le bloc "Prochains Départs"',
       type: 'boolean',
       initialValue: false,
-      description: 'Cochez pour masquer les dates de sorties sur la page de ce séjour (ex: séjour uniquement sur demande privée).',
     }),
     defineField({
       name: 'hideGallery',
       title: 'Masquer la galerie photos',
       type: 'boolean',
       initialValue: false,
-      description: 'Cochez pour masquer la galerie photos sur la page de ce séjour, même si des photos sont renseignées.',
     }),
     defineField({
       name: 'bookAdventureUrl',
       title: 'Lien de réservation Book\'Adventure (Séjour)',
       type: 'url',
-      description: 'Optionnel. Si défini, le bouton de réservation principal renverra vers ce lien plutôt que vers le formulaire de contact.',
     }),
     defineField({
       name: 'faqs',
       title: 'Questions fréquentes (FAQ)',
-      description: 'Sélectionnez des FAQ spécifiques à afficher sur la page de ce séjour. Filtrez par catégorie pour retrouver vos questions plus facilement.',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
       components: { input: FAQPickerInput },
@@ -580,14 +552,12 @@ export const sejourType = defineType({
     defineField({
       name: 'relatedPosts',
       title: 'Articles de blog (sélection manuelle)',
-      description: 'Sélectionnez directement les articles à afficher. Si renseigné, ces articles sont affichés en priorité (les Tags liés sont ignorés).',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'post' }], weak: true }],
     }),
     defineField({
       name: 'relatedTags',
       title: 'Tags d\'articles liés (sélection par tag)',
-      description: 'Alternative à la sélection manuelle : tous les articles ayant ces tags seront affichés. Ignoré si des articles sont sélectionnés manuellement ci-dessus.',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'tag' }], weak: true }],
     }),
@@ -596,7 +566,6 @@ export const sejourType = defineType({
       title: 'Nombre d\'articles à afficher',
       type: 'number',
       initialValue: 6,
-      description: 'Nombre maximum d\'articles de blog affichés dans "Dernières Sorties". Par défaut : 6.',
       options: {
         list: [6, 12, 18, 24, 30, 36, 42, 48, 54, 60].map(n => ({ title: `${n} articles`, value: n })),
       },
@@ -607,33 +576,28 @@ export const sejourType = defineType({
       title: 'Masquer les dernières sorties du blog',
       type: 'boolean',
       initialValue: false,
-      description: 'Cochez pour ne pas afficher la section "Dernières Sorties" sur la page de ce séjour.',
     }),
     defineField({
       name: 'metaTitle', fieldset: 'fsSeoTitle',
       title: '🔍 SEO — Titre (balise title)',
       type: 'string',
-      description: 'Optionnel. Remplace le titre auto-généré dans les résultats Google. Idéalement < 60 caractères.',
     }),
     defineField({
       name: 'metaDescription', fieldset: 'fsSeoDesc',
       title: '🔍 SEO — Description (meta description)',
       type: 'text',
       rows: 3,
-      description: 'Optionnel. Remplace la description auto-générée dans les résultats Google. Idéalement entre 120 et 160 caractères.',
     }),
     defineField({
       name: 'metaTitleEn', fieldset: 'fsSeoTitle',
       title: '🔍 SEO — Titre (balise title) EN',
       type: 'string',
-      description: 'Optionnel. Version anglaise du titre SEO.',
     }),
     defineField({
       name: 'metaDescriptionEn', fieldset: 'fsSeoDesc',
       title: '🔍 SEO — Description (meta) EN',
       type: 'text',
       rows: 3,
-      description: 'Optionnel. Version anglaise de la meta description.',
     }),
   ],
 })

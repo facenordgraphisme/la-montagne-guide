@@ -16,7 +16,6 @@ export const testimonialType = defineType({
       name: 'role',
       title: 'Rôle / Activité',
       type: 'string',
-      description: 'Ex: Alpinisme, Ski de rando...',
     }),
     defineField({
       name: 'quote',

@@ -6,6 +6,7 @@ import { activityBySlugQuery, sejoursByActivityQuery } from "@/sanity/lib/querie
 import { notFound } from 'next/navigation';
 import SejourCard from "@/components/SejourCard";
 import FAQAccordion from "@/components/FAQAccordion";
+import FaqJsonLd from '@/components/FaqJsonLd';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { PortableText } from '@portabletext/react';
@@ -86,7 +87,7 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
 
 export default async function UniversePage({ params }: { params: Promise<{ activitySlug: string, subCategorySlug: string }> }) {
   const { activitySlug, subCategorySlug } = await params;
-  const { at, t, translatePortableText } = await getServerTranslations();
+  const { at, t, lang, translatePortableText } = await getServerTranslations();
 
   // Fetch activity and all its sejours
   const [activity, sejours] = await Promise.all([
@@ -158,7 +159,7 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
       <section className="relative -mt-32 z-20 pb-24">
         <div className="container mx-auto px-6">
           <div className="glass p-12 md:p-24 rounded-[60px] border border-white/10 shadow-2xl bg-background/80 backdrop-blur-3xl max-w-5xl mx-auto text-center relative">
-            <div className="prose-custom prose-xl mx-auto mb-16">
+            <div className="prose-custom text-lg mx-auto mb-16">
               {currentUnivers.description ? (
                 <PortableText value={translatePortableText({ fr: currentUnivers.description, en: currentUnivers.descriptionEn })} components={blockAlignComponents} />
               ) : (
@@ -223,9 +224,10 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
         </div>
       </section>
 
-      {currentUnivers.faqs && currentUnivers.faqs.length > 0 && (
+      {currentUnivers.faqs?.some(Boolean) && (
         <section className="py-20 border-t border-border/10 bg-background">
           <div className="container mx-auto px-6 max-w-4xl">
+            <FaqJsonLd faqs={currentUnivers.faqs} lang={lang} />
             <FAQAccordion faqs={currentUnivers.faqs} />
           </div>
         </section>

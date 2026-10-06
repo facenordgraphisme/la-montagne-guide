@@ -55,7 +55,6 @@ export const settingsType = defineType({
     defineField({
       name: 'clientPasscode',
       title: 'Code d\'accès client (Témoignages)',
-      description: 'Le mot de passe confidentiel à donner à vos clients pour qu\'ils puissent laisser un commentaire sur votre blog (ex: guide2026).',
       type: 'string',
       initialValue: 'montagne2026',
       group: 'general',
@@ -64,7 +63,6 @@ export const settingsType = defineType({
       name: 'logoLight',
       title: 'Logo (Version Sombre / Texte blanc)',
       type: 'image',
-      description: 'Affiché sur fond sombre. Si laissé vide, le logo par défaut est utilisé.',
       options: { hotspot: true },
       group: 'general',
     }),
@@ -72,7 +70,6 @@ export const settingsType = defineType({
       name: 'logoDark',
       title: 'Logo (Version Claire / Texte noir)',
       type: 'image',
-      description: 'Affiché sur fond clair. Si laissé vide, le logo par défaut est utilisé.',
       options: { hotspot: true },
       group: 'general',
     }),
@@ -115,7 +112,6 @@ export const settingsType = defineType({
       name: 'bannerLink',
       title: "Lien de redirection (Optionnel)",
       type: 'string',
-      description: 'Ex: /prochaines-sorties ou un lien externe.',
       group: 'banner',
     }),
 
@@ -126,7 +122,6 @@ export const settingsType = defineType({
       type: 'boolean',
       initialValue: false,
       group: 'partners',
-      description: "Cochez cette case pour masquer le défilement des logos partenaires sur tout le site (page d'accueil et page guide).",
     }),
     defineField({
       name: 'partners',
@@ -158,21 +153,18 @@ export const settingsType = defineType({
       name: 'instagram',
       title: 'Lien Instagram',
       type: 'url',
-      description: 'Ex: https://www.instagram.com/moncompte',
       group: 'social',
     }),
     defineField({
       name: 'facebook',
       title: 'Lien Facebook',
       type: 'url',
-      description: 'Ex: https://www.facebook.com/moncompte',
       group: 'social',
     }),
     defineField({
       name: 'youtube',
       title: 'Lien YouTube',
       type: 'url',
-      description: 'Ex: https://www.youtube.com/@moncompte',
       group: 'social',
     }),
 
@@ -181,14 +173,12 @@ export const settingsType = defineType({
       name: 'whatsappNumber',
       title: 'Numéro WhatsApp (Bouton flottant)',
       type: 'string',
-      description: 'Le numéro de téléphone au format international sans le + ni le 0 (ex: 33675079708). Utilisé pour le bouton de discussion instantanée.',
       group: 'contact',
     }),
     defineField({
       name: 'whatsappText',
       title: 'Message WhatsApp pré-rempli (Français)',
       type: 'string',
-      description: 'Message par défaut envoyé lors du clic (ex: Bonjour Nicolas, je souhaiterais avoir des informations...)',
       group: 'contact',
     }),
     defineField({
@@ -248,7 +238,6 @@ export const settingsType = defineType({
       name: 'seoTitle',
       title: 'Titre SEO de base (Français)',
       type: 'string',
-      description: 'Le titre du site affiché sur Google (ex: Nicolas Draperi - Guide de Haute Montagne Ecrins).',
       group: 'seo',
     }),
     defineField({
@@ -262,7 +251,6 @@ export const settingsType = defineType({
       title: 'Description SEO générale (Français)',
       type: 'text',
       rows: 3,
-      description: 'Le texte descriptif affiché sous le titre dans les résultats Google.',
       group: 'seo',
     }),
     defineField({
@@ -276,7 +264,6 @@ export const settingsType = defineType({
       name: 'seoImage',
       title: 'Image de partage social (Open Graph)',
       type: 'image',
-      description: 'L\'image affichée lors du partage du lien sur les réseaux sociaux (Facebook, LinkedIn, Twitter). Dimension idéale : 1200x630px.',
       group: 'seo',
     }),
     defineField({
@@ -310,7 +297,6 @@ export const settingsType = defineType({
     defineField({
       name: 'activitiesOrder',
       title: 'Ordre d\'affichage des activités',
-      description: 'Glissez-déposez les activités ci-dessous pour choisir l\'ordre d\'affichage global (sur la page d\'accueil, la page activités et la barre de navigation).',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'activity' }] }],
       group: 'activities',
@@ -401,7 +387,6 @@ export const settingsType = defineType({
       title: 'Texte du badge (Français)',
       type: 'string',
       initialValue: 'RESSOURCES & CONSEILS',
-      description: 'Petit texte en accent affiché au-dessus du titre (ex : "RESSOURCES & CONSEILS").',
       group: 'ressources',
     }),
     defineField({
@@ -558,7 +543,6 @@ export const settingsType = defineType({
     defineField({
       name: 'sejourSidebarNotice',
       title: 'Notice calendrier séjours (Français)',
-      description: 'La notice d\'information affichée sous le calendrier de départ des séjours (Partage de sortie, Groupes sur mesure...).',
       type: 'array',
       of: descriptionBlocks,
       group: 'sejoursSettings',
@@ -566,7 +550,6 @@ export const settingsType = defineType({
     defineField({
       name: 'sejourSidebarNoticeEn',
       title: 'Notice calendrier séjours (Anglais)',
-      description: 'La notice d\'information affichée sous le calendrier de départ des séjours (Partage de sortie, Groupes sur mesure...).',
       type: 'array',
       of: descriptionBlocks,
       group: 'sejoursSettings',
@@ -576,7 +559,6 @@ export const settingsType = defineType({
     defineField({
       name: 'homeFaqCategories',
       title: 'Catégories FAQ à afficher sur l\'accueil',
-      description: 'Sélectionnez les catégories à afficher dans la section FAQ de la page d\'accueil. Si aucune catégorie n\'est sélectionnée, toutes les FAQ sont affichées.',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'faqCategory' }], weak: true }],
       group: 'homepage',
@@ -586,21 +568,18 @@ export const settingsType = defineType({
     defineField({
       name: 'bgColorLight',
       title: 'Couleur de fond — Mode Clair (Hex)',
-      description: 'Couleur de fond des pages en mode clair (ex: #f4f7fa). Laissez vide pour la valeur par défaut.',
       type: 'string',
       group: 'design',
     }),
     defineField({
       name: 'bgColorDark',
       title: 'Couleur de fond — Mode Sombre (Hex)',
-      description: 'Couleur de fond des pages en mode sombre (ex: #0b1121). Laissez vide pour la valeur par défaut.',
       type: 'string',
       group: 'design',
     }),
     defineField({
       name: 'accentColor',
       title: 'Couleur d\'accentuation (Hex)',
-      description: 'Couleur principale du site (ex: #0ea5e9 pour bleu, #22c55e pour vert). Laissez vide pour la couleur par défaut.',
       type: 'string',
       initialValue: '#0ea5e9',
       group: 'design',
@@ -608,7 +587,6 @@ export const settingsType = defineType({
     defineField({
       name: 'highlightColor',
       title: 'Couleur de mise en valeur (Hex)',
-      description: 'Couleur des éléments mis en valeur (ex: #f97316 pour orange). Laissez vide pour la couleur par défaut.',
       type: 'string',
       initialValue: '#f97316',
       group: 'design',
@@ -616,42 +594,36 @@ export const settingsType = defineType({
     defineField({
       name: 'btnHoverColor',
       title: 'Couleur de survol des boutons (Hex)',
-      description: 'Couleur du bouton au survol de la souris. Laissez vide pour la valeur par défaut.',
       type: 'string',
       group: 'design',
     }),
     defineField({
       name: 'textColorLight',
       title: 'Couleur du texte - Mode Clair (Hex)',
-      description: 'Couleur par défaut du corps de texte sur fond clair (ex: #0b1121). Laissez vide pour défaut.',
       type: 'string',
       group: 'design',
     }),
     defineField({
       name: 'titleColorLight',
       title: 'Couleur des titres - Mode Clair (Hex)',
-      description: 'Couleur des titres (H1, H2...) sur fond clair. Laissez vide pour défaut.',
       type: 'string',
       group: 'design',
     }),
     defineField({
       name: 'textColorDark',
       title: 'Couleur du texte - Mode Sombre (Hex)',
-      description: 'Couleur par défaut du corps de texte sur fond sombre (ex: #f1f5f9). Laissez vide pour défaut.',
       type: 'string',
       group: 'design',
     }),
     defineField({
       name: 'titleColorDark',
       title: 'Couleur des titres - Mode Sombre (Hex)',
-      description: 'Couleur des titres (H1, H2...) sur fond sombre. Laissez vide pour défaut.',
       type: 'string',
       group: 'design',
     }),
     defineField({
       name: 'fontFamily',
       title: 'Police du site',
-      description: 'La police utilisée pour tous les textes du site. Laissez vide pour la police par défaut (Outfit).',
       type: 'string',
       group: 'design',
       options: {
@@ -667,7 +639,6 @@ export const settingsType = defineType({
     defineField({
       name: 'fontScale',
       title: 'Taille du texte',
-      description: 'Ajuste la taille de tous les textes du site (titres et paragraphes) de façon proportionnelle. Laissez vide pour la taille par défaut.',
       type: 'string',
       group: 'design',
       options: {
@@ -684,7 +655,6 @@ export const settingsType = defineType({
     defineField({
       name: 'technicalLevelIcons',
       title: 'Niveau technique — Icônes',
-      description: 'Associez une icône à chaque niveau. Si le "Niveau technique" d\'un séjour correspond exactement au libellé (majuscules et accents ignorés), l\'icône s\'affiche dans la fiche technique. Sinon, le texte reste affiché.',
       type: 'array',
       group: 'levels',
       of: [{ type: 'levelIcon' }],
@@ -692,7 +662,6 @@ export const settingsType = defineType({
     defineField({
       name: 'physicalLevelIcons',
       title: 'Niveau physique — Icônes',
-      description: 'Même principe pour le "Niveau physique".',
       type: 'array',
       group: 'levels',
       of: [{ type: 'levelIcon' }],
@@ -716,15 +685,13 @@ export const levelIconType = defineType({
       name: 'label',
       title: 'Libellé du niveau (FR)',
       type: 'string',
-      description: 'Exactement comme saisi dans les séjours. Ex : Initié',
       validation: (Rule) => Rule.required(),
     }),
-    defineField({ name: 'labelEn', title: 'Libellé affiché (EN)', type: 'string', description: 'Ex : Beginner. Si vide, le libellé FR est utilisé.' }),
+    defineField({ name: 'labelEn', title: 'Libellé affiché (EN)', type: 'string' }),
     defineField({
       name: 'icon',
       title: 'Icône',
       type: 'image',
-      description: 'SVG ou PNG à fond transparent, de préférence carré.',
       options: { accept: 'image/svg+xml,image/png,image/webp' },
       validation: (Rule) => Rule.required(),
     }),

@@ -36,7 +36,7 @@ const STRING_FIELDS: Record<string, [string, string][]> = {
 
 // Which Portable Text fields to translate per document type
 const PT_FIELDS: Record<string, [string, string][]> = {
-  post: [['body', 'bodyEn']],
+  post: [['body', 'bodyEn'], ['topo', 'topoEn']],
   sejour: [['description', 'descriptionEn']],
   resource: [['content', 'contentEn']],
 }
@@ -44,18 +44,35 @@ const PT_FIELDS: Record<string, [string, string][]> = {
 const HAS_TABS = ['sejour', 'resource']
 
 type SpanRef = { blockIdx: number; spanIdx: number; text: string }
-type ImageFieldRef = { blockIdx: number; enField: 'captionEn' | 'altEn'; text: string }
+type ImageFieldRef = { blockIdx: number; subIdx?: number; enField: 'captionEn' | 'altEn'; text: string }
+
+function imageRefs(img: any, blockIdx: number, subIdx?: number): ImageFieldRef[] {
+  const refs: ImageFieldRef[] = []
+  if (img?.caption?.trim() && !img.captionEn?.trim()) refs.push({ blockIdx, subIdx, enField: 'captionEn', text: img.caption })
+  if (img?.alt?.trim() && !img.altEn?.trim()) refs.push({ blockIdx, subIdx, enField: 'altEn', text: img.alt })
+  return refs
+}
 
 function extractImageFields(blocks: any[]): ImageFieldRef[] {
   const refs: ImageFieldRef[] = []
   if (!Array.isArray(blocks)) return refs
   blocks.forEach((block, blockIdx) => {
-    if (block._type !== 'image') return
-    if (block.caption && !block.captionEn?.trim()) refs.push({ blockIdx, enField: 'captionEn', text: block.caption })
-    if (block.alt && !block.altEn?.trim()) refs.push({ blockIdx, enField: 'altEn', text: block.alt })
+    if (block._type === 'image') refs.push(...imageRefs(block, blockIdx))
+    if (block._type === 'gallery') (block.images || []).forEach((img: any, subIdx: number) => refs.push(...imageRefs(img, blockIdx, subIdx)))
   })
   return refs
 }
+
+function applyImageTranslations(blocks: any[], refs: ImageFieldRef[], translations: string[], offset: number): any[] {
+  const result = blocks.map(b => (b._type === 'gallery' ? { ...b, images: (b.images || []).map((i: any) => ({ ...i })) } : { ...b }))
+  refs.forEach(({ blockIdx, subIdx, enField }, i) => {
+    const target = subIdx === undefined ? result[blockIdx] : result[blockIdx]?.images?.[subIdx]
+    if (target) target[enField] = translations[offset + i]
+  })
+  return result
+}
+
+const MAIN_IMAGE_FIELD: Record<string, string> = { post: 'mainImage', sejour: 'image', resource: 'image' }
 
 function extractSpans(blocks: any[]): SpanRef[] {
   const refs: SpanRef[] = []
@@ -159,6 +176,8 @@ export function translateDocumentAction(props: DocumentActionProps) {
         contentSpans: SpanRef[]
         contentBlocks: any[]
         contentOffset: number
+        imageRefs: ImageFieldRef[]
+        imageOffset: number
       }
       const tabJobs: TabJob[] = []
       if (HAS_TABS.includes(type)) {
@@ -179,13 +198,33 @@ export function translateDocumentAction(props: DocumentActionProps) {
               allTexts.push(...contentSpans.map(s => s.text))
             }
           }
+          const tabImageRefs = extractImageFields(content)
+          const imageOffset = allTexts.length
+          allTexts.push(...tabImageRefs.map(r => r.text))
           tabJobs.push({
             titleIdx,
             contentSpans,
             contentBlocks: content,
             contentOffset,
+            imageRefs: tabImageRefs,
+            imageOffset,
           })
         })
+      }
+
+      // ── 4. Main image ALT + bottom gallery ──────────────────────────────
+      const pathJobs: { path: string; textIdx: number }[] = []
+      const addPathJob = (path: string, text: string) => {
+        pathJobs.push({ path, textIdx: allTexts.length })
+        allTexts.push(text)
+      }
+      const mainField = MAIN_IMAGE_FIELD[type]
+      const mainImg = mainField ? (doc as any)[mainField] : null
+      if (mainImg?.alt?.trim() && !mainImg.altEn?.trim()) addPathJob(`${mainField}.altEn`, mainImg.alt)
+      for (const img of ((doc as any).gallery || []) as any[]) {
+        if (!img?._key) continue
+        if (img.caption?.trim() && !img.captionEn?.trim()) addPathJob(`gallery[_key=="${img._key}"].captionEn`, img.caption)
+        if (img.alt?.trim() && !img.altEn?.trim()) addPathJob(`gallery[_key=="${img._key}"].altEn`, img.alt)
       }
 
       if (allTexts.length === 0) {
@@ -207,17 +246,8 @@ export function translateDocumentAction(props: DocumentActionProps) {
 
       // PT fields
       ptMeta.forEach(({ enKey, blocks, spans, offset, imageRefs, imageOffset }) => {
-        let enBlocks = applySpanTranslations(blocks, spans, translations, offset)
-        if (imageRefs.length > 0) {
-          enBlocks = enBlocks.map((b, idx) => {
-            const refs = imageRefs.filter(r => r.blockIdx === idx)
-            if (refs.length === 0) return b
-            const updates: Record<string, string> = {}
-            refs.forEach(r => { updates[r.enField] = translations[imageOffset + imageRefs.indexOf(r)] })
-            return { ...b, ...updates }
-          })
-        }
-        setValues[enKey] = enBlocks
+        const enBlocks = applySpanTranslations(blocks, spans, translations, offset)
+        setValues[enKey] = applyImageTranslations(enBlocks, imageRefs, translations, imageOffset)
       })
 
       // Tabs
@@ -229,17 +259,17 @@ export function translateDocumentAction(props: DocumentActionProps) {
           if (job.titleIdx !== -1) {
             updated.titleEn = translations[job.titleIdx]
           }
-          if (job.contentOffset !== -1 && job.contentSpans.length > 0) {
-            updated.contentEn = applySpanTranslations(
-              job.contentBlocks,
-              job.contentSpans,
-              translations,
-              job.contentOffset
-            )
+          if (job.contentSpans.length > 0 || job.imageRefs.length > 0) {
+            const enBlocks = job.contentSpans.length > 0
+              ? applySpanTranslations(job.contentBlocks, job.contentSpans, translations, job.contentOffset)
+              : job.contentBlocks
+            updated.contentEn = applyImageTranslations(enBlocks, job.imageRefs, translations, job.imageOffset)
           }
           return updated
         })
       }
+
+      pathJobs.forEach(({ path, textIdx }) => { setValues[path] = translations[textIdx] })
 
       // Auto-generate slugEn from titleEn for post / sejour / resource
       if (['post', 'sejour', 'resource'].includes(type)) {

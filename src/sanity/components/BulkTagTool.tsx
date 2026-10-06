@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useClient } from 'sanity'
+import { SyncArticleTagsToMedia } from './SyncArticleTagsToMedia'
 import {
   Box,
   Button,
@@ -232,6 +233,8 @@ export function BulkTagTool() {
             )}
           </Stack>
         </Card>
+
+        <SyncArticleTagsToMedia />
       </Stack>
     </Container>
   )
