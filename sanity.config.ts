@@ -1,6 +1,8 @@
 import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
 import { visionTool } from '@sanity/vision'
+import { presentationTool } from 'sanity/presentation'
+import { resolve } from './src/sanity/presentation/resolve'
 import { frFRLocale } from '@sanity/locale-fr-fr'
 import { media } from 'sanity-plugin-media'
 import { imageAssetPickerPlugin } from 'sanity-plugin-image-asset-picker'
@@ -16,6 +18,7 @@ import { ApplyTagsToImagesAction } from './src/sanity/actions/applyTagsToImages'
 import { StudioLayoutWithScrollButtons } from './src/sanity/components/ScrollButtons'
 import { MediaDetails } from './src/sanity/components/MediaDetails'
 import { DeleteTagEverywhereAction } from './src/sanity/actions/deleteTagEverywhere'
+import { ImageAssetSyncInput } from './src/sanity/components/ImageAssetSync'
 
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'your-project-id'
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production'
@@ -29,6 +32,11 @@ export default defineConfig({
   studio: { components: { layout: StudioLayoutWithScrollButtons } },
   plugins: [
     structureTool({ structure }),
+    presentationTool({
+      title: 'Éditeur visuel',
+      resolve,
+      previewUrl: { previewMode: { enable: '/api/draft-mode/enable' } },
+    }),
     visionTool(),
     frFRLocale(),
     media({ components: { details: MediaDetails as any } }),
@@ -44,6 +52,7 @@ export default defineConfig({
     },
   ],
   schema,
+  form: { components: { input: ImageAssetSyncInput } },
   document: {
     actions: (prev, ctx) => {
       const extra: any[] = []

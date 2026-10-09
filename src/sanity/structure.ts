@@ -1,7 +1,14 @@
-import type { StructureBuilder } from 'sanity/structure'
-import { Home, UserRound, Mail, Settings, Compass, Layers, Mountain, BookOpen, Tag, LayoutTemplate } from 'lucide-react'
+import type { StructureResolver } from 'sanity/structure'
+import { Home, UserRound, Mail, Settings, Compass, Layers, Mountain, BookOpen, Tag, LayoutTemplate, FileText } from 'lucide-react'
 
-export const structure = (S: StructureBuilder) =>
+// A post counts as done if either its published or draft version is ticked
+const PROGRESS_QUERY = `{
+  "total": count(*[_type == "post" && !(_id in path("drafts.**"))]),
+  "reviewed": count(array::unique(*[_type == "post" && reviewed == true]{"id": select(_id in path("drafts.**") => string::split(_id, "drafts.")[1], _id)}.id)),
+  "images": count(array::unique(*[_type == "post" && imagesReviewed == true]{"id": select(_id in path("drafts.**") => string::split(_id, "drafts.")[1], _id)}.id))
+}`
+
+export const structure: StructureResolver = (S, context) =>
   S.list()
     .title('Contenu')
     .items([
@@ -120,8 +127,16 @@ export const structure = (S: StructureBuilder) =>
 
       S.divider(),
 
+      S.listItem()
+        .title('Blog')
+        .id('post')
+        .icon(FileText)
+        .child(async () => {
+          const c = await context.getClient({ apiVersion: '2024-05-01' }).fetch(PROGRESS_QUERY)
+          return S.documentTypeList('post').title(`Blog · ✅ ${c.reviewed}/${c.total} relus · 🖼️ ${c.images}/${c.total} images`)
+        }),
       // Regular document types, filtered to exclude singletons and types already reachable via la navigation hiérarchique ci-dessus
       ...S.documentTypeListItems().filter(
-        (listItem) => !['home', 'guide', 'contact', 'settings', 'activity', 'univers', 'sejour', 'tabTemplate', 'resource', 'resourceCategory'].includes(listItem.getId() || '')
+        (listItem) => !['home', 'guide', 'contact', 'settings', 'activity', 'univers', 'sejour', 'tabTemplate', 'resource', 'resourceCategory', 'post'].includes(listItem.getId() || '')
       ),
     ])

@@ -3,7 +3,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { client } from "@/sanity/lib/client";
+import { client } from "@/sanity/lib/live";
 import {
   activityBySlugQuery,
   activitySlugsQuery,

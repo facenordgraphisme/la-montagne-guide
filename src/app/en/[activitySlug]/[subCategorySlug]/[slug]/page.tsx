@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { client } from '@/sanity/lib/client'
+import { client } from '@/sanity/lib/live'
 import { sejourBySlugQuery, sejourBySlugEnQuery, sejourSlugEnQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from '@/sanity/lib/queries'
 import { notFound, redirect } from 'next/navigation'
 import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Download, Users, CalendarDays, Info } from 'lucide-react'
@@ -13,6 +13,8 @@ import RichContent from '@/components/RichContent'
 import BlogCard from '@/components/BlogCard'
 import FAQAccordion from '@/components/FAQAccordion'
 import FaqJsonLd from '@/components/FaqJsonLd'
+import SejourCard from '@/components/SejourCard'
+import BookingButton from '@/components/BookingButton'
 import { LevelValue } from '@/components/LevelValue'
 import { renderRichText, toPlainText } from '@/utils/richText'
 
@@ -294,9 +296,7 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
                     </div>
                   </div>
 
-                  <Link href="/contact" className="btn-primary w-full block text-center text-white! py-4 text-sm font-black uppercase tracking-widest">
-                    Book this trip
-                  </Link>
+                  <BookingButton url={sejour.bookAdventureUrl} label="Book this trip" />
                   <p className="text-[10px] text-center mt-6 text-foreground/40 font-bold uppercase tracking-widest">
                     Booking & advice by phone available
                   </p>
@@ -384,6 +384,21 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
                   </div>
                 )
               })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {sejour.recommendedSejours?.length > 0 && (
+        <section className="pb-24">
+          <div className="container mx-auto px-6 pt-16">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase mb-10">
+              Recommended <span className="text-accent italic">Trips</span>
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {sejour.recommendedSejours.map((s: any) => (
+                <SejourCard key={s.slug} sejour={s} activitySlug={s.activitySlug || s.activityType} />
+              ))}
             </div>
           </div>
         </section>

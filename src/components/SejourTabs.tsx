@@ -178,7 +178,7 @@ export default function SejourTabs({ tabs }: SejourTabsProps) {
                 href={current.pdf}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-primary inline-flex items-center gap-3"
+                className="btn-primary inline-flex items-center gap-3 !text-white !no-underline"
               >
                 <FileText size={18} className="shrink-0" />
                 {at('Télécharger la liste de matériel (PDF)')}

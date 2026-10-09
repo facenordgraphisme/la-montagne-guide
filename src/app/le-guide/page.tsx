@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import React from 'react'
 import Image from 'next/image';
 import Link from 'next/link';
-import { client } from "@/sanity/lib/client";
+import { client } from "@/sanity/lib/live";
 import { guideQuery, settingsQuery } from "@/sanity/lib/queries";
 import { PortableText } from "@portabletext/react";
 import PartnersSlider from "@/components/PartnersSlider";

@@ -1,6 +1,6 @@
 import { defineField, defineType } from 'sanity'
 import { FileText } from 'lucide-react'
-import { TagImagePickerInput } from '../components/TagImagePicker'
+import { TagImagePickerInput, GalleryPickerInput } from '../components/TagImagePicker'
 import { FAQPickerInput } from '../components/FAQPickerInput'
 
 export const postType = defineType({
@@ -14,6 +14,12 @@ export const postType = defineType({
     { name: 'fsSeoTitle', title: '🔍 SEO — Titre', options: { columns: 2 } },
   ],
   fields: [
+    defineField({
+      name: 'isHidden',
+      title: 'Masquer la page sur le site',
+      type: 'boolean',
+      initialValue: false,
+    }),
     defineField({
       name: 'title', fieldset: 'fsTitle',
       title: 'Titre (Français)',
@@ -114,6 +120,7 @@ export const postType = defineType({
             {
               name: 'images',
               type: 'array',
+              components: { input: GalleryPickerInput },
               title: 'Images',
               of: [{
                 type: 'image',
@@ -193,6 +200,7 @@ export const postType = defineType({
             {
               name: 'images',
               type: 'array',
+              components: { input: GalleryPickerInput },
               title: 'Images',
               of: [{
                 type: 'image',
@@ -258,6 +266,7 @@ export const postType = defineType({
       name: 'gallery',
       title: 'Galerie photos (Bas d\'article)',
       type: 'array',
+      components: { input: GalleryPickerInput },
       options: {
         layout: 'grid',
       },
@@ -428,6 +437,12 @@ export const postType = defineType({
       type: 'boolean',
       initialValue: false,
     }),
+    defineField({
+      name: 'imagesReviewed',
+      title: '🖼️ Images revues',
+      type: 'boolean',
+      initialValue: false,
+    }),
   ],
   orderings: [
     {
@@ -449,13 +464,15 @@ export const postType = defineType({
       title: 'title',
       media: 'mainImage',
       reviewed: 'reviewed',
+      imagesReviewed: 'imagesReviewed',
+      isHidden: 'isHidden',
       date: 'publishedAt',
     },
-    prepare({ title, media, reviewed, date }: any) {
+    prepare({ title, media, reviewed, imagesReviewed, date, isHidden }: any) {
       const dateStr = date ? new Date(date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }) : ''
       return {
-        title: `${reviewed ? '✅' : '⬜'} ${title || 'Sans titre'}`,
-        subtitle: dateStr,
+        title: `${reviewed ? '✅' : '⬜'}${imagesReviewed ? '🖼️' : '▫️'} ${title || 'Sans titre'}`,
+        subtitle: isHidden ? `Masqué · ${dateStr}` : dateStr,
         media,
       }
     },

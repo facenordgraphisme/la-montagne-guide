@@ -2,7 +2,7 @@ import React from 'react'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
-import { client } from "@/sanity/lib/client";
+import { client } from "@/sanity/lib/live";
 import { sortieBySlugQuery } from "@/sanity/lib/queries";
 import { Calendar, MapPin, Clock, Euro, Users, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'

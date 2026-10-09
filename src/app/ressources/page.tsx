@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import React from 'react'
-import { client } from "@/sanity/lib/client";
+import { client } from "@/sanity/lib/live";
 import { resourcesQuery, resourceCategoryQuery, faqsQuery, settingsQuery } from "@/sanity/lib/queries";
 import { getServerTranslations } from '@/i18n/server';
 import ResourcesListClient from './ResourcesListClient';

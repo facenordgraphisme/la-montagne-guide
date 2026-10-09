@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import React from 'react'
 import Image from 'next/image';
-import { client } from "@/sanity/lib/client";
+import { client } from "@/sanity/lib/live";
 import { activityBySlugQuery, sejoursByActivityQuery } from "@/sanity/lib/queries";
 import { notFound } from 'next/navigation';
 import SejourCard from "@/components/SejourCard";

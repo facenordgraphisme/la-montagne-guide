@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
-import { client } from '@/sanity/lib/client'
+import { client } from '@/sanity/lib/live'
 import { postBySlugEnQuery, postBySlugQuery, postSlugEnQuery } from '@/sanity/lib/queries'
 import { prefersFrench } from '@/i18n/server'
 import PostDetail from '@/components/PostDetail'

@@ -278,4 +278,11 @@ export const sanityTranslations: Record<string, string> = {
   "je vous répondrai dans les plus brefs délais.": "I'll get back to you as soon as possible.",
   "envoyer un autre message": "Send another message",
   "une erreur est survenue. veuillez réessayer ou nous contacter par téléphone.": "An error occurred. Please try again or contact us by phone.",
+  "prénom": "First name",
+  "nom": "Last name",
+  "être recontacté": "Get back to me",
+  "besoin d'infos ?": "Need some info?",
+  "faites-moi part de vos envies !": "Tell me what you have in mind!",
+  "demande-moi conseil, ça n'engage à rien !": "Ask me for advice, no strings attached!",
+  "appelez-moi": "Call me",
 };

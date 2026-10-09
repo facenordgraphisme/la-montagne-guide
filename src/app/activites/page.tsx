@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import React from 'react'
 import Link from 'next/link';
-import { client } from "@/sanity/lib/client";
+import { client } from "@/sanity/lib/live";
 import { activitiesQuery, settingsQuery } from "@/sanity/lib/queries";
 import Image from 'next/image';
 

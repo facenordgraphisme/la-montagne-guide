@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react'
 import { useClient } from 'sanity'
 import { set, unset } from 'sanity'
-import { Stack, Text, Select, Flex, Button } from '@sanity/ui'
+import { Stack, Text, Select, Flex, Button, TextInput } from '@sanity/ui'
 
 function generateKey() {
   return Math.random().toString(36).slice(2, 10)
 }
 
-type FilterMode = 'article' | 'media'
+type FilterMode = 'article' | 'media' | 'search'
 
 export function TagImagePickerInput(props: any) {
-  const { value, onChange } = props
+  const { value, onChange, embedded } = props
   const client = useClient({ apiVersion: '2023-01-01' })
-  const [mode, setMode] = useState<FilterMode>('media')
+  const [mode, setMode] = useState<FilterMode>(embedded ? 'search' : 'media')
+  const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
 
   const [articleTags, setArticleTags] = useState<any[]>([])
   const [mediaTags, setMediaTags] = useState<any[]>([])
@@ -34,6 +36,36 @@ export function TagImagePickerInput(props: any) {
       .then(setMediaTags)
   }, [client])
 
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 400)
+    return () => clearTimeout(t)
+  }, [search])
+
+  // Search mode: whole media library, newest first when the box is empty
+  useEffect(() => {
+    if (mode !== 'search') return
+    let cancelled = false
+    setLoading(true)
+    client
+      .fetch(
+        `*[_type == "sanity.imageAsset" && ($q == "" || originalFilename match $q || title match $q || altText match $q || description match $q)] | order(_createdAt desc)[0...150] {
+          "assetId": _id,
+          "url": url,
+          "alt": altText,
+          "caption": description,
+          "imageName": coalesce(title, originalFilename)
+        }`,
+        { q: debouncedSearch ? `*${debouncedSearch}*` : '' }
+      )
+      .then((images: any[]) => {
+        if (cancelled) return
+        setAvailableImages(images)
+        setLastClicked(null)
+      })
+      .finally(() => !cancelled && setLoading(false))
+    return () => { cancelled = true }
+  }, [mode, debouncedSearch, client])
+
   // Reset selected tag when mode switches
   useEffect(() => {
     setSelectedTagId('')
@@ -42,7 +74,7 @@ export function TagImagePickerInput(props: any) {
 
   // Fetch images when a tag is selected
   useEffect(() => {
-    if (!selectedTagId) return
+    if (mode === 'search' || !selectedTagId) return
     setLoading(true)
     setAvailableImages([])
 
@@ -141,6 +173,7 @@ export function TagImagePickerInput(props: any) {
           _key: generateKey(),
           asset: { _type: 'reference', _ref: i.assetId },
           alt: i.alt || '',
+          ...(i.caption ? { caption: i.caption } : {}),
           imageName: i.imageName || '',
         }))
       next = [...currentValue, ...toAdd]
@@ -158,6 +191,7 @@ export function TagImagePickerInput(props: any) {
       {/* Mode toggle */}
       <Flex gap={2}>
         {([
+          { value: 'search', label: '🔍 Recherche' },
           { value: 'media', label: '🏷️ Media Tags' },
           { value: 'article', label: '📝 Tags d\'articles' },
         ] as { value: FilterMode; label: string }[]).map(opt => (
@@ -183,15 +217,22 @@ export function TagImagePickerInput(props: any) {
         ))}
       </Flex>
 
-      {/* Tag selector */}
-      <Select value={selectedTagId} onChange={e => setSelectedTagId(e.currentTarget.value)}>
-        <option value="">
-          {mode === 'media' ? 'Choisir un Media Tag…' : 'Choisir un tag d\'article…'}
-        </option>
-        {activeTags.map(t => (
-          <option key={t._id} value={t._id}>{t.name}</option>
-        ))}
-      </Select>
+      {mode === 'search' ? (
+        <TextInput
+          value={search}
+          onChange={e => setSearch(e.currentTarget.value)}
+          placeholder="Rechercher par nom, titre, ALT ou légende… (vide = photos récentes)"
+        />
+      ) : (
+        <Select value={selectedTagId} onChange={e => setSelectedTagId(e.currentTarget.value)}>
+          <option value="">
+            {mode === 'media' ? 'Choisir un Media Tag…' : 'Choisir un tag d\'article…'}
+          </option>
+          {activeTags.map(t => (
+            <option key={t._id} value={t._id}>{t.name}</option>
+          ))}
+        </Select>
+      )}
 
       {/* Available images grid */}
       {loading && <Text size={1} muted>Chargement des photos…</Text>}
@@ -259,11 +300,11 @@ export function TagImagePickerInput(props: any) {
         </Stack>
       )}
 
-      {!loading && selectedTagId && availableImages.length === 0 && (
-        <Text size={1} muted>Aucune photo trouvée pour ce tag.</Text>
+      {!loading && (selectedTagId || mode === 'search') && availableImages.length === 0 && (
+        <Text size={1} muted>Aucune photo trouvée.</Text>
       )}
 
-      {currentValue.length > 0 && (
+      {!embedded && currentValue.length > 0 && (
         <Flex align="center" justify="space-between">
           <Text size={1} weight="semibold">
             {currentValue.length} photo{currentValue.length > 1 ? 's' : ''} sélectionnée{currentValue.length > 1 ? 's' : ''} — glissez-déposez ci-dessous pour changer l'ordre
@@ -271,7 +312,23 @@ export function TagImagePickerInput(props: any) {
           <Button text="Tout retirer" tone="critical" mode="ghost" fontSize={1} padding={2} onClick={() => onChange(unset())} />
         </Flex>
       )}
-      {currentValue.length > 0 && props.renderDefault(props)}
+      {!embedded && currentValue.length > 0 && props.renderDefault(props)}
+    </Stack>
+  )
+}
+
+export function GalleryPickerInput(props: any) {
+  const [open, setOpen] = useState(false)
+  return (
+    <Stack space={3}>
+      <Button
+        text={open ? 'Fermer la sélection multiple' : '➕ Ajouter plusieurs photos depuis Media'}
+        mode={open ? 'bleed' : 'ghost'}
+        tone="primary"
+        onClick={() => setOpen(o => !o)}
+      />
+      {open && <TagImagePickerInput {...props} embedded />}
+      {props.renderDefault(props)}
     </Stack>
   )
 }

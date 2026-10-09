@@ -58,7 +58,7 @@ export const testimonialsQuery = groq`*[_type == "testimonial"] | order(_created
   "avatar": avatar.asset->url
 }`
 
-export const sortiesQuery = groq`*[_type == "sortie"] | order(startDate asc) {
+export const sortiesQuery = groq`*[_type == "sortie" && !(sejour->isHidden == true)] | order(startDate asc) {
   date,
   startDate,
   availableSpots,
@@ -82,7 +82,7 @@ export const sortiesQuery = groq`*[_type == "sortie"] | order(startDate asc) {
   }
 }`
 
-export const sejoursQuery = groq`*[_type == "sejour"] | order(title asc) {
+export const sejoursQuery = groq`*[_type == "sejour" && !(isHidden == true)] | order(title asc) {
   title,
   titleEn,
   "slug": slug.current,
@@ -99,7 +99,7 @@ export const sejoursQuery = groq`*[_type == "sejour"] | order(title asc) {
   description
 }`
 
-export const sejoursByActivityQuery = groq`*[_type == "sejour" && activityType == $activity] | order(title asc) {
+export const sejoursByActivityQuery = groq`*[_type == "sejour" && !(isHidden == true) && activityType == $activity] | order(title asc) {
   title,
   titleEn,
   "slug": slug.current,
@@ -116,7 +116,7 @@ export const sejoursByActivityQuery = groq`*[_type == "sejour" && activityType =
   description
 }`
 
-export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $slug][0] {
+export const sejourBySlugQuery = groq`*[_type == "sejour" && !(isHidden == true) && slug.current == $slug][0] {
   ...,
   slugEn,
   "subCategory": subCategory->slug.current,
@@ -211,7 +211,23 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
   "tagBrowsedImages": tagBrowsedImages[]{imageName, "caption": coalesce(caption, asset->description), alt, altEn, "url": asset->url, "originalFilename": asset->originalFilename, "extension": asset->extension},
   relatedPostsLimit,
   hideRelatedPosts,
-  "relatedPosts": relatedPosts[]->{
+  bookAdventureUrl,
+  "recommendedSejours": recommendedSejours[!(@->isHidden == true)]->{
+    title,
+    titleEn,
+    "slug": slug.current,
+    slugEn,
+    activityType,
+    "activitySlug": subCategory->activity->slug.current,
+    "subCategory": subCategory->slug.current,
+    "subCategorySlug": subCategory->slug.current,
+    massif,
+    level,
+    duration,
+    basePrice,
+    "image": image.asset->url
+  }[defined(slug)],
+  "relatedPosts": relatedPosts[!(@->isHidden == true)]->{
     title, titleEn,
     "slug": slug.current, slugEn,
     "date": publishedAt,
@@ -224,7 +240,7 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && slug.current == $sl
   }
 }`
 
-export const postsBySejourQuery = groq`*[_type == "post" && relatedSejour._ref == $sejourId] | order(publishedAt desc)[0...$limit] {
+export const postsBySejourQuery = groq`*[_type == "post" && !(isHidden == true) && relatedSejour._ref == $sejourId] | order(publishedAt desc)[0...$limit] {
   title, titleEn,
   "slug": slug.current, slugEn,
   "date": publishedAt,
@@ -236,7 +252,7 @@ export const postsBySejourQuery = groq`*[_type == "post" && relatedSejour._ref =
 }`
 
 
-export const postsByTagsQuery = groq`*[_type == "post" && count(tags[@._ref in $tagIds]) > 0] | order(publishedAt desc)[0...$limit] {
+export const postsByTagsQuery = groq`*[_type == "post" && !(isHidden == true) && count(tags[@._ref in $tagIds]) > 0] | order(publishedAt desc)[0...$limit] {
   title, titleEn,
   "slug": slug.current, slugEn,
   "date": publishedAt,
@@ -247,7 +263,7 @@ export const postsByTagsQuery = groq`*[_type == "post" && count(tags[@._ref in $
   excerpt, excerptEn
 }`
 
-export const postsByActivityQuery = groq`*[_type == "post" && (activityType == $activityType || activityType->_ref == $activityType || activityType->type == $activityType || activityType->slug.current == $activityType) && !(relatedSejour._ref in $excludedIds)] | order(publishedAt desc)[0...$limit] {
+export const postsByActivityQuery = groq`*[_type == "post" && !(isHidden == true) && (activityType == $activityType || activityType->_ref == $activityType || activityType->type == $activityType || activityType->slug.current == $activityType) && !(relatedSejour._ref in $excludedIds)] | order(publishedAt desc)[0...$limit] {
   title, titleEn,
   "slug": slug.current, slugEn,
   "date": publishedAt,
@@ -286,7 +302,7 @@ export const activitiesQuery = groq`*[_type == "activity"] | order(title asc) {
   universBadge, universBadgeEn,
   universTitle, universTitleEn,
   universDescription, universDescriptionEn,
-  "univers": *[_type == "univers" && activity._ref == ^._id] {
+  "univers": *[_type == "univers" && !(isHidden == true) && activity._ref == ^._id] {
     title, titleEn,
     "slug": slug.current,
     description, descriptionEn,
@@ -315,7 +331,7 @@ export const activityBySlugQuery = groq`*[_type == "activity" && slug.current ==
   universBadge, universBadgeEn,
   universTitle, universTitleEn,
   universDescription, universDescriptionEn,
-  "univers": *[_type == "univers" && activity._ref == ^._id] {
+  "univers": *[_type == "univers" && !(isHidden == true) && activity._ref == ^._id] {
     title, titleEn,
     "slug": slug.current,
     description, descriptionEn,
@@ -336,7 +352,7 @@ export const activityBySlugQuery = groq`*[_type == "activity" && slug.current ==
   "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order}
 }`
 
-export const blogTeaserQuery = groq`*[_type == "post"] | order(publishedAt desc)[0...$limit] {
+export const blogTeaserQuery = groq`*[_type == "post" && !(isHidden == true)] | order(publishedAt desc)[0...$limit] {
   title,
   titleEn,
   "slug": slug.current,
@@ -376,13 +392,17 @@ export const guideQuery = groq`*[_type == "guide"][0] {
 
 export const contactQuery = groq`*[_type == "contact"][0] {
   title,
+  heading,
+  headingEn,
+  "image": coalesce(image.asset->url, *[_type == "home"][0].heroImages[0].asset->url),
+  "imageAlt": image.alt,
   description,
   email,
   phone,
   location
 }`
 
-export const postsQuery = groq`*[_type == "post"] | order(publishedAt desc) {
+export const postsQuery = groq`*[_type == "post" && !(isHidden == true)] | order(publishedAt desc) {
   title,
   "slug": slug.current,
   "date": publishedAt,
@@ -409,10 +429,10 @@ export const postsQuery = groq`*[_type == "post"] | order(publishedAt desc) {
   "tags": tags[]->name
 }`
 
-export const postSlugsQuery = groq`*[_type == "post"]{ "slug": slug.current }`
+export const postSlugsQuery = groq`*[_type == "post" && !(isHidden == true)]{ "slug": slug.current }`
 
 export const postsPageQuery = groq`{
-  "posts": *[_type == "post"
+  "posts": *[_type == "post" && !(isHidden == true)
     && (!defined($category) || $category in tags[]->slug.current || activityType->slug.current == $category)
     && (!defined($massif) || $massif in tags[]->slug.current)
     && (!defined($q) || title match $q + "*" || excerpt match $q + "*")
@@ -429,7 +449,7 @@ export const postsPageQuery = groq`{
     excerpt,
     excerptEn
   },
-  "total": count(*[_type == "post"
+  "total": count(*[_type == "post" && !(isHidden == true)
     && (!defined($category) || $category in tags[]->slug.current || activityType->slug.current == $category)
     && (!defined($massif) || $massif in tags[]->slug.current)
     && (!defined($q) || title match $q + "*" || excerpt match $q + "*")
@@ -440,7 +460,7 @@ export const categoryTagsQuery = groq`*[_type == "tag" && tagType == "category"]
 
 export const massifTagsQuery = groq`*[_type == "tag" && tagType == "massif"] | order(name asc) { name, nameEn, "slug": slug.current }`
 
-export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][0] {
+export const postBySlugQuery = groq`*[_type == "post" && !(isHidden == true) && slug.current == $slug][0] {
   _id,
   title,
   titleEn,
@@ -512,10 +532,10 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
   "tags": array::compact([
     activityType->{ "name": title, "slug": slug.current, "tagType": "category" }
   ] + tags[]->{ name, nameEn, "slug": slug.current, tagType }),
-  "prevPost": *[_type == "post" && (publishedAt < ^.publishedAt || (publishedAt == ^.publishedAt && _createdAt < ^._createdAt))] | order(publishedAt desc, _createdAt desc)[0] {
+  "prevPost": *[_type == "post" && !(isHidden == true) && (publishedAt < ^.publishedAt || (publishedAt == ^.publishedAt && _createdAt < ^._createdAt))] | order(publishedAt desc, _createdAt desc)[0] {
     title, titleEn, "slug": slug.current, slugEn
   },
-  "nextPost": *[_type == "post" && (publishedAt > ^.publishedAt || (publishedAt == ^.publishedAt && _createdAt > ^._createdAt))] | order(publishedAt asc, _createdAt asc)[0] {
+  "nextPost": *[_type == "post" && !(isHidden == true) && (publishedAt > ^.publishedAt || (publishedAt == ^.publishedAt && _createdAt > ^._createdAt))] | order(publishedAt asc, _createdAt asc)[0] {
     title, titleEn, "slug": slug.current, slugEn
   },
   metaTitle,
@@ -534,7 +554,7 @@ export const postBySlugQuery = groq`*[_type == "post" && slug.current == $slug][
     _type == "image" => { ..., "asset": asset-> }
   },
   "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": category->slug.current, "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order},
-  "relatedActivities": relatedActivities[]-> {
+  "relatedActivities": relatedActivities[!(@->isHidden == true)]-> {
     title,
     "slug": slug.current,
     "image": image.asset->url,
@@ -667,7 +687,7 @@ export const resourcesQuery = groq`*[_type == "resource"] | order(_createdAt des
   intro,
   introEn,
   "image": image.asset->url,
-  "relatedActivities": relatedActivities[]-> {
+  "relatedActivities": relatedActivities[!(@->isHidden == true)]-> {
     title,
     "slug": slug.current
   }
@@ -708,7 +728,7 @@ export const resourceBySlugQuery = groq`*[_type == "resource" && slug.current ==
     },
     "pdf": pdf.asset->url
   },
-  "relatedActivities": relatedActivities[]-> {
+  "relatedActivities": relatedActivities[!(@->isHidden == true)]-> {
     title,
     "slug": slug.current,
     "image": image.asset->url,
@@ -729,19 +749,19 @@ export const resourceBySlugQuery = groq`*[_type == "resource" && slug.current ==
 
 // ── EN slug lookup queries ───────────────────────────────────────────────────
 
-export const postBySlugEnQuery = groq`*[_type == "post" && slugEn == $slug][0] { "slug": slug.current }`
+export const postBySlugEnQuery = groq`*[_type == "post" && !(isHidden == true) && slugEn == $slug][0] { "slug": slug.current }`
 
 export const resourceBySlugEnQuery = groq`*[_type == "resource" && slugEn == $slug][0] { "slug": slug.current }`
 
-export const sejourBySlugEnQuery = groq`*[_type == "sejour" && slugEn == $slug][0] {
+export const sejourBySlugEnQuery = groq`*[_type == "sejour" && !(isHidden == true) && slugEn == $slug][0] {
   "slug": slug.current,
   "activitySlug": activityType,
   "subCategorySlug": subCategory->slug.current
 }`
 
-export const postSlugEnQuery = groq`*[_type == "post" && defined(slugEn)]{ slugEn }`
+export const postSlugEnQuery = groq`*[_type == "post" && !(isHidden == true) && defined(slugEn)]{ slugEn }`
 export const resourceSlugEnQuery = groq`*[_type == "resource" && defined(slugEn)]{ slugEn }`
-export const sejourSlugEnQuery = groq`*[_type == "sejour" && defined(slugEn)]{
+export const sejourSlugEnQuery = groq`*[_type == "sejour" && !(isHidden == true) && defined(slugEn)]{
   slugEn,
   "activitySlug": activityType,
   "subCategorySlug": subCategory->slug.current

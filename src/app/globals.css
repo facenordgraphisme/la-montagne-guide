@@ -139,3 +139,25 @@ body {
 .prose-custom em { font-style: italic; }
 .prose-custom a { color: var(--accent); text-decoration: underline; font-weight: 600; }
 .prose-custom a:hover { opacity: 0.8; }
+/* Buttons placed inside rich text must not inherit the prose link color/underline */
+.prose-custom a.btn-primary, .prose-custom a.btn-highlight { color: #fff; text-decoration: none; }
+.prose-custom a.btn-outline { color: var(--foreground); text-decoration: none; }
+
+.btn-highlight {
+  padding: 0.75rem 1.5rem;
+  background: var(--highlight);
+  color: white;
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-highlight:hover { transform: translateY(-2px); opacity: 0.9; }
+.btn-outline {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--accent);
+  color: var(--foreground);
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-outline:hover { background: var(--accent); color: white; }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import BlogCard from "@/components/BlogCard";
 import BlogFilters from "@/components/BlogFilters";
 import Pagination from "@/components/Pagination";
-import { client } from "@/sanity/lib/client";
+import { client } from "@/sanity/lib/live";
 import { postsPageQuery, categoryTagsQuery, massifTagsQuery } from "@/sanity/lib/queries";
 
 import { getServerTranslations } from '@/i18n/server';

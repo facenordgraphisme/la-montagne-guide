@@ -16,6 +16,6 @@ export default function sanityImageLoader({ src, width, quality }: ImageLoaderPr
     return url.toString()
   }
 
-  // Local (/public) images: served as-is, unoptimized.
-  return src
+  // Local (/public) images: served as-is; the w param is ignored but satisfies Next's loader-width check
+  return `${src}${src.includes('?') ? '&' : '?'}w=${width}`
 }

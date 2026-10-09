@@ -19,6 +19,7 @@ interface FAQItem {
 interface FAQAccordionProps {
   faqs?: FAQItem[]
   hideHeader?: boolean
+  initialVisible?: number
 }
 
 const DEFAULT_FAQS: FAQItem[] = [
@@ -45,10 +46,11 @@ const DEFAULT_FAQS: FAQItem[] = [
   },
 ]
 
-export default function FAQAccordion({ faqs, hideHeader = false }: FAQAccordionProps) {
+export default function FAQAccordion({ faqs, hideHeader = false, initialVisible }: FAQAccordionProps) {
   const { language } = useLanguage()
   const [activeId, setActiveId] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [showAll, setShowAll] = useState(false)
 
   const cleanFaqs = faqs?.filter((item) => item && item._id)
   const items = cleanFaqs && cleanFaqs.length > 0 ? cleanFaqs : DEFAULT_FAQS
@@ -80,6 +82,8 @@ export default function FAQAccordion({ faqs, hideHeader = false }: FAQAccordionP
   const filteredItems = !showCategories || selectedCategory === 'all'
     ? items
     : items.filter(item => item.category === selectedCategory)
+  const visibleItems = initialVisible && !showAll ? filteredItems.slice(0, initialVisible) : filteredItems
+  const hiddenCount = filteredItems.length - visibleItems.length
 
   return (
     <section className="py-20 w-full relative">
@@ -108,6 +112,7 @@ export default function FAQAccordion({ faqs, hideHeader = false }: FAQAccordionP
                   onClick={() => {
                     setSelectedCategory(cat.value)
                     setActiveId(null)
+                    setShowAll(false)
                   }}
                   className={`px-5 py-2.5 rounded-full text-sm font-semibold tracking-wide border transition-all duration-300 ${
                     isActive
@@ -125,7 +130,7 @@ export default function FAQAccordion({ faqs, hideHeader = false }: FAQAccordionP
         {/* FAQ Accordion List */}
         <div className="space-y-4">
           <AnimatePresence mode="popLayout">
-            {filteredItems.map((item) => {
+            {visibleItems.map((item) => {
               const isOpen = activeId === item._id
               const question = language === 'en' ? (item.questionEn || item.question) : item.question
               const answer = language === 'en' ? (item.answerEn || item.answer) : item.answer
@@ -176,6 +181,20 @@ export default function FAQAccordion({ faqs, hideHeader = false }: FAQAccordionP
               )
             })}
           </AnimatePresence>
+
+          {(hiddenCount > 0 || (initialVisible && showAll && filteredItems.length > initialVisible)) && (
+            <div className="flex justify-center pt-4">
+              <button
+                onClick={() => { setShowAll(v => !v); setActiveId(null) }}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-foreground/10 text-sm font-bold uppercase tracking-widest text-foreground/70 hover:text-accent hover:border-accent/40 transition-colors"
+              >
+                {showAll
+                  ? (language === 'en' ? 'Show less' : 'Voir moins')
+                  : (language === 'en' ? `Show ${hiddenCount} more questions` : `Voir les ${hiddenCount} autres questions`)}
+                <ChevronDown className={`w-4 h-4 transition-transform ${showAll ? 'rotate-180' : ''}`} />
+              </button>
+            </div>
+          )}
 
           {filteredItems.length === 0 && (
             <div className="text-center py-12 text-foreground/40 text-sm">

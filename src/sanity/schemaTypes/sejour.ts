@@ -1,6 +1,6 @@
 import { defineField, defineType } from 'sanity'
 import { Mountain } from 'lucide-react'
-import { TagImagePickerInput } from '../components/TagImagePicker'
+import { TagImagePickerInput, GalleryPickerInput } from '../components/TagImagePicker'
 import { FAQPickerInput } from '../components/FAQPickerInput'
 
 const descriptionBlocks = [
@@ -41,6 +41,12 @@ export const sejourType = defineType({
     { name: 'fsSeoDesc', title: '🔍 SEO — Description', options: { columns: 2 } },
   ],
   fields: [
+    defineField({
+      name: 'isHidden',
+      title: 'Masquer la page sur le site',
+      type: 'boolean',
+      initialValue: false,
+    }),
     defineField({ name: 'title', fieldset: 'fsTitle', title: 'Titre du séjour (FR)', type: 'string' }),
     defineField({ name: 'titleEn', fieldset: 'fsTitle', title: 'Titre du séjour (EN)', type: 'string' }),
     defineField({
@@ -494,6 +500,7 @@ export const sejourType = defineType({
       name: 'gallery',
       title: 'Galerie photos',
       type: 'array',
+      components: { input: GalleryPickerInput },
       options: {
         layout: 'grid',
       },
@@ -539,7 +546,7 @@ export const sejourType = defineType({
     }),
     defineField({
       name: 'bookAdventureUrl',
-      title: 'Lien de réservation Book\'Adventure (Séjour)',
+      title: 'Lien de réservation Outplanners',
       type: 'url',
     }),
     defineField({
@@ -548,6 +555,23 @@ export const sejourType = defineType({
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
       components: { input: FAQPickerInput },
+    }),
+    defineField({
+      name: 'recommendedSejours',
+      title: 'Séjours recommandés',
+      type: 'array',
+      of: [{
+        type: 'reference',
+        to: [{ type: 'sejour' }],
+        weak: true,
+        options: {
+          filter: ({ document }: any) => {
+            const id = String(document._id || '').replace(/^drafts\./, '')
+            return { filter: '!(_id in [$id, $draftId])', params: { id, draftId: `drafts.${id}` } }
+          },
+        },
+      }],
+      validation: (Rule) => Rule.unique(),
     }),
     defineField({
       name: 'relatedPosts',

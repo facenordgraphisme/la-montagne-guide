@@ -20,6 +20,12 @@ export default function ContactForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!formRef.current) return
+    // The EmailJS template expects a single "name" variable
+    const f = formRef.current
+    const fullName = f.elements.namedItem('name') as HTMLInputElement
+    const first = (f.elements.namedItem('first_name') as HTMLInputElement).value.trim()
+    const last = (f.elements.namedItem('last_name') as HTMLInputElement).value.trim()
+    fullName.value = `${first} ${last}`.trim()
     setStatus('sending')
     try {
       await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, formRef.current, { publicKey: PUBLIC_KEY })
@@ -34,7 +40,7 @@ export default function ContactForm() {
     <motion.div
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="glass p-10 rounded-[40px]"
+      className="glass p-6 md:p-10 rounded-[32px]"
     >
       {status === 'success' ? (
         <div className="flex flex-col items-center justify-center py-12 text-center gap-4">
@@ -50,17 +56,32 @@ export default function ContactForm() {
         </div>
       ) : (
         <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2">
-              {at('Nom complet')}
-            </label>
-            <input
-              type="text"
-              name="name"
-              required
-              className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 focus:outline-none focus:border-accent transition-colors text-foreground"
-              placeholder={at('Votre nom')}
-            />
+          <input type="hidden" name="name" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2">
+                {at('Prénom')}
+              </label>
+              <input
+                type="text"
+                name="first_name"
+                required
+                autoComplete="given-name"
+                className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 focus:outline-none focus:border-accent transition-colors text-foreground"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2">
+                {at('Nom')}
+              </label>
+              <input
+                type="text"
+                name="last_name"
+                required
+                autoComplete="family-name"
+                className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 focus:outline-none focus:border-accent transition-colors text-foreground"
+              />
+            </div>
           </div>
           <div>
             <label className="block text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2">
@@ -90,7 +111,7 @@ export default function ContactForm() {
               {at('Message')}
             </label>
             <textarea
-              rows={4}
+              rows={6}
               name="message"
               required
               className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 focus:outline-none focus:border-accent transition-colors resize-none text-foreground"
@@ -116,7 +137,7 @@ export default function ContactForm() {
                 {at('Envoi en cours...')}
               </>
             ) : (
-              at('Envoyer le message')
+              at('Être recontacté')
             )}
           </button>
         </form>

@@ -8,6 +8,12 @@ export const universType = defineType({
   icon: Layers,
   fields: [
     defineField({
+      name: 'isHidden',
+      title: 'Masquer la page sur le site',
+      type: 'boolean',
+      initialValue: false,
+    }),
+    defineField({
       name: 'title',
       title: 'Nom de l\'univers (FR)',
       type: 'string',

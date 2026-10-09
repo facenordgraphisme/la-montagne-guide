@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { X, ChevronLeft, ChevronRight, ZoomIn, Download } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 
 interface GalleryImage {
   src: string;
@@ -74,18 +74,6 @@ export default function ImageGallery({ images, unoptimized = false }: ImageGalle
                   </span>
                 </div>
               </button>
-              {img.downloadUrl && (
-                <a
-                  href={img.downloadUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Télécharger l'image"
-                  className="absolute bottom-2 right-2 p-1.5 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-accent/80 z-10"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Download size={13} />
-                </a>
-              )}
             </div>
             {img.caption && (
               <p className="text-center text-xs text-foreground/60 italic font-medium px-2">
@@ -108,18 +96,6 @@ export default function ImageGallery({ images, unoptimized = false }: ImageGalle
               {selectedIndex + 1} / {images.length}
             </span>
             <div className="flex items-center gap-2">
-              {images[selectedIndex].downloadUrl && (
-                <a
-                  href={images[selectedIndex].downloadUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Télécharger l'image"
-                  className="p-2.5 rounded-full bg-white/10 text-white hover:bg-accent/60 transition-all duration-300"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Download size={18} />
-                </a>
-              )}
               <button
                 onClick={(e) => { e.stopPropagation(); closeLightbox(); }}
                 className="p-2.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all duration-300 cursor-pointer shadow-lg"

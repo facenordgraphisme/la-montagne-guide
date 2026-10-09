@@ -12,7 +12,7 @@ import FaqJsonLd from '@/components/FaqJsonLd';
 import Footer from "@/components/Footer";
 import PartnersSlider from "@/components/PartnersSlider";
 
-import { client } from "@/sanity/lib/client";
+import { client } from "@/sanity/lib/live";
 import { homeQuery, sortiesQuery, testimonialsQuery, blogTeaserQuery, activitiesQuery, settingsQuery, faqsQuery } from "@/sanity/lib/queries";
 import { getServerTranslations } from '@/i18n/server';
 import { autoFillAll } from '@/lib/translate';

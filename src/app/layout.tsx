@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { Outfit, Poppins, Montserrat, Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { cookies } from 'next/headers';
+import { cookies, draftMode } from 'next/headers';
+import { VisualEditing } from 'next-sanity/visual-editing';
+import DraftModeBanner from '@/components/DraftModeBanner';
 
-import { client } from "@/sanity/lib/client";
+import { client } from "@/sanity/lib/live";
 import { contactQuery, activitiesQuery, settingsQuery } from "@/sanity/lib/queries";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import CanonicalHeader from "@/components/CanonicalHeader";
@@ -95,6 +97,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookieStore = await cookies();
+  const isDraftMode = (await draftMode()).isEnabled;
   const lang = cookieStore.get('language')?.value || 'fr';
 
   const [contactData, activitiesData, settingsData] = await Promise.all([
@@ -149,6 +152,12 @@ export default async function RootLayout({
               whatsappText={whatsappText}
             />
             <ScrollToTop />
+            {isDraftMode && (
+              <>
+                <VisualEditing />
+                <DraftModeBanner />
+              </>
+            )}
           </LanguageProvider>
         </ThemeProvider>
       </body>

@@ -3,7 +3,7 @@ import React from 'react'
 import Image from 'next/image';
 import { urlFor } from '@/sanity/lib/image'
 import Link from 'next/link';
-import { client } from "@/sanity/lib/client";
+import { client } from "@/sanity/lib/live";
 import { resourceBySlugQuery, resourcesQuery } from "@/sanity/lib/queries";
 import { notFound, redirect } from 'next/navigation';
 import { getServerTranslations } from '@/i18n/server';

@@ -13,6 +13,15 @@ export const contactType = defineType({
       type: 'string',
       initialValue: 'CONTACT',
     }),
+    defineField({ name: 'heading', title: 'Titre principal (FR)', type: 'string', initialValue: "Besoin d'infos ?" }),
+    defineField({ name: 'headingEn', title: 'Titre principal (EN)', type: 'string', initialValue: 'Need some info?' }),
+    defineField({
+      name: 'image',
+      title: 'Photo (colonne de gauche)',
+      type: 'image',
+      options: { hotspot: true },
+      fields: [defineField({ name: 'alt', title: 'Texte ALT', type: 'string' })],
+    }),
     defineField({
       name: 'description',
       title: 'Description',
