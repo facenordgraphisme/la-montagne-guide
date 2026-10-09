@@ -212,7 +212,7 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && !(isHidden == true)
   relatedPostsLimit,
   hideRelatedPosts,
   bookAdventureUrl,
-  "recommendedSejours": recommendedSejours[!(@->isHidden == true)]->{
+  "recommendedSejours": (recommendedSejours[!(@->isHidden == true)]->{
     title,
     titleEn,
     "slug": slug.current,
@@ -226,7 +226,7 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && !(isHidden == true)
     duration,
     basePrice,
     "image": image.asset->url
-  }[defined(slug)],
+  })[defined(slug)],
   "relatedPosts": relatedPosts[!(@->isHidden == true)]->{
     title, titleEn,
     "slug": slug.current, slugEn,
