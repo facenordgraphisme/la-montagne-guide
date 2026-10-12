@@ -574,6 +574,29 @@ export const sejourType = defineType({
       validation: (Rule) => Rule.unique(),
     }),
     defineField({
+      name: 'autoRecommendRules',
+      title: 'Afficher ce séjour dans les articles ayant les tags… (règles)',
+      type: 'array',
+      of: [{
+        type: 'object',
+        name: 'tagRule',
+        title: 'Règle',
+        fields: [
+          defineField({
+            name: 'tags',
+            title: "L'article doit avoir TOUS ces tags",
+            type: 'array',
+            of: [{ type: 'reference', to: [{ type: 'tag' }], weak: true }],
+            validation: (Rule) => Rule.min(1),
+          }),
+        ],
+        preview: {
+          select: { t0: 'tags.0.name', t1: 'tags.1.name', t2: 'tags.2.name', t3: 'tags.3.name' },
+          prepare: ({ t0, t1, t2, t3 }: any) => ({ title: [t0, t1, t2, t3].filter(Boolean).join(' + ') || 'Règle sans tag' }),
+        },
+      }],
+    }),
+    defineField({
       name: 'relatedPosts',
       title: 'Articles de blog (sélection manuelle)',
       type: 'array',

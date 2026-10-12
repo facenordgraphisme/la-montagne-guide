@@ -75,7 +75,7 @@ export default function SejourTabs({ tabs }: SejourTabsProps) {
       image: ({ value }) => {
         if (!value?.asset) return null
         const alt = (language === 'en' ? (value.altEn || value.alt) : value.alt) || ''
-        const caption = (language === 'en' ? (value.captionEn || value.caption) : value.caption) || value.asset?.description
+        const caption = language === 'en' ? null : (value.caption || value.asset?.description)
         return (
           <figure className="not-prose my-8">
             <Image

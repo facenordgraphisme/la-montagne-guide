@@ -47,7 +47,7 @@ function makeBlockComponents(lang: string) {
         if (!value?.asset) return null
         const imgUrl = urlFor(value.asset).width(1200).auto('format').url()
         const displayAlt = (lang === 'en' ? (value.altEn || value.alt) : value.alt) || ''
-        const displayCaption = lang === 'en' ? (value.captionEn || value.caption) : value.caption
+        const displayCaption = lang === 'en' ? null : value.caption
         return (
           <figure className="my-10">
             <div className="relative w-full overflow-hidden rounded-2xl">

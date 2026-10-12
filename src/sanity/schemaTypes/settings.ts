@@ -36,6 +36,7 @@ export const settingsType = defineType({
     { name: 'activities', title: 'Page Activités' },
     { name: 'sorties', title: 'Page Sorties' },
     { name: 'ressources', title: 'Page Ressources' },
+    { name: 'blogPage', title: 'Page Blog' },
     { name: 'tarifs', title: 'Page Tarifs' },
     { name: 'menu', title: 'Menu / Navigation' },
     { name: 'sejoursSettings', title: 'Page Séjours' },
@@ -382,6 +383,14 @@ export const settingsType = defineType({
       of: descriptionBlocks,
       group: 'ressources',
     }),
+    defineField({ name: 'ressourcesMetaTitle', title: '🔍 SEO — Titre (balise title) FR', type: 'string', group: 'ressources' }),
+    defineField({ name: 'ressourcesMetaTitleEn', title: '🔍 SEO — Titre (balise title) EN', type: 'string', group: 'ressources' }),
+    defineField({ name: 'ressourcesMetaDescription', title: '🔍 SEO — Description (meta) FR', type: 'text', rows: 3, validation: (Rule) => Rule.max(160).warning('Au-delà de 160 caractères, Google tronque la description.'), group: 'ressources' }),
+    defineField({ name: 'ressourcesMetaDescriptionEn', title: '🔍 SEO — Description (meta) EN', type: 'text', rows: 3, validation: (Rule) => Rule.max(160).warning('Au-delà de 160 caractères, Google tronque la description.'), group: 'ressources' }),
+    defineField({ name: 'blogMetaTitle', title: '🔍 SEO — Titre (balise title) FR', type: 'string', group: 'blogPage' }),
+    defineField({ name: 'blogMetaTitleEn', title: '🔍 SEO — Titre (balise title) EN', type: 'string', group: 'blogPage' }),
+    defineField({ name: 'blogMetaDescription', title: '🔍 SEO — Description (meta) FR', type: 'text', rows: 3, validation: (Rule) => Rule.max(160).warning('Au-delà de 160 caractères, Google tronque la description.'), group: 'blogPage' }),
+    defineField({ name: 'blogMetaDescriptionEn', title: '🔍 SEO — Description (meta) EN', type: 'text', rows: 3, validation: (Rule) => Rule.max(160).warning('Au-delà de 160 caractères, Google tronque la description.'), group: 'blogPage' }),
     defineField({
       name: 'ressourcesBadge',
       title: 'Texte du badge (Français)',
@@ -666,13 +675,6 @@ export const settingsType = defineType({
       group: 'levels',
       of: [{ type: 'levelIcon' }],
     }),
-    defineField({
-      name: 'levelIconsShowText',
-      title: 'Afficher aussi le texte à côté de l\'icône',
-      type: 'boolean',
-      group: 'levels',
-      initialValue: true,
-    }),
   ],
 })
 
@@ -695,6 +697,18 @@ export const levelIconType = defineType({
       options: { accept: 'image/svg+xml,image/png,image/webp' },
       validation: (Rule) => Rule.required(),
     }),
+    defineField({ name: 'description', title: 'Description du niveau (FR)', type: 'array', of: [{
+        type: 'block',
+        styles: [{ title: 'Normal', value: 'normal' }, { title: 'Intertitre', value: 'h3' }],
+        lists: [{ title: 'Puces', value: 'bullet' }],
+        marks: { decorators: [{ title: 'Gras', value: 'strong' }] },
+      }] }),
+    defineField({ name: 'descriptionEn', title: 'Description du niveau (EN)', type: 'array', of: [{
+        type: 'block',
+        styles: [{ title: 'Normal', value: 'normal' }, { title: 'Intertitre', value: 'h3' }],
+        lists: [{ title: 'Puces', value: 'bullet' }],
+        marks: { decorators: [{ title: 'Gras', value: 'strong' }] },
+      }] }),
   ],
   preview: {
     select: { title: 'label', subtitle: 'labelEn', media: 'icon' },

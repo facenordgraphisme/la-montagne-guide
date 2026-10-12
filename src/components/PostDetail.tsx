@@ -60,9 +60,9 @@ function makeBlogBlockComponents(lang: string) {
             <div className="relative w-full h-[400px] md:h-[600px] rounded-[2rem] overflow-hidden border border-border">
               <Image src={urlFor(value).url()} alt={(lang === 'en' ? (value.altEn || value.alt) : value.alt) || 'Image'} fill sizes="(max-width: 1024px) 100vw, 800px" className="object-cover" />
             </div>
-            {(value.captionEn || value.caption) && (
+            {lang !== 'en' && value.caption && (
               <p className="mt-3 text-center text-sm text-foreground/60 italic font-medium px-4">
-                {lang === 'en' ? (value.captionEn || value.caption) : value.caption}
+                {value.caption}
               </p>
             )}
           </div>

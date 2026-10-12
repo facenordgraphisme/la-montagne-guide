@@ -133,7 +133,19 @@ export const structure: StructureResolver = (S, context) =>
         .icon(FileText)
         .child(async () => {
           const c = await context.getClient({ apiVersion: '2024-05-01' }).fetch(PROGRESS_QUERY)
-          return S.documentTypeList('post').title(`Blog · ✅ ${c.reviewed}/${c.total} relus · 🖼️ ${c.images}/${c.total} images`)
+          const list = (id: string, title: string, filter: string) =>
+            S.listItem().id(id).title(title).child(S.documentTypeList('post').title(title).filter(filter))
+          return S.list()
+            .title(`Blog · ✅ ${c.reviewed}/${c.total} · 🖼️ ${c.images}/${c.total}`)
+            .items([
+              S.listItem().id('all-posts').title(`Tous les articles (${c.total})`).child(S.documentTypeList('post').title('Tous les articles')),
+              S.divider(),
+              list('reviewed', `✅ Relus (${c.reviewed})`, '_type == "post" && reviewed == true'),
+              list('to-review', `⬜ À relire (${c.total - c.reviewed})`, '_type == "post" && !(reviewed == true)'),
+              S.divider(),
+              list('images-reviewed', `🖼️ Images revues (${c.images})`, '_type == "post" && imagesReviewed == true'),
+              list('images-to-review', `▫️ Images à revoir (${c.total - c.images})`, '_type == "post" && !(imagesReviewed == true)'),
+            ])
         }),
       // Regular document types, filtered to exclude singletons and types already reachable via la navigation hiérarchique ci-dessus
       ...S.documentTypeListItems().filter(

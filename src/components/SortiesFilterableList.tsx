@@ -1,10 +1,11 @@
-﻿'use client'
+'use client'
 
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Calendar as CalendarIcon, MapPin, Clock, ArrowRight, BarChart3, Users, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Calendar as CalendarIcon, MapPin, ArrowRight, BarChart3, Users, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useLanguage } from '@/context/LanguageContext'
 
 interface Sejour {
   title: string
@@ -12,6 +13,7 @@ interface Sejour {
   slug: string
   slugEn?: string
   activityType: string
+  activitySlug?: string
   subCategory: string
   subCategorySlug?: string
   massif: string
@@ -20,7 +22,6 @@ interface Sejour {
   duration: string
   basePrice: string
   image: string
-  description?: string
 }
 
 interface Sortie {
@@ -37,54 +38,24 @@ interface SortiesFilterableListProps {
   initialSorties: Sortie[]
 }
 
-const categories = ['Tout voir', 'Alpinisme', 'Escalade', 'Ski', 'Voyage', 'Cascade de glace', 'Paralpinisme']
-
-const getActivityColor = (type: string) => {
-  const map: Record<string, string> = {
-    'alpinisme': 'bg-accent',
-    'ski': 'bg-secondary',
-    'escalade': 'bg-highlight',
-    'voyage': 'bg-foreground/20',
-    'paralpinisme': 'bg-purple-500',
-    'cascade-de-glace': 'bg-blue-300',
-    'cascade de glace': 'bg-blue-300'
-  }
-  return map[type.toLowerCase()] || 'bg-foreground/20'
-}
-
-const getCategoryLabel = (type: string) => {
-  const map: Record<string, string> = {
-    'alpinisme': 'Alpinisme',
-    'ski': 'Ski',
-    'escalade': 'Escalade',
-    'voyage': 'Voyage',
-    'paralpinisme': 'Paralpinisme',
-    'cascade-de-glace': 'Cascade de glace',
-    'cascade de glace': 'Cascade de glace'
-  }
-  return map[type.toLowerCase()] || type
-}
-
-const getLevelLabel = (level?: string) => {
-  const map: Record<string, string> = {
-    'debutant': 'Débutant',
-    'intermediaire': 'Intermédiaire',
-    'confirme': 'Confirmé',
-    'expert': 'Expert'
-  }
-  return level ? map[level] || level : ''
-}
-
-import { useLanguage } from '@/context/LanguageContext'
+const toIsoDay = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 
 export default function SortiesFilterableList({ initialSorties }: SortiesFilterableListProps) {
-  const { at, t, language } = useLanguage()
+  const { at, language } = useLanguage()
   const [filter, setFilter] = useState(at('Tout voir'))
-  const [currentMonth, setCurrentMonth] = useState(new Date())
   const [showPastSorties, setShowPastSorties] = useState(false)
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
+  const todayIso = toIsoDay(today)
+
+  // Open the calendar on the month of the next departure
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const next = initialSorties.map(s => s.startDate).filter((d): d is string => !!d && d >= todayIso).sort()[0]
+    if (!next) return new Date(today.getFullYear(), today.getMonth(), 1)
+    const [y, m] = next.split('-').map(Number)
+    return new Date(y, m - 1, 1)
+  })
 
   const categories = [at('Tout voir'), at('Alpinisme'), at('Escalade'), at('Ski'), at('Voyage'), at('Cascade de glace'), at('Paralpinisme')]
 
@@ -94,11 +65,13 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
       'ski': 'bg-secondary',
       'escalade': 'bg-highlight',
       'voyage': 'bg-foreground/20',
+      'voyages': 'bg-foreground/20',
       'paralpinisme': 'bg-purple-500',
+      'parapente-alpinisme': 'bg-purple-500',
       'cascade-de-glace': 'bg-blue-300',
       'cascade de glace': 'bg-blue-300'
     }
-    return map[type.toLowerCase()] || 'bg-foreground/20'
+    return map[type?.toLowerCase()] || 'bg-foreground/20'
   }
 
   const getCategoryLabel = (type: string) => {
@@ -107,11 +80,13 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
       'ski': at('Ski'),
       'escalade': at('Escalade'),
       'voyage': at('Voyage'),
+      'voyages': at('Voyage'),
       'paralpinisme': at('Paralpinisme'),
+      'parapente-alpinisme': at('Paralpinisme'),
       'cascade-de-glace': at('Cascade de glace'),
       'cascade de glace': at('Cascade de glace')
     }
-    return map[type.toLowerCase()] || type
+    return map[type?.toLowerCase()] || type
   }
 
   const getLevelLabel = (level?: string) => {
@@ -126,55 +101,35 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
 
   const filteredSorties = initialSorties
     .filter(s => {
-      if (!s.sejour) return false;
-      return filter === at('Tout voir') || getCategoryLabel(s.sejour.activityType) === filter;
+      if (!s.sejour) return false
+      return filter === at('Tout voir') || getCategoryLabel(s.sejour.activityType) === filter
     })
-    .map(s => {
-      const start = s.startDate ? new Date(s.startDate) : null;
-      if (start) start.setHours(0, 0, 0, 0);
-      const isPassed = start ? start < today : false;
-      return { ...s, isPassed };
-    });
+    .map(s => ({ ...s, isPassed: s.startDate ? s.startDate < todayIso : false }))
 
-  const visibleSorties = filteredSorties.filter(s => {
-    if (showPastSorties) return true;
-    return !s.isPassed;
-  });
-
-  // Calendar Logic
-  const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
-  const firstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
+  const visibleSorties = filteredSorties.filter(s => showPastSorties || !s.isPassed)
 
   const renderCalendar = () => {
-    const year = currentMonth.getFullYear();
-    const month = currentMonth.getMonth();
-    const totalDays = daysInMonth(year, month);
-    const startDay = (firstDayOfMonth(year, month) + 6) % 7; // Adjust for Monday start
-    const locale = language === 'fr' ? 'fr-FR' : 'en-US';
-    const monthName = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(currentMonth);
+    const year = currentMonth.getFullYear()
+    const month = currentMonth.getMonth()
+    const totalDays = new Date(year, month + 1, 0).getDate()
+    const startDay = (new Date(year, month, 1).getDay() + 6) % 7 // Monday first
+    const locale = language === 'fr' ? 'fr-FR' : 'en-US'
+    const monthName = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(currentMonth)
 
-    const days = [];
-    // Padding
+    const days = []
     for (let i = 0; i < startDay; i++) {
-      days.push(<div key={`pad-${i}`} className="h-8 w-8" />);
+      days.push(<div key={`pad-${i}`} className="h-8 w-8" />)
     }
-    // Days
     for (let d = 1; d <= totalDays; d++) {
-      const dateStr = `${d < 10 ? '0' + d : d}`;
-      
-      const dailySorties = visibleSorties.filter(s => {
-        const parts = s.date.split(' ');
-        const day = parts[0];
-        const sMonth = parts[1]?.toLowerCase();
-        // Month parsing logic: we assume sanity dates are in French or we need to map them
-        // For now let's use a mapping for months if sMonth is French
-        const monthsFr = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-        const currentMonthIdx = currentMonth.getMonth();
-        return day === dateStr && sMonth === monthsFr[currentMonthIdx];
-      });
+      const isoDay = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+      const dailySorties = visibleSorties.filter(s => s.startDate === isoDay)
 
       days.push(
-        <div key={d} className="relative h-8 w-8 flex items-center justify-center text-[10px] font-bold rounded-lg hover:bg-accent/10 transition-colors cursor-default">
+        <div
+          key={d}
+          title={dailySorties.map(s => s.titleOverride || s.sejour.title).join(' · ') || undefined}
+          className={`relative h-8 w-8 flex items-center justify-center text-[10px] font-bold rounded-lg transition-colors cursor-default ${dailySorties.length > 0 ? 'bg-accent/10' : 'hover:bg-accent/10'}`}
+        >
           <span className={dailySorties.length > 0 ? 'text-accent' : 'text-foreground/40'}>{d}</span>
           {dailySorties.length > 0 && (
             <div className="absolute bottom-1 flex gap-0.5">
@@ -184,16 +139,16 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
             </div>
           )}
         </div>
-      );
+      )
     }
-    return { monthName, days };
-  };
+    return { monthName, days }
+  }
 
-  const { monthName, days } = renderCalendar();
+  const { monthName, days } = renderCalendar()
 
   return (
     <div className="flex flex-col lg:flex-row gap-12 lg:gap-20">
-      
+
       {/* Sidebar Calendar */}
       <aside className="w-full lg:w-72 flex-shrink-0">
         <div className="sticky top-32 space-y-10">
@@ -201,11 +156,11 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-sm font-black uppercase tracking-widest">{monthName}</h3>
               <div className="flex gap-1">
-                <button onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() - 1)))} className="p-1 hover:text-accent"><ChevronLeft size={16} /></button>
-                <button onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() + 1)))} className="p-1 hover:text-accent"><ChevronRight size={16} /></button>
+                <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))} className="p-1 hover:text-accent"><ChevronLeft size={16} /></button>
+                <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))} className="p-1 hover:text-accent"><ChevronRight size={16} /></button>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-7 gap-y-2 text-center mb-2">
               {[at('Lundi'), at('Mardi'), at('Mercredi'), at('Jeudi'), at('Vendredi'), at('Samedi'), at('Dimanche')].map((d, idx) => (
                 <span key={idx} className="text-[9px] font-black text-foreground/20">{d.charAt(0).toUpperCase()}</span>
@@ -265,119 +220,106 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
           </button>
         </div>
 
-        {/* Grid of smaller cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
           <AnimatePresence mode="popLayout">
             {visibleSorties.length > 0 ? (
-              visibleSorties.map((s, index) => (
-                <motion.div
-                  key={index}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.4, delay: index * 0.05 }}
-                  className={`group glass rounded-[40px] overflow-hidden flex flex-col border transition-all duration-500 shadow-xl ${
-                    s.isPassed 
-                      ? 'border-white/5 opacity-55 grayscale' 
-                      : 'border-white/5 hover:border-accent/30'
-                  }`}
-                >
-                  {/* Image Card */}
-                  <div className="relative aspect-[1.4] overflow-hidden">
-                    {s.sejour?.image && (
-                      <Image
-                        src={s.sejour.image}
-                        alt={language === 'en' ? (s.titleOverrideEn || s.titleOverride || s.sejour.titleEn || s.sejour.title) : (s.titleOverride || s.sejour.title)}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                        className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                    
-                    <div className="absolute top-4 left-4 flex gap-2">
-                      <span className={`px-3 py-1 ${getActivityColor(s.sejour.activityType)} text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-lg`}>
-                        {getCategoryLabel(s.sejour?.activityType)}
-                      </span>
-                      {s.isFull && (
-                        <span className="px-3 py-1 bg-red-500 text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-lg">
-                          {at('Complet')}
-                        </span>
-                      )}
-                      {s.isPassed && (
-                        <span className="px-3 py-1 bg-zinc-600 text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-lg">
-                          {at('Terminée')}
-                        </span>
-                      )}
-                    </div>
+              visibleSorties.map((s, index) => {
+                const subSlug = s.sejour?.subCategorySlug || s.sejour?.subCategory?.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '-')
+                const activitySlug = s.sejour?.activitySlug || s.sejour?.activityType
+                const href = language === 'en' && s.sejour?.slugEn && s.sejour?.subCategorySlug
+                  ? `/en/${activitySlug}/${s.sejour.subCategorySlug}/${s.sejour.slugEn}`
+                  : `/${activitySlug}/${subSlug}/${s.sejour?.slug}`
+                const dimmed = s.isPassed || s.isFull
+                const title = language === 'en'
+                  ? (s.titleOverrideEn || s.titleOverride || s.sejour?.titleEn || s.sejour?.title)
+                  : (s.titleOverride || s.sejour?.title)
 
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <div className="flex items-center gap-2 text-accent font-black mb-1">
-                        <CalendarIcon size={14} />
-                        <span className="text-xs uppercase tracking-[0.2em]">{at(s.date)}</span>
-                      </div>
-                      <h3 className="text-2xl font-black text-white uppercase tracking-tighter leading-none line-clamp-1">
-                        {language === 'en' ? (s.titleOverrideEn || s.titleOverride || s.sejour?.titleEn || s.sejour?.title) : (s.titleOverride || s.sejour?.title)}
-                      </h3>
-                    </div>
-                  </div>
+                return (
+                  <motion.div
+                    key={index}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                    className={`group glass rounded-[28px] overflow-hidden border transition-all duration-500 shadow-xl ${
+                      dimmed ? 'border-white/5 opacity-55 grayscale' : 'border-white/5 hover:border-accent/30'
+                    }`}
+                  >
+                    <Link href={href} className="flex h-full flex-col">
+                      <div className="relative aspect-[1.6] overflow-hidden">
+                        {s.sejour?.image && (
+                          <Image
+                            src={s.sejour.image}
+                            alt={title}
+                            fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                            className="object-cover transition-transform duration-700 group-hover:scale-110"
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-                  {/* Info Section */}
-                  <div className="p-6 flex-1 flex flex-col justify-between bg-card/5">
-                    <div className="space-y-4 mb-6">
-                      <div className="flex flex-wrap gap-5 text-[11px] font-bold uppercase tracking-widest text-foreground/50">
-                        <div className="flex items-center gap-1.5">
-                          <MapPin size={14} className="text-accent" />
-                          {at(s.sejour?.massif)}
+                        <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+                          <span className={`px-3 py-1 ${getActivityColor(s.sejour.activityType)} text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-lg`}>
+                            {getCategoryLabel(s.sejour?.activityType)}
+                          </span>
+                          {s.isFull && (
+                            <span className="px-3 py-1 bg-red-500 text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-lg">
+                              {at('Complet')}
+                            </span>
+                          )}
+                          {s.isPassed && (
+                            <span className="px-3 py-1 bg-zinc-600 text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-lg">
+                              {at('Terminée')}
+                            </span>
+                          )}
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <Users size={14} className="text-accent" />
-                          {s.isPassed ? at('Date passée') : at(s.availableSpots)}
-                        </div>
-                        <div className="flex items-center gap-1.5 text-highlight">
-                          <BarChart3 size={14} />
-                          {getLevelLabel(s.sejour?.level)}
+
+                        <div className="absolute bottom-3 left-4 right-4">
+                          <div className="flex items-center gap-2 text-accent font-black mb-1">
+                            <CalendarIcon size={13} />
+                            <span className="text-[11px] uppercase tracking-[0.2em]">{at(s.date)}</span>
+                          </div>
+                          <h3 className="text-lg font-black text-white uppercase tracking-tighter leading-tight line-clamp-2">
+                            {title}
+                          </h3>
                         </div>
                       </div>
-                      <p className="text-sm leading-relaxed text-foreground/70 line-clamp-2 font-medium">
-                        {at(s.sejour?.description || "Une expérience d'exception encadrée par votre guide.")}
-                      </p>
-                    </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                      <div className="flex flex-col">
-                        <span className="text-[8px] font-black text-foreground/30 uppercase tracking-widest">{at('À partir de')}</span>
-                        <span className="text-xl font-black text-foreground">{at(s.sejour?.basePrice)}</span>
-                      </div>
-                      {(() => {
-                        if (s.isPassed) {
-                          return (
-                            <div 
-                              className="w-10 h-10 bg-foreground/10 rounded-xl flex items-center justify-center text-foreground/30 cursor-not-allowed"
-                              title={at("Cette sortie est passée")}
-                            >
-                              <ArrowRight size={18} />
+                      <div className="p-5 flex-1 flex flex-col justify-between bg-card/5">
+                        <div className="flex flex-wrap gap-4 text-[10px] font-bold uppercase tracking-widest text-foreground/50 mb-4">
+                          {s.sejour?.massif && (
+                            <div className="flex items-center gap-1.5">
+                              <MapPin size={13} className="text-accent" />
+                              {at(s.sejour.massif)}
                             </div>
-                          );
-                        }
-                        const subSlug = s.sejour?.subCategorySlug || s.sejour?.subCategory?.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-')
-                        const href = language === 'en' && s.sejour?.slugEn && s.sejour?.subCategorySlug
-                          ? `/en/${s.sejour.activityType}/${s.sejour.subCategorySlug}/${s.sejour.slugEn}`
-                          : `/${s.sejour?.activityType}/${subSlug}/${s.sejour?.slug}`
-                        return (
-                          <Link 
-                            href={href}
-                            className="w-10 h-10 bg-accent rounded-xl flex items-center justify-center text-white hover:scale-110 transition-transform shadow-lg shadow-accent/20"
-                          >
+                          )}
+                          <div className="flex items-center gap-1.5">
+                            <Users size={13} className="text-accent" />
+                            {s.isPassed ? at('Date passée') : s.isFull ? at('Complet') : at(s.availableSpots)}
+                          </div>
+                          {s.sejour?.level && (
+                            <div className="flex items-center gap-1.5 text-highlight">
+                              <BarChart3 size={13} />
+                              {getLevelLabel(s.sejour.level)}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                          <div className="flex flex-col">
+                            <span className="text-[8px] font-black text-foreground/30 uppercase tracking-widest">{at('À partir de')}</span>
+                            <span className="text-lg font-black text-foreground">{at(s.sejour?.basePrice)}</span>
+                          </div>
+                          <span className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform ${dimmed ? 'bg-foreground/10 text-foreground/30' : 'bg-accent text-white shadow-lg shadow-accent/20 group-hover:scale-110'}`}>
                             <ArrowRight size={18} />
-                          </Link>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                </motion.div>
-              ))
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                )
+              })
             ) : (
               <div className="col-span-full text-center py-32 glass rounded-[60px] border border-dashed border-white/10">
                 <p className="text-xl font-black uppercase tracking-tighter text-foreground/20">{at('Aucune sortie disponible')}</p>

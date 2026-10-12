@@ -1,5 +1,6 @@
 import { defineField, defineType } from 'sanity'
 import { Home } from 'lucide-react'
+import { FAQPickerInput } from '../components/FAQPickerInput'
 
 const descriptionBlocks = [
   {
@@ -50,8 +51,17 @@ export const homeType = defineType({
     { name: 'contact', title: 'Contact Home' },
     { name: 'testimonials', title: 'Témoignages' },
     { name: 'blog', title: 'Blog' },
+    { name: 'faq', title: 'FAQ' },
   ],
   fields: [
+    defineField({
+      name: 'faqs',
+      title: 'FAQ à afficher',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
+      components: { input: FAQPickerInput },
+      group: 'faq',
+    }),
     // HERO SECTION
     defineField({ name: 'heroTitle', title: 'Titre Hero (FR)', type: 'text', rows: 2, group: 'hero' }),
     defineField({ name: 'heroTitleEn', title: 'Titre Hero (EN)', type: 'text', rows: 2, group: 'hero' }),

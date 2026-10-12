@@ -17,6 +17,7 @@ import FaqJsonLd from '@/components/FaqJsonLd';
 import SejourCard from '@/components/SejourCard';
 import BookingButton from '@/components/BookingButton';
 import { LevelValue } from '@/components/LevelValue';
+import { findLevelIcon } from '@/utils/levels';
 import { renderRichText, toPlainText } from '@/utils/richText';
 
 function FicheRow({ icon, label, value, tooltip }: {
@@ -294,14 +295,14 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                   <FicheRow
                     icon={<BarChart3 size={18} className="text-accent" />}
                     label={at('Niveau technique')}
-                    value={sejour.level ? <LevelValue raw={sejour.level} text={getLevelLabel(sejour.level)} icons={settingsData?.technicalLevelIcons} showText={settingsData?.levelIconsShowText} lang={lang} /> : null}
-                    tooltip={sejour.ficheTooltips?.level}
+                    value={sejour.level ? <LevelValue raw={sejour.level} text={getLevelLabel(sejour.level)} icons={settingsData?.technicalLevelIcons} lang={lang} heading={at('Niveau technique')} note={sejour.ficheTooltips?.level} /> : null}
+                    tooltip={findLevelIcon(settingsData?.technicalLevelIcons, sejour.level) ? undefined : sejour.ficheTooltips?.level}
                   />
                   <FicheRow
                     icon={<BarChart3 size={18} className="text-accent" />}
                     label={at('Niveau physique')}
-                    value={sejour.physicalLevel ? <LevelValue raw={sejour.physicalLevel} text={sejour.physicalLevel} icons={settingsData?.physicalLevelIcons} showText={settingsData?.levelIconsShowText} lang={lang} /> : null}
-                    tooltip={sejour.physicalLevelTooltip || sejour.ficheTooltips?.physicalLevel}
+                    value={sejour.physicalLevel ? <LevelValue raw={sejour.physicalLevel} text={sejour.physicalLevel} icons={settingsData?.physicalLevelIcons} lang={lang} heading={at('Niveau physique')} note={sejour.physicalLevelTooltip || sejour.ficheTooltips?.physicalLevel} /> : null}
+                    tooltip={findLevelIcon(settingsData?.physicalLevelIcons, sejour.physicalLevel) ? undefined : (sejour.physicalLevelTooltip || sejour.ficheTooltips?.physicalLevel)}
                   />
                   <FicheRow
                     icon={<MapPin size={18} className="text-accent" />}

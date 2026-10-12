@@ -126,9 +126,9 @@ function makeBlogBlockComponents(lang: string) { return {
               className="object-cover"
             />
           </div>
-          {(value.captionEn || value.caption) && (
+          {lang !== 'en' && value.caption && (
             <p className="mt-3 text-center text-sm text-foreground/60 italic font-medium px-4">
-              {lang === 'en' ? (value.captionEn || value.caption) : value.caption}
+              {value.caption}
             </p>
           )}
         </div>
@@ -220,8 +220,8 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
     const introText = activity.introEn && lang === 'en' ? activity.introEn : activity.intro;
     const descBlocks = lang === 'en' && activity.descriptionEn?.length ? activity.descriptionEn : activity.description;
     const autoDescription = introText ? at(introText) : (descBlocks ? toPlainText(descBlocks).substring(0, 160) : '');
-    const title = activity.metaTitle || autoTitle;
-    const description = activity.metaDescription || autoDescription;
+    const title = (lang === 'en' ? activity.metaTitleEn || activity.metaTitle : activity.metaTitle) || autoTitle;
+    const description = (lang === 'en' ? activity.metaDescriptionEn || activity.metaDescription : activity.metaDescription) || autoDescription;
     const ogImage = activity.image || undefined;
     return {
       title,
@@ -269,7 +269,7 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
         <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 z-0">
             {activity.image && (
-              <Image 
+              <Image
                 src={activity.image}
                 alt={at(activity.title)}
                 fill
@@ -325,13 +325,13 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
               {univers.map((univ: any, i: number) => {
                 const universSlug = univ.slug || univ.title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
                 return (
-                  <Link 
-                    key={i} 
+                  <Link
+                    key={i}
                     href={`/${activitySlug}/${universSlug}`}
                     className="group relative h-[450px] rounded-[50px] overflow-hidden border border-border hover:border-accent/40 transition-all duration-500 shadow-xl"
                   >
                     {univ.image && (
-                      <Image 
+                      <Image
                         src={urlFor(univ.image).url()}
                         alt={at({ fr: univ.title, en: univ.titleEn })}
                         fill
@@ -411,14 +411,14 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
 
         <section className="relative py-20 md:py-28 bg-muted/10 border-b border-border/50">
           <div className="container relative z-10 px-6 max-w-3xl mx-auto">
-            <Link 
-              href="/blog" 
+            <Link
+              href="/blog"
               className="inline-flex items-center gap-2 text-accent font-bold mb-6 hover:gap-4 transition-all duration-300 text-sm"
             >
               <ArrowLeft size={16} />
               {at('RETOUR AU BLOG')}
             </Link>
-            
+
             <div className="flex items-center gap-3 text-foreground/60 mb-6 text-sm">
               <Calendar size={16} className="text-accent" />
               <span className="font-medium">{formattedDate}</span>
@@ -437,7 +437,7 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
               {(post.prevPost || post.nextPost) && (
                 <div className="flex items-center justify-between border-b border-border/40 pb-6 mb-8 gap-4">
                   {post.prevPost ? (
-                    <Link 
+                    <Link
                       href={`/${post.prevPost.slug}`}
                       className="group flex items-center gap-2 text-foreground/60 hover:text-accent transition-colors text-sm max-w-[48%] text-left"
                     >
@@ -447,9 +447,9 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                   ) : (
                     <div />
                   )}
-                  
+
                   {post.nextPost ? (
-                    <Link 
+                    <Link
                       href={`/${post.nextPost.slug}`}
                       className="group flex items-center gap-2 text-foreground/60 hover:text-accent transition-colors text-sm max-w-[48%] text-right justify-end ml-auto"
                     >
@@ -470,7 +470,7 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
 
               {post.image && (
                 <div className="relative aspect-video rounded-[2rem] overflow-hidden border border-border shadow-2xl mb-12">
-                  <Image 
+                  <Image
                     src={getVanityImageUrl(post.image, post.imageName || post.imageAlt || post.title)}
                     alt={lang === 'en' ? (post.imageAltEn || post.imageAlt || at(post.title)) : (post.imageAlt || at(post.title))}
                     fill

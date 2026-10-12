@@ -137,7 +137,7 @@ export default function ContactForm() {
                 {at('Envoi en cours...')}
               </>
             ) : (
-              at('Être recontacté')
+              at('Envoyer')
             )}
           </button>
         </form>

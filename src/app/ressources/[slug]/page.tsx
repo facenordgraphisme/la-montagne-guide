@@ -55,7 +55,7 @@ function makeBlockAlignComponents(lang: string) { return {
       if (!value?.asset) return null;
       const imgUrl = urlFor(value.asset).width(1200).auto('format').url();
       const displayAlt = (lang === 'en' ? (value.altEn || value.alt) : value.alt) || '';
-      const displayCaption = lang === 'en' ? (value.captionEn || value.caption) : value.caption;
+      const displayCaption = lang === 'en' ? null : value.caption;
       return (
         <figure className="my-10">
           <div className="relative w-full overflow-hidden rounded-2xl">
@@ -166,8 +166,8 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
     <main className="relative min-h-screen pt-32 pb-24">
       {/* Back button */}
       <div className="container mx-auto px-6 mb-12">
-        <Link 
-          href="/ressources" 
+        <Link
+          href="/ressources"
           className="inline-flex items-center gap-2 text-foreground/60 hover:text-accent font-bold uppercase tracking-widest text-xs transition-colors"
         >
           <ArrowLeft size={16} />
@@ -177,7 +177,7 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
 
       <article className="container mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 items-start">
-          
+
           {/* Main content column */}
           <div className="lg:col-span-2 space-y-12">
             <div>
@@ -185,7 +185,7 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
               <span className="inline-block px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-accent/10 text-accent mb-6">
                 {at(catLabels[data.category] || data.category)}
               </span>
-              
+
               <h1 className="text-4xl md:text-6xl font-bold tracking-tighter leading-tight mb-8">
                 {displayTitle}
               </h1>
@@ -239,14 +239,14 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
                   {data.relatedActivities.map((act: any) => {
                     const stayLink = `/${act.categorySlug || 'alpinisme'}/${act.subCategorySlug || 'initiation'}/${act.slug}`;
                     return (
-                      <Link 
-                        key={act.slug} 
-                        href={stayLink} 
+                      <Link
+                        key={act.slug}
+                        href={stayLink}
                         className="group flex gap-4 items-center p-3 rounded-2xl hover:bg-foreground/5 border border-transparent hover:border-border transition-all duration-300"
                       >
                         {act.image && (
                           <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0">
-                            <Image 
+                            <Image
                               src={act.image}
                               alt={at(act.title)}
                               fill

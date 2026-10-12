@@ -56,7 +56,7 @@ export default defineConfig({
   document: {
     actions: (prev, ctx) => {
       const extra: any[] = []
-      if (['post', 'sejour', 'resource', 'tag'].includes(ctx.schemaType)) {
+      if (['post', 'sejour', 'resource', 'tag', 'univers', 'activity'].includes(ctx.schemaType)) {
         extra.push(translateDocumentAction)
       }
       if (['post', 'sejour', 'resource'].includes(ctx.schemaType)) {

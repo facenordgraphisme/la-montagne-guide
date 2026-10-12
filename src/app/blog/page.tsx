@@ -3,7 +3,7 @@ import BlogCard from "@/components/BlogCard";
 import BlogFilters from "@/components/BlogFilters";
 import Pagination from "@/components/Pagination";
 import { client } from "@/sanity/lib/live";
-import { postsPageQuery, categoryTagsQuery, massifTagsQuery } from "@/sanity/lib/queries";
+import { postsPageQuery, categoryTagsQuery, massifTagsQuery, settingsQuery } from "@/sanity/lib/queries";
 
 import { getServerTranslations } from '@/i18n/server';
 
@@ -14,13 +14,18 @@ type BlogPageProps = {
 };
 
 export async function generateMetadata({ searchParams }: BlogPageProps): Promise<Metadata> {
-  const { at } = await getServerTranslations();
+  const { at, lang } = await getServerTranslations();
   const params = await searchParams;
   const pageNumber = Math.max(1, Number(params.page) || 1);
+  const settings = await client.fetch(settingsQuery);
+
+  const baseTitle = (lang === 'en' ? settings?.blogMetaTitleEn || settings?.blogMetaTitle : settings?.blogMetaTitle) || at('Blog')
+  const description = (lang === 'en' ? settings?.blogMetaDescriptionEn || settings?.blogMetaDescription : settings?.blogMetaDescription)
+    || at("Récits d'alpinisme, de ski de rando et d'escalade dans les Écrins et les Alpes : conseils, topos et actus de Nicolas Draperi, guide de haute montagne.");
 
   return {
-    title: `${at('Blog')}${pageNumber > 1 ? ` - ${at('Page')} ${pageNumber}` : ''} | La Montagne Guide`,
-    description: at("Retrouvez mes derniers récits d'aventures, conseils techniques et actualités de la montagne."),
+    title: `${baseTitle}${pageNumber > 1 ? ` - ${at('Page')} ${pageNumber}` : ''}${baseTitle.includes('La Montagne Guide') ? '' : ' | La Montagne Guide'}`,
+    description,
   };
 }
 

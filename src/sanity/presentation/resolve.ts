@@ -6,6 +6,9 @@ export const resolve: PresentationPluginOptions['resolve'] = {
     { route: '/', filter: `_type == "home"` },
     { route: '/le-guide', filter: `_type == "guide"` },
     { route: '/contact', filter: `_type == "contact"` },
+    { route: '/prochaines-sorties', filter: `_type == "settings"` },
+    { route: '/blog', filter: `_type == "settings"` },
+    { route: '/ressources', filter: `_type == "settings"` },
     { route: '/en/ressources/:slug', filter: `_type == "resource" && slugEn == $slug` },
     { route: '/en/:activity/:univers/:slug', filter: `_type == "sejour" && slugEn == $slug` },
     { route: '/en/:slug', filter: `_type == "post" && slugEn == $slug` },
@@ -18,6 +21,7 @@ export const resolve: PresentationPluginOptions['resolve'] = {
     home: defineLocations({ message: "Page d'accueil", locations: [{ title: 'Accueil', href: '/' }] }),
     guide: defineLocations({ locations: [{ title: 'Le Guide', href: '/le-guide' }] }),
     contact: defineLocations({ locations: [{ title: 'Contact', href: '/contact' }] }),
+    sortie: defineLocations({ locations: [{ title: 'Prochains départs', href: '/prochaines-sorties' }] }),
     activity: defineLocations({
       select: { title: 'title', slug: 'slug.current' },
       resolve: (doc) => (doc?.slug ? { locations: [{ title: doc.title || 'Activité', href: `/${doc.slug}` }] } : null),

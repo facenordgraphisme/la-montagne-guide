@@ -446,14 +446,6 @@ export const postType = defineType({
   ],
   orderings: [
     {
-      title: 'Relus en premier',
-      name: 'reviewedFirst',
-      by: [
-        { field: 'reviewed', direction: 'desc' },
-        { field: 'publishedAt', direction: 'desc' },
-      ],
-    },
-    {
       title: 'Date (récent en premier)',
       name: 'publishedAtDesc',
       by: [{ field: 'publishedAt', direction: 'desc' }],
@@ -610,8 +602,8 @@ function PostMediaManagerInput(props: any) {
                 {bodyImages.map((img: any, idx: number) => (
                   <Flex key={img._key || idx} gap={3} align="center" style={{ borderBottom: '1px solid var(--card-border-color)', paddingBottom: '12px' }}>
                     <div style={{ width: '80px', height: '60px', position: 'relative', overflow: 'hidden', borderRadius: '4px', background: '#000' }}>
-                      {safeImgUrl(img.asset, 160, 120) && (<img src={safeImgUrl(img.asset, 160, 120) || ''} 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      {safeImgUrl(img.asset, 160, 120) && (<img src={safeImgUrl(img.asset, 160, 120) || ''}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                       )}
                     </div>
@@ -661,8 +653,8 @@ function PostMediaManagerInput(props: any) {
                   return (
                     <Flex key={img._key || idx} gap={3} align="center" style={{ borderBottom: '1px solid var(--card-border-color)', paddingBottom: '12px' }}>
                       <div style={{ width: '80px', height: '60px', position: 'relative', overflow: 'hidden', borderRadius: '4px', background: '#000' }}>
-                        {safeImgUrl(img.asset, 160, 120) && (<img src={safeImgUrl(img.asset, 160, 120) || ''} 
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        {safeImgUrl(img.asset, 160, 120) && (<img src={safeImgUrl(img.asset, 160, 120) || ''}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           />
                         )}
                       </div>
@@ -711,8 +703,8 @@ function PostMediaManagerInput(props: any) {
                 {galleryImages.map((img: any, idx: number) => (
                   <Flex key={img._key || idx} gap={3} align="center" style={{ borderBottom: '1px solid var(--card-border-color)', paddingBottom: '12px' }}>
                     <div style={{ width: '80px', height: '60px', position: 'relative', overflow: 'hidden', borderRadius: '4px', background: '#000' }}>
-                      {safeImgUrl(img.asset, 160, 120) && (<img src={safeImgUrl(img.asset, 160, 120) || ''} 
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      {safeImgUrl(img.asset, 160, 120) && (<img src={safeImgUrl(img.asset, 160, 120) || ''}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                       )}
                     </div>

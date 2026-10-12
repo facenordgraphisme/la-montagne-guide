@@ -43,9 +43,13 @@ export default async function Home() {
   const allowedCategories: string[] | null = settingsData?.homeFaqCategories?.length
     ? settingsData.homeFaqCategories.filter(Boolean)
     : null;
-  const filteredFaqs = allowedCategories
-    ? faqsData?.filter((faq: any) => allowedCategories.includes(faq.category))
-    : faqsData;
+  // Hand-picked FAQs win over the category filter
+  const pickedFaqs = homeData?.faqs?.filter(Boolean);
+  const filteredFaqs = pickedFaqs?.length
+    ? pickedFaqs
+    : allowedCategories
+      ? faqsData?.filter((faq: any) => allowedCategories.includes(faq.category))
+      : faqsData;
 
   const jsonLd = {
     "@context": "https://schema.org",

@@ -25,6 +25,10 @@ export const activityType = defineType({
   title: 'Activités',
   type: 'document',
   icon: Compass,
+  fieldsets: [
+    { name: 'fsSeoTitle', title: '🔍 SEO — Titre', options: { columns: 2 } },
+    { name: 'fsSeoDesc', title: '🔍 SEO — Description', options: { columns: 2 } },
+  ],
   fields: [
     defineField({ name: 'title', title: 'Titre (FR)', type: 'string' }),
     defineField({ name: 'titleEn', title: 'Titre (EN)', type: 'string' }),
@@ -119,13 +123,24 @@ export const activityType = defineType({
       of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
     }),
     defineField({
-      name: 'metaTitle',
-      title: '🔍 SEO — Titre (balise title)',
+      name: 'metaTitle', fieldset: 'fsSeoTitle',
+      title: '🔍 SEO — Titre (balise title) FR',
       type: 'string',
     }),
     defineField({
-      name: 'metaDescription',
-      title: '🔍 SEO — Description (meta description)',
+      name: 'metaTitleEn', fieldset: 'fsSeoTitle',
+      title: '🔍 SEO — Titre (balise title) EN',
+      type: 'string',
+    }),
+    defineField({
+      name: 'metaDescription', fieldset: 'fsSeoDesc',
+      title: '🔍 SEO — Description (meta) FR',
+      type: 'text',
+      rows: 3,
+    }),
+    defineField({
+      name: 'metaDescriptionEn', fieldset: 'fsSeoDesc',
+      title: '🔍 SEO — Description (meta) EN',
       type: 'text',
       rows: 3,
     }),

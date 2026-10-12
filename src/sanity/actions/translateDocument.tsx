@@ -17,6 +17,7 @@ const STRING_FIELDS: Record<string, [string, string][]> = {
   post: [
     ['title', 'titleEn'],
     ['excerpt', 'excerptEn'],
+    ['metaTitle', 'metaTitleEn'],
   ],
   sejour: [
     ['title', 'titleEn'],
@@ -24,6 +25,8 @@ const STRING_FIELDS: Record<string, [string, string][]> = {
     ['participants', 'participantsEn'],
     ['period', 'periodEn'],
     ['basePrice', 'basePriceEn'],
+    ['metaTitle', 'metaTitleEn'],
+    ['metaDescription', 'metaDescriptionEn'],
   ],
   resource: [
     ['title', 'titleEn'],
@@ -32,6 +35,28 @@ const STRING_FIELDS: Record<string, [string, string][]> = {
   tag: [
     ['name', 'nameEn'],
   ],
+  univers: [
+    ['title', 'titleEn'],
+    ['catalogTitle', 'catalogTitleEn'],
+    ['metaTitle', 'metaTitleEn'],
+    ['metaDescription', 'metaDescriptionEn'],
+  ],
+  // String or Portable Text depending on the field: each loop only picks the matching shape
+  activity: [
+    ['title', 'titleEn'],
+    ['subtitle', 'subtitleEn'],
+    ['intro', 'introEn'],
+    ['description', 'descriptionEn'],
+    ['period', 'periodEn'],
+    ['location', 'locationEn'],
+    ['universBadge', 'universBadgeEn'],
+    ['universTitle', 'universTitleEn'],
+    ['universDescription', 'universDescriptionEn'],
+    ['customTripText', 'customTripTextEn'],
+    ['customTripCTA', 'customTripCTAEn'],
+    ['metaTitle', 'metaTitleEn'],
+    ['metaDescription', 'metaDescriptionEn'],
+  ],
 }
 
 // Which Portable Text fields to translate per document type
@@ -39,6 +64,8 @@ const PT_FIELDS: Record<string, [string, string][]> = {
   post: [['body', 'bodyEn'], ['topo', 'topoEn']],
   sejour: [['description', 'descriptionEn']],
   resource: [['content', 'contentEn']],
+  univers: [['description', 'descriptionEn']],
+  activity: [['intro', 'introEn'], ['description', 'descriptionEn'], ['universDescription', 'universDescriptionEn'], ['details', 'detailsEn']],
 }
 
 const HAS_TABS = ['sejour', 'resource']
@@ -290,7 +317,7 @@ export function translateDocumentAction(props: DocumentActionProps) {
     }
   }, [draft, published, id, type, patch])
 
-  if (!['post', 'sejour', 'resource', 'tag'].includes(type)) return null
+  if (!['post', 'sejour', 'resource', 'tag', 'univers', 'activity'].includes(type)) return null
 
   return {
     label:

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface GalleryImage {
   src: string;
@@ -17,6 +18,7 @@ interface ImageGalleryProps {
 }
 
 export default function ImageGallery({ images, unoptimized = false }: ImageGalleryProps) {
+  const { language } = useLanguage();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const openLightbox = (index: number) => setSelectedIndex(index);
@@ -75,11 +77,6 @@ export default function ImageGallery({ images, unoptimized = false }: ImageGalle
                 </div>
               </button>
             </div>
-            {img.caption && (
-              <p className="text-center text-xs text-foreground/60 italic font-medium px-2">
-                {img.caption}
-              </p>
-            )}
           </div>
         ))}
       </div>
@@ -145,10 +142,11 @@ export default function ImageGallery({ images, unoptimized = false }: ImageGalle
           </div>
 
           {/* Caption / Footer */}
-          {(images[selectedIndex].caption || images[selectedIndex].alt) && (
+          {/* Captions only in the enlarged view, never in English */}
+          {language !== 'en' && images[selectedIndex].caption?.trim() && (
             <div className="text-center text-white/80 max-w-2xl mx-auto z-10 pb-2">
               <p className="text-sm md:text-base bg-white/5 border border-white/10 backdrop-blur-md px-4 py-2 rounded-xl">
-                {images[selectedIndex].caption || images[selectedIndex].alt}
+                {images[selectedIndex].caption}
               </p>
             </div>
           )}

@@ -16,6 +16,7 @@ import FaqJsonLd from '@/components/FaqJsonLd'
 import SejourCard from '@/components/SejourCard'
 import BookingButton from '@/components/BookingButton'
 import { LevelValue } from '@/components/LevelValue'
+import { findLevelIcon } from '@/utils/levels'
 import { renderRichText, toPlainText } from '@/utils/richText'
 
 function FicheRow({ icon, label, value, tooltip }: { icon: React.ReactNode; label: string; value: React.ReactNode; tooltip?: string }) {
@@ -245,8 +246,8 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
 
                   <div className="space-y-6 mb-10">
                     <FicheRow icon={<Clock size={18} className="text-accent" />} label="Duration" value={sejour.durationEn || sejour.duration} tooltip={sejour.ficheTooltips?.duration} />
-                    <FicheRow icon={<BarChart3 size={18} className="text-accent" />} label="Technical Level" value={sejour.level ? <LevelValue raw={sejour.level} text={getLevelLabel(sejour.level)} icons={settingsData?.technicalLevelIcons} showText={settingsData?.levelIconsShowText} lang="en" /> : null} tooltip={sejour.ficheTooltips?.level} />
-                    <FicheRow icon={<BarChart3 size={18} className="text-accent" />} label="Physical Level" value={sejour.physicalLevel ? <LevelValue raw={sejour.physicalLevel} text={sejour.physicalLevel} icons={settingsData?.physicalLevelIcons} showText={settingsData?.levelIconsShowText} lang="en" /> : null} tooltip={sejour.physicalLevelTooltip || sejour.ficheTooltips?.physicalLevel} />
+                    <FicheRow icon={<BarChart3 size={18} className="text-accent" />} label="Technical Level" value={sejour.level ? <LevelValue raw={sejour.level} text={getLevelLabel(sejour.level)} icons={settingsData?.technicalLevelIcons} lang="en" heading="Technical level" note={sejour.ficheTooltips?.level} /> : null} tooltip={findLevelIcon(settingsData?.technicalLevelIcons, sejour.level) ? undefined : sejour.ficheTooltips?.level} />
+                    <FicheRow icon={<BarChart3 size={18} className="text-accent" />} label="Physical Level" value={sejour.physicalLevel ? <LevelValue raw={sejour.physicalLevel} text={sejour.physicalLevel} icons={settingsData?.physicalLevelIcons} lang="en" heading="Physical level" note={sejour.physicalLevelTooltip || sejour.ficheTooltips?.physicalLevel} /> : null} tooltip={findLevelIcon(settingsData?.physicalLevelIcons, sejour.physicalLevel) ? undefined : (sejour.physicalLevelTooltip || sejour.ficheTooltips?.physicalLevel)} />
                     <FicheRow icon={<MapPin size={18} className="text-accent" />} label="Massif" value={at(sejour.massif)} tooltip={sejour.ficheTooltips?.massif} />
                     <FicheRow icon={<Users size={18} className="text-accent" />} label="Participants" value={sejour.participantsEn || sejour.participants} tooltip={sejour.ficheTooltips?.participants} />
                     <FicheRow icon={<CalendarDays size={18} className="text-accent" />} label="Season" value={sejour.periodEn || sejour.period} tooltip={sejour.ficheTooltips?.period} />

@@ -31,6 +31,8 @@ export default async function ContactPage() {
     client.fetch(faqsQuery)
   ]);
   const { at, lang } = await getServerTranslations();
+  const pickedFaqs = data?.faqs?.filter(Boolean);
+  const displayedFaqs = pickedFaqs?.length ? pickedFaqs : faqsData;
 
   const contact = {
     title: 'CONTACT',
@@ -62,10 +64,6 @@ export default async function ContactPage() {
             <div className="absolute inset-0 bg-linear-to-br from-accent/30 via-accent/10 to-highlight/20" />
           )}
           <div className="absolute inset-0 bg-linear-to-r from-transparent via-transparent to-background" />
-          <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent" />
-          <p className="absolute bottom-12 left-12 right-24 text-white text-3xl font-black uppercase tracking-tighter leading-tight drop-shadow-lg">
-            {at('Faites-moi part de vos envies !')}
-          </p>
         </div>
 
         {/* Content */}
@@ -75,7 +73,6 @@ export default async function ContactPage() {
             <h1 className="text-5xl md:text-6xl font-black tracking-tighter uppercase leading-[0.95] mb-6">
               {heading}
             </h1>
-            <p className="text-lg text-foreground/70 mb-2 text-left">{at("Demande-moi conseil, ça n'engage à rien !")}</p>
             {contact.description && (
               <p className="text-foreground/60 mb-8 text-left">{at(contact.description)}</p>
             )}
@@ -127,8 +124,8 @@ export default async function ContactPage() {
 
       <section className="container mx-auto px-6 py-20">
         <div className="max-w-4xl mx-auto">
-          <FaqJsonLd faqs={faqsData} lang={lang} />
-          <FAQAccordion faqs={faqsData} initialVisible={6} />
+          <FaqJsonLd faqs={displayedFaqs} lang={lang} />
+          <FAQAccordion faqs={displayedFaqs} initialVisible={6} />
         </div>
       </section>
     </main>

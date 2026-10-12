@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const [settingsData] = await Promise.all([
     client.fetch(settingsQuery)
   ]);
-  const { at, translatePortableText } = await getServerTranslations();
+  const { at, lang, translatePortableText } = await getServerTranslations();
 
   if (settingsData?.hideRessourcesPage) {
     return {};
@@ -21,7 +21,9 @@ export async function generateMetadata(): Promise<Metadata> {
     fr: settingsData?.ressourcesPageTitle || 'Ressources & Guides',
     en: settingsData?.ressourcesPageTitleEn || settingsData?.ressourcesPageTitle || 'Resources & Guides',
   });
-  const title = `${pageTitle} | La Montagne Guide`;
+  const metaTitle = lang === 'en' ? settingsData?.ressourcesMetaTitleEn || settingsData?.ressourcesMetaTitle : settingsData?.ressourcesMetaTitle;
+  const title = metaTitle || `${pageTitle} | La Montagne Guide`;
+  const metaDescription = lang === 'en' ? settingsData?.ressourcesMetaDescriptionEn || settingsData?.ressourcesMetaDescription : settingsData?.ressourcesMetaDescription;
 
   const rawMetaDesc = settingsData?.ressourcesPageDescription;
   const rawMetaDescEn = settingsData?.ressourcesPageDescriptionEn;
@@ -34,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title,
-    description,
+    description: metaDescription || description,
     alternates: {
       canonical: '/ressources',
     },

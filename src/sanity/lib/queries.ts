@@ -1,6 +1,7 @@
 import { groq } from 'next-sanity'
 
 export const homeQuery = groq`*[_type == "home"][0]{
+  "faqs": faqs[]->{ _id, question, questionEn, answer, answerEn, "category": category->slug.current, "categoryTitle": category->title, "categoryTitleEn": category->titleEn },
   heroTitle, heroTitleEn,
   heroSubtitle, heroSubtitleEn,
   heroDescription, heroDescriptionEn,
@@ -71,6 +72,7 @@ export const sortiesQuery = groq`*[_type == "sortie" && !(sejour->isHidden == tr
     "slug": slug.current,
     "slugEn": slugEn,
     activityType,
+    "activitySlug": subCategory->activity->slug.current,
     "subCategory": subCategory->slug.current,
     "subCategorySlug": subCategory->slug.current,
     massif,
@@ -337,7 +339,7 @@ export const activityBySlugQuery = groq`*[_type == "activity" && slug.current ==
     description, descriptionEn,
     "image": image.asset->url,
     catalogTitle, catalogTitleEn,
-    metaTitle, metaDescription,
+    metaTitle, metaTitleEn, metaDescription, metaDescriptionEn,
     "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order}
   },
   price,
@@ -348,7 +350,7 @@ export const activityBySlugQuery = groq`*[_type == "activity" && slug.current ==
   customTripText, customTripTextEn,
   customTripCTA, customTripCTAEn,
   hideCustomTrip,
-  metaTitle, metaDescription,
+  metaTitle, metaTitleEn, metaDescription, metaDescriptionEn,
   "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": coalesce(category->slug.current, category), "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order}
 }`
 
@@ -391,6 +393,7 @@ export const guideQuery = groq`*[_type == "guide"][0] {
 }`
 
 export const contactQuery = groq`*[_type == "contact"][0] {
+  "faqs": faqs[]->{ _id, question, questionEn, answer, answerEn, "category": category->slug.current, "categoryTitle": category->title, "categoryTitleEn": category->titleEn },
   title,
   heading,
   headingEn,
@@ -554,7 +557,15 @@ export const postBySlugQuery = groq`*[_type == "post" && !(isHidden == true) && 
     _type == "image" => { ..., "asset": asset-> }
   },
   "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": category->slug.current, "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order},
-  "relatedActivities": relatedActivities[!(@->isHidden == true)]-> {
+  // Hand-picked séjours first, then séjours whose tag rule is fully matched by this post's tags
+  "relatedActivities": coalesce(relatedActivities[!(@->isHidden == true)]-> {
+    title,
+    "slug": slug.current,
+    "image": image.asset->url,
+    basePrice,
+    "categorySlug": activityType,
+    "subCategorySlug": subCategory->slug.current
+  }, []) + *[_type == "sejour" && !(_id in path("drafts.**")) && !(isHidden == true) && !(_id in ^.relatedActivities[]._ref) && count(autoRecommendRules[count(tags) > 0 && count(tags[@._ref in ^.^.^.tags[]._ref]) == count(tags)]) > 0] | order(title asc) {
     title,
     "slug": slug.current,
     "image": image.asset->url,
@@ -573,9 +584,8 @@ export const postBySlugQuery = groq`*[_type == "post" && !(isHidden == true) && 
 }`
 
 export const settingsQuery = groq`*[_type == "settings"][0]{
-  "technicalLevelIcons": technicalLevelIcons[]{ label, labelEn, "icon": icon.asset->url },
-  "physicalLevelIcons": physicalLevelIcons[]{ label, labelEn, "icon": icon.asset->url },
-  levelIconsShowText,
+  "technicalLevelIcons": technicalLevelIcons[]{ label, labelEn, "icon": icon.asset->url, description, descriptionEn },
+  "physicalLevelIcons": physicalLevelIcons[]{ label, labelEn, "icon": icon.asset->url, description, descriptionEn },
   siteName,
   clientPasscode,
   "logoLight": logoLight.asset->url,
@@ -626,6 +636,8 @@ export const settingsQuery = groq`*[_type == "settings"][0]{
   ressourcesPageTitleEn,
   ressourcesPageDescription,
   ressourcesPageDescriptionEn,
+  ressourcesMetaTitle, ressourcesMetaTitleEn, ressourcesMetaDescription, ressourcesMetaDescriptionEn,
+  blogMetaTitle, blogMetaTitleEn, blogMetaDescription, blogMetaDescriptionEn,
   hideTarifsPage,
   tarifsMenuTitle,
   tarifsMenuTitleEn,

@@ -70,8 +70,8 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
   const plainTextDescription = blocksToText({ fr: currentUnivers.description, en: currentUnivers.descriptionEn }, lang);
   const autoDescription = plainTextDescription ? plainTextDescription.substring(0, 160) : '';
 
-  const title = currentUnivers.metaTitle || autoTitle;
-  const description = currentUnivers.metaDescription || autoDescription;
+  const title = (lang === 'en' ? currentUnivers.metaTitleEn || currentUnivers.metaTitle : currentUnivers.metaTitle) || autoTitle;
+  const description = (lang === 'en' ? currentUnivers.metaDescriptionEn || currentUnivers.metaDescription : currentUnivers.metaDescription) || autoDescription;
   const ogImage = currentUnivers.image || activity.image || undefined;
 
   return {
@@ -112,12 +112,12 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
 
   return (
     <main className="relative min-h-screen bg-background text-foreground transition-colors duration-300">
-      
+
       {/* Hero Header with Background Image */}
       <section className="relative h-[85vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           {currentUnivers.image ? (
-            <Image 
+            <Image
               src={currentUnivers.image}
               alt={at({ fr: currentUnivers.title, en: currentUnivers.titleEn })}
               fill
@@ -141,8 +141,8 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
         </div>
 
         <div className="container relative z-10 px-6 pt-32 text-center">
-          <Link 
-            href={`/${activitySlug}`} 
+          <Link
+            href={`/${activitySlug}`}
             className="inline-flex items-center gap-2 text-white/60 font-bold mb-12 hover:text-accent transition-all duration-300 group"
           >
             <ArrowLeft size={16} />
@@ -166,7 +166,7 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
                 <p className="text-foreground/60">{at('Description à venir pour cet univers.')}</p>
               )}
             </div>
-            
+
             <div className="w-24 h-1 bg-accent mx-auto" />
 
             {/* CTA Encart - Sur mesure */}
@@ -208,10 +208,10 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
           {filteredSejours.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredSejours.map((sejour: any) => (
-                <SejourCard 
-                   key={sejour.slug} 
-                   sejour={sejour} 
-                   activitySlug={activitySlug} 
+                <SejourCard
+                   key={sejour.slug}
+                   sejour={sejour}
+                   activitySlug={activitySlug}
                  />
               ))}
             </div>
@@ -232,7 +232,7 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
           </div>
         </section>
       )}
-      
+
     </main>
   );
 }

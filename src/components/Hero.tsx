@@ -20,8 +20,8 @@ interface HeroProps {
   btnDeparturesTextEn?: string
 }
 
-const Hero = ({ 
-  title = "L'AVENTURE EN CORDÉE", 
+const Hero = ({
+  title = "L'AVENTURE EN CORDÉE",
   subtitle = "Nicolas Draperi — Guide de Haute Montagne",
   description = "Alpinisme, Ski, Escalade & Voyages. Explorez les plus beaux massifs des Alpes et d'ailleurs avec un guide passionné.",
   images = [
@@ -91,22 +91,22 @@ const Hero = ({
           <h1 className={`text-5xl md:text-8xl font-black tracking-tighter mb-8 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 uppercase whitespace-pre-line ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}>
             {at(title)}
           </h1>
-          <div 
-            className={`max-w-2xl text-lg text-white/80 mb-10 leading-relaxed ${descAlignClass} ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}
+          <div
+            className={`sr-only max-w-2xl text-lg text-white/80 mb-10 leading-relaxed ${descAlignClass} ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}
             style={{ textAlign: (textAlign === 'left' || textAlign === 'right') ? textAlign : 'center' }}
           >
             {renderRichText(translatePortableText(description) || at(description))}
           </div>
           <div className={`flex flex-col sm:flex-row items-center gap-4 ${btnAlignClass}`}>
             <Link href="/activites" className="btn-primary !text-white">
-              {language === 'en' 
-                ? (btnDiscoverTextEn || btnDiscoverText || t('hero.discover')) 
+              {language === 'en'
+                ? (btnDiscoverTextEn || btnDiscoverText || t('hero.discover'))
                 : (btnDiscoverText || t('hero.discover'))
               }
             </Link>
             <Link href="/prochaines-sorties" className="px-8 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full font-medium transition-all text-white">
-              {language === 'en' 
-                ? (btnDeparturesTextEn || btnDeparturesText || t('hero.departures')) 
+              {language === 'en'
+                ? (btnDeparturesTextEn || btnDeparturesText || t('hero.departures'))
                 : (btnDeparturesText || t('hero.departures'))
               }
             </Link>
@@ -117,16 +117,16 @@ const Hero = ({
       {/* Progress Indicators */}
       <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 flex gap-3">
         {backgrounds.map((_, i) => (
-          <button 
-            key={i} 
+          <button
+            key={i}
             onClick={() => setCurrentBg(i)}
-            className={`h-1 rounded-full transition-all duration-500 ${i === currentBg ? 'w-12 bg-accent' : 'w-4 bg-white/20 hover:bg-white/40'}`} 
+            className={`h-1 rounded-full transition-all duration-500 ${i === currentBg ? 'w-12 bg-accent' : 'w-4 bg-white/20 hover:bg-white/40'}`}
           />
         ))}
       </div>
 
       {/* Scroll Indicator */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 1 }}

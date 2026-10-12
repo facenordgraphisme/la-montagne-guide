@@ -16,22 +16,33 @@ export function CopyAltToCaptionAction(props: DocumentActionProps) {
     onHandle: () => {
       const doc: any = draft || published
       const patches: Record<string, string> = {}
+      // Alt text moved into the caption is cleared afterwards
+      const cleared: string[] = []
 
       function processImages(images: any[], pathPrefix: string) {
         images?.forEach((img: any) => {
           if (img._type === 'image' && img._key) {
-            if (!img.caption?.trim() && img.alt?.trim())
+            if (!img.caption?.trim() && img.alt?.trim()) {
               patches[`${pathPrefix}[_key=="${img._key}"].caption`] = img.alt
-            if (!img.captionEn?.trim() && img.altEn?.trim())
+              cleared.push(`${pathPrefix}[_key=="${img._key}"].alt`)
+            }
+            if (!img.captionEn?.trim() && img.altEn?.trim()) {
               patches[`${pathPrefix}[_key=="${img._key}"].captionEn`] = img.altEn
+              cleared.push(`${pathPrefix}[_key=="${img._key}"].altEn`)
+            }
           }
           if (img._type === 'gallery' && img._key) {
             img.images?.forEach((sub: any) => {
               if (sub._key) {
-                if (!sub.caption?.trim() && sub.alt?.trim())
-                  patches[`${pathPrefix}[_key=="${img._key}"].images[_key=="${sub._key}"].caption`] = sub.alt
-                if (!sub.captionEn?.trim() && sub.altEn?.trim())
-                  patches[`${pathPrefix}[_key=="${img._key}"].images[_key=="${sub._key}"].captionEn`] = sub.altEn
+                const base = `${pathPrefix}[_key=="${img._key}"].images[_key=="${sub._key}"]`
+                if (!sub.caption?.trim() && sub.alt?.trim()) {
+                  patches[`${base}.caption`] = sub.alt
+                  cleared.push(`${base}.alt`)
+                }
+                if (!sub.captionEn?.trim() && sub.altEn?.trim()) {
+                  patches[`${base}.captionEn`] = sub.altEn
+                  cleared.push(`${base}.altEn`)
+                }
               }
             })
           }
@@ -43,7 +54,7 @@ export function CopyAltToCaptionAction(props: DocumentActionProps) {
       processImages(doc.gallery || [], 'gallery')
 
       if (Object.keys(patches).length > 0) {
-        patch.execute([{ set: patches }])
+        patch.execute([{ set: patches }, { unset: cleared }])
         setStatus('done')
       } else {
         setStatus('none')

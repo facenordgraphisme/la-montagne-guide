@@ -1,5 +1,6 @@
 import { defineField, defineType } from 'sanity'
 import { Mail } from 'lucide-react'
+import { FAQPickerInput } from '../components/FAQPickerInput'
 
 export const contactType = defineType({
   name: 'contact',
@@ -7,6 +8,13 @@ export const contactType = defineType({
   type: 'document',
   icon: Mail,
   fields: [
+    defineField({
+      name: 'faqs',
+      title: 'FAQ à afficher',
+      type: 'array',
+      of: [{ type: 'reference', to: [{ type: 'faq' }], weak: true }],
+      components: { input: FAQPickerInput },
+    }),
     defineField({
       name: 'title',
       title: 'Titre de la page',
