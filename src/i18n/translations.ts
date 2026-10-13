@@ -286,4 +286,5 @@ export const sanityTranslations: Record<string, string> = {
   "demande-moi conseil, ça n'engage à rien !": "Ask me for advice, no strings attached!",
   "appelez-moi": "Call me",
   "envoyer": "Send",
+  "séjour complet": "Fully booked",
 };

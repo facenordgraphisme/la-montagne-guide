@@ -90,6 +90,7 @@ import Footer from "@/components/Footer";
 import { LanguageProvider } from "@/context/LanguageContext";
 import AnnouncementBanner from "@/components/AnnouncementBanner";
 import ScrollToTop from "@/components/ScrollToTop";
+import ImageProtection from "@/components/ImageProtection";
 
 export default async function RootLayout({
   children,
@@ -152,6 +153,7 @@ export default async function RootLayout({
               whatsappText={whatsappText}
             />
             <ScrollToTop />
+            <ImageProtection />
             {isDraftMode && (
               <>
                 <VisualEditing />

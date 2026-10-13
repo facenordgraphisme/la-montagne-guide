@@ -9,7 +9,6 @@ interface GalleryImage {
   src: string;
   alt: string;
   caption?: string;
-  downloadUrl?: string;
 }
 
 interface ImageGalleryProps {

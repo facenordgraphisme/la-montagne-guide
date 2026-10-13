@@ -548,20 +548,22 @@ function PostMediaManagerInput(props: any) {
       .catch(console.error)
   }, [body, gallery, client])
 
-  // Sync existing document values into local state (only for keys not yet locally modified)
+  // localValues only buffers typing until the patch lands; once the document holds the same value the
+  // buffer is dropped, so external changes (e.g. the "ALT → Légende" action clearing ALT) show up
   useEffect(() => {
     setLocalValues(prev => {
-      const updates: Record<string, string> = {}
-      const sync = (img: any, prefix: string) => {
+      const docValues: Record<string, string | undefined> = {}
+      const collect = (img: any, prefix: string) => {
         if (!img._key) return
-        if (img.imageName && !(`${prefix}${img._key}_name` in prev)) updates[`${prefix}${img._key}_name`] = img.imageName
-        if (img.caption && !(`${prefix}${img._key}_caption` in prev)) updates[`${prefix}${img._key}_caption`] = img.caption
-        if (img.alt && !(`${prefix}${img._key}_alt` in prev)) updates[`${prefix}${img._key}_alt`] = img.alt
+        docValues[`${prefix}${img._key}_name`] = img.imageName
+        docValues[`${prefix}${img._key}_caption`] = img.caption
+        docValues[`${prefix}${img._key}_alt`] = img.alt
       }
-      bodyImages.forEach(img => sync(img, ''))
-      bodyGalleryImages.forEach(img => sync(img, 'bgi_'))
-      galleryImages.forEach(img => sync(img, 'gal_'))
-      return Object.keys(updates).length ? { ...prev, ...updates } : prev
+      bodyImages.forEach(img => collect(img, ''))
+      bodyGalleryImages.forEach(img => collect(img, 'bgi_'))
+      galleryImages.forEach(img => collect(img, 'gal_'))
+      const next = Object.fromEntries(Object.entries(prev).filter(([k, v]) => (docValues[k] ?? '') !== v))
+      return Object.keys(next).length === Object.keys(prev).length ? prev : next
     })
   }, [body, gallery])
 

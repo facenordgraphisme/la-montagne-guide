@@ -243,7 +243,7 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.4, delay: index * 0.05 }}
                     className={`group glass rounded-[28px] overflow-hidden border transition-all duration-500 shadow-xl ${
-                      dimmed ? 'border-white/5 opacity-55 grayscale' : 'border-white/5 hover:border-accent/30'
+                      dimmed ? 'border-white/5 opacity-75' : 'border-white/5 hover:border-accent/30'
                     }`}
                   >
                     <Link href={href} className="flex h-full flex-col">
@@ -254,8 +254,13 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                             alt={title}
                             fill
                             sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
-                            className="object-cover transition-transform duration-700 group-hover:scale-110"
+                            className={`object-cover transition-transform duration-700 group-hover:scale-110 ${dimmed ? 'grayscale' : ''}`}
                           />
+                        )}
+                        {s.isFull && !s.isPassed && (
+                          <div className="pointer-events-none absolute top-7 -right-14 z-10 w-56 rotate-45 bg-red-600 py-2 text-center text-[11px] font-black uppercase tracking-[0.2em] text-white shadow-xl">
+                            {at('Séjour complet')}
+                          </div>
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
@@ -263,11 +268,6 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                           <span className={`px-3 py-1 ${getActivityColor(s.sejour.activityType)} text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-lg`}>
                             {getCategoryLabel(s.sejour?.activityType)}
                           </span>
-                          {s.isFull && (
-                            <span className="px-3 py-1 bg-red-500 text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-lg">
-                              {at('Complet')}
-                            </span>
-                          )}
                           {s.isPassed && (
                             <span className="px-3 py-1 bg-zinc-600 text-white text-[8px] font-black uppercase tracking-widest rounded-full shadow-lg">
                               {at('Terminée')}

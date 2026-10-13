@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { client } from "@/sanity/lib/live";
 import { sejourBySlugQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from "@/sanity/lib/queries";
 import { notFound, redirect } from 'next/navigation';
-import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Download, Users, CalendarDays, Info } from 'lucide-react';
+import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Users, CalendarDays, Info } from 'lucide-react';
 
 import { getServerTranslations } from '@/i18n/server';
 import { autoFill, autoFillAll } from '@/lib/translate';
@@ -438,10 +438,6 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {fullGallery.map((photo: { url: string; alt?: string; imageName?: string; originalFilename?: string; extension?: string }, i: number) => {
-                const dlFilename = photo.imageName
-                  ? `${photo.imageName}.${photo.extension || photo.originalFilename?.split('.').pop() || 'jpg'}`
-                  : photo.originalFilename;
-                const downloadUrl = dlFilename ? `${photo.url.split('?')[0]}?dl=${encodeURIComponent(dlFilename)}` : undefined;
                 return (
                   <div key={i} className="relative aspect-square overflow-hidden rounded-2xl group">
                     <Image
@@ -453,17 +449,6 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-                    {downloadUrl && (
-                      <a
-                        href={downloadUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="Télécharger"
-                        className="absolute bottom-2 right-2 p-1.5 rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-accent/80 z-10"
-                      >
-                        <Download size={13} />
-                      </a>
-                    )}
                   </div>
                 );
               })}

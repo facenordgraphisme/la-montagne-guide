@@ -24,18 +24,6 @@ import { toPlainText } from '@/utils/richText';
 import { autoFill } from '@/lib/translate';
 
 
-function buildDownloadUrl(url: string, imageName?: string, originalFilename?: string, extension?: string): string | undefined {
-  if (!url) return undefined;
-  const base = url.split('?')[0];
-  if (imageName) {
-    const ext = extension || originalFilename?.split('.').pop() || 'jpg';
-    return `${base}?dl=${encodeURIComponent(`${imageName}.${ext}`)}`;
-  }
-  if (originalFilename) {
-    return `${base}?dl=${encodeURIComponent(originalFilename)}`;
-  }
-  return undefined;
-}
 
 // Portable Text component for activity blocks
 const activityBlockComponents = {
@@ -147,7 +135,6 @@ function makeBlogBlockComponents(lang: string) { return {
             src: getVanityImageUrl(sizedUrl, vanityName),
             alt: (lang === 'en' ? (img.altEn || img.alt) : img.alt) || img.caption || 'Image',
             caption: lang === 'en' ? (img.captionEn || img.caption) : img.caption,
-            downloadUrl: buildDownloadUrl(rawUrl, img.imageName, img.originalFilename, img.extension),
           };
         });
       if (formattedImages.length === 0) return null;
@@ -518,7 +505,6 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                           src: getVanityImageUrl(sizedUrl, vanityName),
                           alt: (lang === 'en' ? (img.altEn || img.alt) : img.alt) || 'Image',
                           caption: lang === 'en' ? (img.captionEn || img.caption) : img.caption,
-                          downloadUrl: buildDownloadUrl(img.url, img.imageName, img.originalFilename, img.extension),
                         };
                       })}
                   />
