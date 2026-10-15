@@ -59,6 +59,13 @@
   p {
     text-align: justify;
   }
+
+  /* Kept in the base layer so text-center / text-right utilities still win */
+  @media (max-width: 767px) {
+    p {
+      text-align: left;
+    }
+  }
 }
 
 @layer utilities {
@@ -91,6 +98,36 @@
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(59, 130, 246, 0.23);
   }
+}
+
+/* Mobile typography: the desktop scale is far too big on a ~390px screen. Tailwind's text-* utilities read these
+   variables, so shrinking them here tones down every page at once (md: and up keep the default scale) */
+@media (max-width: 767px) {
+  :root {
+    --text-lg: 1.0625rem;
+    --text-xl: 1.125rem;
+    --text-2xl: 1.3125rem;
+    --text-3xl: 1.5rem;
+    --text-4xl: 1.75rem;
+    --text-5xl: 2rem;
+    --text-6xl: 2.375rem;
+    --text-7xl: 2.625rem;
+    --text-8xl: 2.875rem;
+    --text-9xl: 3.125rem;
+  }
+
+  /* Justified text in a narrow column leaves huge gaps between words */
+  .text-justify {
+    text-align: left;
+  }
+
+  /* Big uppercase titles must never overflow the screen */
+  h1, h2, h3 {
+    overflow-wrap: break-word;
+  }
+
+  .prose-custom h2 { font-size: 1.3125rem; }
+  .prose-custom h3 { font-size: 1.125rem; }
 }
 
 /* Custom scrollbar */
