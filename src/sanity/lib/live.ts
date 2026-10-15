@@ -38,6 +38,7 @@ const HIDDEN_FILTER = /!\([\w@>.-]*isHidden == true\)/g
 export const client = {
   async fetch<R = any>(query: string, params: QueryParams = {}): Promise<R> {
     if (token && (await isPreview())) return previewClient.fetch<R>(query.replace(HIDDEN_FILTER, 'true'), params)
-    return baseClient.fetch<R>(query, params)
+    // Next Data Cache: each distinct query hits Sanity at most once per minute, whatever the traffic
+    return baseClient.fetch<R>(query, params, { next: { revalidate: 60, tags: ['sanity'] } })
   },
 }

@@ -8,5 +8,6 @@ export const client = createClient({
   projectId,
   dataset,
   apiVersion,
-  useCdn: false, // Set to true for production
+  // CDN = cached, faster, and counted against the separate 1M "API CDN" quota instead of the 250k "API" one
+  useCdn: true,
 })
