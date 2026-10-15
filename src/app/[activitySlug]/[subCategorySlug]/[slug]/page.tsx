@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { client } from "@/sanity/lib/live";
 import { sejourBySlugQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from "@/sanity/lib/queries";
 import { notFound, redirect } from 'next/navigation';
-import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Users, CalendarDays, Info } from 'lucide-react';
+import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Users, CalendarDays, Info, FileDown } from 'lucide-react';
 
 import { getServerTranslations } from '@/i18n/server';
 import { autoFill, autoFillAll } from '@/lib/translate';
@@ -16,9 +16,10 @@ import FAQAccordion from '@/components/FAQAccordion';
 import FaqJsonLd from '@/components/FaqJsonLd';
 import SejourCard from '@/components/SejourCard';
 import BookingButton from '@/components/BookingButton';
-import { LevelValue } from '@/components/LevelValue';
-import { findLevelIcon } from '@/utils/levels';
+import { SejourLevels } from '@/components/SejourLevels';
+import { findLevelIcon, levelDiscipline } from '@/utils/levels';
 import { renderRichText, toPlainText } from '@/utils/richText';
+import { sortiePeriod } from '@/utils/dates';
 
 function FicheRow({ icon, label, value, tooltip }: {
   icon: React.ReactNode
@@ -144,6 +145,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
 
   relatedPosts = await autoFillAll(relatedPosts, [['title', 'titleEn'], ['excerpt', 'excerptEn'], ['imageAlt', 'imageAltEn']], lang);
 
+  const discipline = levelDiscipline(sejour.activityType, sejour.levelDiscipline, sejour.subCategory)
   const getLevelLabel = (level?: string) => {
     const map: Record<string, string> = {
       'debutant': at('Débutant'),
@@ -292,17 +294,10 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                     value={at({ fr: sejour.duration, en: sejour.durationEn })}
                     tooltip={sejour.ficheTooltips?.duration}
                   />
-                  <FicheRow
-                    icon={<BarChart3 size={18} className="text-accent" />}
-                    label={at('Niveau technique')}
-                    value={sejour.level ? <LevelValue raw={sejour.level} text={getLevelLabel(sejour.level)} icons={settingsData?.technicalLevelIcons} lang={lang} heading={at('Niveau technique')} note={sejour.ficheTooltips?.level} /> : null}
-                    tooltip={findLevelIcon(settingsData?.technicalLevelIcons, sejour.level) ? undefined : sejour.ficheTooltips?.level}
-                  />
-                  <FicheRow
-                    icon={<BarChart3 size={18} className="text-accent" />}
-                    label={at('Niveau physique')}
-                    value={sejour.physicalLevel ? <LevelValue raw={sejour.physicalLevel} text={sejour.physicalLevel} icons={settingsData?.physicalLevelIcons} lang={lang} heading={at('Niveau physique')} note={sejour.physicalLevelTooltip || sejour.ficheTooltips?.physicalLevel} /> : null}
-                    tooltip={findLevelIcon(settingsData?.physicalLevelIcons, sejour.physicalLevel) ? undefined : (sejour.physicalLevelTooltip || sejour.ficheTooltips?.physicalLevel)}
+                  <SejourLevels
+                    technical={sejour.level ? { heading: at('Niveau technique'), match: findLevelIcon(settingsData?.technicalLevelIcons, sejour.level, discipline), text: getLevelLabel(sejour.level) } : undefined}
+                    physical={sejour.physicalLevel ? { heading: at('Niveau physique'), match: findLevelIcon(settingsData?.physicalLevelIcons, sejour.physicalLevel), text: sejour.physicalLevel } : undefined}
+                    lang={lang}
                   />
                   <FicheRow
                     icon={<MapPin size={18} className="text-accent" />}
@@ -370,6 +365,16 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                 </div>
 
                 <BookingButton url={sejour.bookAdventureUrl} label={at('Réserver ce séjour')} />
+                {/* Generated live from this séjour's data */}
+                <a
+                  href={`/api/fiche-sejour/${encodeURIComponent(sejour.slug?.current ?? sejour.slug)}${lang === 'en' ? '?lang=en' : ''}`}
+                  target="_blank"
+                  rel="nofollow"
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-border py-4 text-xs font-black uppercase tracking-widest text-foreground/70 hover:border-accent hover:text-accent transition-colors"
+                >
+                  <FileDown size={16} />
+                  {at({ fr: 'Télécharger la fiche (PDF)', en: 'Download trip sheet (PDF)' })}
+                </a>
 
                 <p className="text-[10px] text-center mt-6 text-foreground/40 font-bold uppercase tracking-widest">
                   {at('Conseils & Réservation par téléphone possible')}
@@ -388,13 +393,13 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
                       {sejour.upcomingSorties.map((s: any, i: number) => (
                         <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-foreground/5 border border-border">
                           <div className="flex flex-col">
-                            <span className="font-bold text-sm">{at(s.date)}</span>
+                            <span className="font-bold text-sm">{sortiePeriod(s, lang)}</span>
                             <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">{at(s.availableSpots)} {at('places')}</span>
                           </div>
                           {s.isFull ? (
                             <span className="text-[8px] font-black uppercase bg-red-500/10 text-red-500 px-2 py-1 rounded-full border border-red-500/20">{at('Complet')}</span>
                           ) : (
-                            <span className="text-[8px] font-black uppercase bg-green-500/10 text-green-500 px-2 py-1 rounded-full border border-green-500/20">{at('Disponible')}</span>
+                            <span className="text-[8px] font-black uppercase bg-green-500/10 text-green-500 px-2 py-1 rounded-full border border-green-500/20">{s.isConfirmed ? at({ fr: 'Départ assuré', en: 'Guaranteed departure' }) : at('Disponible')}</span>
                           )}
                         </div>
                       ))}

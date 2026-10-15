@@ -9,6 +9,7 @@ import Image from 'next/image'
 import { urlFor } from '@/sanity/lib/image'
 import { useLanguage } from '@/context/LanguageContext'
 import FAQAccordion from './FAQAccordion'
+import { groupEncarts, encartGroupComponent } from '@/utils/richText'
 
 interface Tab {
   id: string
@@ -72,6 +73,7 @@ export default function SejourTabs({ tabs }: SejourTabsProps) {
       ),
     },
     types: {
+      encartGroup: encartGroupComponent,
       image: ({ value }) => {
         if (!value?.asset) return null
         const alt = (language === 'en' ? (value.altEn || value.alt) : value.alt) || ''
@@ -165,7 +167,7 @@ export default function SejourTabs({ tabs }: SejourTabsProps) {
       {current && (
         <div className="px-8 py-8 prose-custom max-w-none animate-in fade-in duration-300">
           {current.content && current.content.length > 0 && (
-            <PortableText value={current.content} components={portableTextComponents} />
+            <PortableText value={groupEncarts(current.content)} components={portableTextComponents} />
           )}
 
           {current.faqs?.some(Boolean) && (

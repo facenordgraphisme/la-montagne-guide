@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { client } from '@/sanity/lib/live'
 import { sejourBySlugQuery, sejourBySlugEnQuery, sejourSlugEnQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from '@/sanity/lib/queries'
 import { notFound, redirect } from 'next/navigation'
-import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Users, CalendarDays, Info } from 'lucide-react'
+import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Users, CalendarDays, Info, FileDown } from 'lucide-react'
 import { getServerTranslations, prefersFrench } from '@/i18n/server'
 import { autoFill, autoFillAll } from '@/lib/translate'
 import SejourTabs from '@/components/SejourTabs'
@@ -15,9 +15,10 @@ import FAQAccordion from '@/components/FAQAccordion'
 import FaqJsonLd from '@/components/FaqJsonLd'
 import SejourCard from '@/components/SejourCard'
 import BookingButton from '@/components/BookingButton'
-import { LevelValue } from '@/components/LevelValue'
-import { findLevelIcon } from '@/utils/levels'
+import { SejourLevels } from '@/components/SejourLevels'
+import { findLevelIcon, levelDiscipline } from '@/utils/levels'
 import { renderRichText, toPlainText } from '@/utils/richText'
+import { sortiePeriod } from '@/utils/dates'
 
 function FicheRow({ icon, label, value, tooltip }: { icon: React.ReactNode; label: string; value: React.ReactNode; tooltip?: string }) {
   if (!value) return null
@@ -122,6 +123,7 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
 
   relatedPosts = await autoFillAll(relatedPosts, [['title', 'titleEn'], ['excerpt', 'excerptEn'], ['imageAlt', 'imageAltEn']], 'en')
 
+  const discipline = levelDiscipline(sejour.activityType, sejour.levelDiscipline, sejour.subCategory)
   const getLevelLabel = (level?: string) => {
     const map: Record<string, string> = { debutant: 'Beginner', intermediaire: 'Intermediate', confirme: 'Advanced', expert: 'Expert' }
     return level ? map[level] || level : ''
@@ -246,8 +248,11 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
 
                   <div className="space-y-6 mb-10">
                     <FicheRow icon={<Clock size={18} className="text-accent" />} label="Duration" value={sejour.durationEn || sejour.duration} tooltip={sejour.ficheTooltips?.duration} />
-                    <FicheRow icon={<BarChart3 size={18} className="text-accent" />} label="Technical Level" value={sejour.level ? <LevelValue raw={sejour.level} text={getLevelLabel(sejour.level)} icons={settingsData?.technicalLevelIcons} lang="en" heading="Technical level" note={sejour.ficheTooltips?.level} /> : null} tooltip={findLevelIcon(settingsData?.technicalLevelIcons, sejour.level) ? undefined : sejour.ficheTooltips?.level} />
-                    <FicheRow icon={<BarChart3 size={18} className="text-accent" />} label="Physical Level" value={sejour.physicalLevel ? <LevelValue raw={sejour.physicalLevel} text={sejour.physicalLevel} icons={settingsData?.physicalLevelIcons} lang="en" heading="Physical level" note={sejour.physicalLevelTooltip || sejour.ficheTooltips?.physicalLevel} /> : null} tooltip={findLevelIcon(settingsData?.physicalLevelIcons, sejour.physicalLevel) ? undefined : (sejour.physicalLevelTooltip || sejour.ficheTooltips?.physicalLevel)} />
+                    <SejourLevels
+                      technical={sejour.level ? { heading: 'Technical level', match: findLevelIcon(settingsData?.technicalLevelIcons, sejour.level, discipline), text: getLevelLabel(sejour.level) } : undefined}
+                      physical={sejour.physicalLevel ? { heading: 'Physical level', match: findLevelIcon(settingsData?.physicalLevelIcons, sejour.physicalLevel), text: sejour.physicalLevel } : undefined}
+                      lang="en"
+                    />
                     <FicheRow icon={<MapPin size={18} className="text-accent" />} label="Massif" value={at(sejour.massif)} tooltip={sejour.ficheTooltips?.massif} />
                     <FicheRow icon={<Users size={18} className="text-accent" />} label="Participants" value={sejour.participantsEn || sejour.participants} tooltip={sejour.ficheTooltips?.participants} />
                     <FicheRow icon={<CalendarDays size={18} className="text-accent" />} label="Season" value={sejour.periodEn || sejour.period} tooltip={sejour.ficheTooltips?.period} />
@@ -298,6 +303,16 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
                   </div>
 
                   <BookingButton url={sejour.bookAdventureUrl} label="Book this trip" />
+                  {/* Generated live from this séjour's data */}
+                  <a
+                    href={`/api/fiche-sejour/${encodeURIComponent(sejour.slug?.current ?? sejour.slug)}?lang=en`}
+                    target="_blank"
+                    rel="nofollow"
+                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-border py-4 text-xs font-black uppercase tracking-widest text-foreground/70 hover:border-accent hover:text-accent transition-colors"
+                  >
+                    <FileDown size={16} />
+                    Download trip sheet (PDF)
+                  </a>
                   <p className="text-[10px] text-center mt-6 text-foreground/40 font-bold uppercase tracking-widest">
                     Booking & advice by phone available
                   </p>
@@ -314,13 +329,13 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
                         {sejour.upcomingSorties.map((s: any, i: number) => (
                           <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-foreground/5 border border-border">
                             <div className="flex flex-col">
-                              <span className="font-bold text-sm">{at(s.date)}</span>
+                              <span className="font-bold text-sm">{sortiePeriod(s, 'en')}</span>
                               <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest">{at(s.availableSpots)} spots</span>
                             </div>
                             {s.isFull ? (
                               <span className="text-[8px] font-black uppercase bg-red-500/10 text-red-500 px-2 py-1 rounded-full border border-red-500/20">Full</span>
                             ) : (
-                              <span className="text-[8px] font-black uppercase bg-green-500/10 text-green-500 px-2 py-1 rounded-full border border-green-500/20">Available</span>
+                              <span className="text-[8px] font-black uppercase bg-green-500/10 text-green-500 px-2 py-1 rounded-full border border-green-500/20">{s.isConfirmed ? 'Guaranteed departure' : 'Available'}</span>
                             )}
                           </div>
                         ))}

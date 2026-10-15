@@ -2,6 +2,7 @@ import { defineField, defineType } from 'sanity'
 import { Mountain } from 'lucide-react'
 import { TagImagePickerInput, GalleryPickerInput } from '../components/TagImagePicker'
 import { FAQPickerInput } from '../components/FAQPickerInput'
+import { LEVEL_DISCIPLINES, LEVEL_NUMBERS } from '../../utils/levels'
 
 const descriptionBlocks = [
   {
@@ -30,6 +31,7 @@ export const sejourType = defineType({
   icon: Mountain,
   fieldsets: [
     { name: 'fsTitle', title: 'Titre', options: { columns: 2 } },
+    { name: 'fsLevels', title: 'Niveaux', options: { columns: 2 } },
     { name: 'fsDuration', title: 'Durée', options: { columns: 2 } },
     { name: 'fsParticipants', title: 'Participants', options: { columns: 2 } },
     { name: 'fsPeriod', title: 'Période', options: { columns: 2 } },
@@ -100,20 +102,25 @@ export const sejourType = defineType({
       type: 'string',
     }),
     defineField({
-      name: 'level',
+      name: 'level', fieldset: 'fsLevels',
       title: 'Niveau technique',
+      description: "Le libellé est déduit de l'univers (ex : 1 en Alpinisme = Alpiniste débutant). Libellés modifiables dans Paramètres → Icônes de niveau.",
       type: 'string',
+      options: { list: LEVEL_NUMBERS, layout: 'radio', direction: 'horizontal' },
     }),
     defineField({
-      name: 'physicalLevel',
+      name: 'physicalLevel', fieldset: 'fsLevels',
       title: 'Niveau physique',
       type: 'string',
+      options: { list: LEVEL_NUMBERS, layout: 'radio', direction: 'horizontal' },
     }),
     defineField({
-      name: 'physicalLevelTooltip',
-      title: 'Niveau physique — Texte au survol',
-      type: 'text',
-      rows: 2,
+      name: 'levelDiscipline',
+      title: 'Référentiel du niveau technique',
+      description: "Pour les voyages : quelle échelle de niveau utiliser. Sinon déduit automatiquement (Parapente = Alpinisme).",
+      type: 'string',
+      options: { list: LEVEL_DISCIPLINES },
+      hidden: ({ document, value }) => document?.activityType !== 'voyages' && !value,
     }),
     defineField({
       name: 'season',
@@ -245,6 +252,7 @@ export const sejourType = defineType({
           { title: 'Centré', value: 'blockCenter' },
           { title: 'Justifié', value: 'blockJustify' },
           { title: 'Droite', value: 'blockRight' },
+          { title: 'Citation', value: 'blockquote' },
         ],
       }, { type: 'image' }],
       hidden: true,
@@ -262,6 +270,7 @@ export const sejourType = defineType({
           { title: 'Centré', value: 'blockCenter' },
           { title: 'Justifié', value: 'blockJustify' },
           { title: 'Droite', value: 'blockRight' },
+          { title: 'Citation', value: 'blockquote' },
         ],
       }, { type: 'image' }],
       hidden: true,
@@ -279,6 +288,7 @@ export const sejourType = defineType({
           { title: 'Centré', value: 'blockCenter' },
           { title: 'Justifié', value: 'blockJustify' },
           { title: 'Droite', value: 'blockRight' },
+          { title: 'Citation', value: 'blockquote' },
         ],
       }, { type: 'image' }],
       hidden: true,
@@ -296,6 +306,7 @@ export const sejourType = defineType({
           { title: 'Centré', value: 'blockCenter' },
           { title: 'Justifié', value: 'blockJustify' },
           { title: 'Droite', value: 'blockRight' },
+          { title: 'Citation', value: 'blockquote' },
         ],
       }, { type: 'image' }],
       hidden: true,
@@ -326,6 +337,7 @@ export const sejourType = defineType({
                     { title: 'Centré', value: 'blockCenter' },
                     { title: 'Justifié', value: 'blockJustify' },
                     { title: 'Droite', value: 'blockRight' },
+                    { title: 'Citation', value: 'blockquote' },
                   ],
                   marks: {
                     decorators: [
@@ -388,6 +400,7 @@ export const sejourType = defineType({
                     { title: 'Centré', value: 'blockCenter' },
                     { title: 'Justifié', value: 'blockJustify' },
                     { title: 'Droite', value: 'blockRight' },
+                    { title: 'Citation', value: 'blockquote' },
                   ],
                   marks: {
                     decorators: [
@@ -465,8 +478,6 @@ export const sejourType = defineType({
       options: { collapsible: true, collapsed: true },
       fields: [
         defineField({ name: 'duration', title: 'Info-bulle — Durée', type: 'text', rows: 2 }),
-        defineField({ name: 'level', title: 'Info-bulle — Niveau technique', type: 'text', rows: 2 }),
-        defineField({ name: 'physicalLevel', title: 'Info-bulle — Niveau physique', type: 'text', rows: 2 }),
         defineField({ name: 'massif', title: 'Info-bulle — Massif', type: 'text', rows: 2 }),
         defineField({ name: 'participants', title: 'Info-bulle — Participants', type: 'text', rows: 2 }),
         defineField({ name: 'period', title: 'Info-bulle — Période', type: 'text', rows: 2 }),
@@ -576,6 +587,7 @@ export const sejourType = defineType({
     defineField({
       name: 'autoRecommendRules',
       title: 'Afficher ce séjour dans les articles ayant les tags… (règles)',
+      description: 'Le séjour est recommandé dès qu’une des règles correspond.',
       type: 'array',
       of: [{
         type: 'object',
@@ -583,16 +595,36 @@ export const sejourType = defineType({
         title: 'Règle',
         fields: [
           defineField({
+            name: 'mode',
+            title: 'Condition',
+            type: 'string',
+            options: {
+              list: [
+                { title: "L'article a AU MOINS UN de ces tags", value: 'any' },
+                { title: "L'article a TOUS ces tags", value: 'all' },
+              ],
+              layout: 'radio',
+            },
+            // Rules created before this option existed behave as "all"
+            initialValue: 'any',
+          }),
+          defineField({
             name: 'tags',
-            title: "L'article doit avoir TOUS ces tags",
+            title: 'Tags',
             type: 'array',
             of: [{ type: 'reference', to: [{ type: 'tag' }], weak: true }],
             validation: (Rule) => Rule.min(1),
           }),
         ],
         preview: {
-          select: { t0: 'tags.0.name', t1: 'tags.1.name', t2: 'tags.2.name', t3: 'tags.3.name' },
-          prepare: ({ t0, t1, t2, t3 }: any) => ({ title: [t0, t1, t2, t3].filter(Boolean).join(' + ') || 'Règle sans tag' }),
+          select: { mode: 'mode', t0: 'tags.0.name', t1: 'tags.1.name', t2: 'tags.2.name', t3: 'tags.3.name', t4: 'tags.4.name' },
+          prepare: ({ mode, t0, t1, t2, t3, t4 }: any) => {
+            const names = [t0, t1, t2, t3, t4].filter(Boolean)
+            return {
+              title: names.join(mode === 'any' ? ' OU ' : ' + ') || 'Règle sans tag',
+              subtitle: mode === 'any' ? 'Au moins un de ces tags' : 'Tous ces tags',
+            }
+          },
         },
       }],
     }),

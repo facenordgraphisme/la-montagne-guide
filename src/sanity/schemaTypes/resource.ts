@@ -84,7 +84,8 @@ export const resourceType = defineType({
             { title: 'Centré', value: 'blockCenter' },
             { title: 'Justifié', value: 'blockJustify' },
             { title: 'Droite', value: 'blockRight' },
-            { title: 'Citation', value: 'blockquote' }
+            { title: 'Citation', value: 'blockquote' },
+            { title: 'Encart', value: 'encart' },
           ]
         },
         { type: 'image', options: { hotspot: true }, fields: [{ name: 'caption', type: 'string', title: 'Légende (Français)' }, { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' }, { name: 'alt', type: 'string', title: 'ALT (Français)' }, { name: 'altEn', type: 'string', title: 'ALT (Anglais)' }] },
@@ -105,7 +106,8 @@ export const resourceType = defineType({
             { title: 'Centré', value: 'blockCenter' },
             { title: 'Justifié', value: 'blockJustify' },
             { title: 'Droite', value: 'blockRight' },
-            { title: 'Citation', value: 'blockquote' }
+            { title: 'Citation', value: 'blockquote' },
+            { title: 'Encart', value: 'encart' },
           ]
         },
         { type: 'image', options: { hotspot: true }, fields: [{ name: 'caption', type: 'string', title: 'Légende (Français)' }, { name: 'captionEn', type: 'string', title: 'Légende (Anglais)' }, { name: 'alt', type: 'string', title: 'ALT (Français)' }, { name: 'altEn', type: 'string', title: 'ALT (Anglais)' }] },
@@ -139,6 +141,7 @@ export const resourceType = defineType({
                     { title: 'Justifié', value: 'blockJustify' },
                     { title: 'Droite', value: 'blockRight' },
                     { title: 'Citation', value: 'blockquote' },
+                    { title: 'Encart', value: 'encart' },
                   ],
                   marks: {
                     decorators: [
@@ -197,6 +200,7 @@ export const resourceType = defineType({
                     { title: 'Justifié', value: 'blockJustify' },
                     { title: 'Droite', value: 'blockRight' },
                     { title: 'Citation', value: 'blockquote' },
+                    { title: 'Encart', value: 'encart' },
                   ],
                   marks: {
                     decorators: [

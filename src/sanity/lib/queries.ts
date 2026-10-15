@@ -1,4 +1,5 @@
 import { groq } from 'next-sanity'
+import { levelLabelProjection } from '@/utils/levels'
 
 export const homeQuery = groq`*[_type == "home"][0]{
   "faqs": faqs[]->{ _id, question, questionEn, answer, answerEn, "category": category->slug.current, "categoryTitle": category->title, "categoryTitleEn": category->titleEn },
@@ -62,8 +63,10 @@ export const testimonialsQuery = groq`*[_type == "testimonial"] | order(_created
 export const sortiesQuery = groq`*[_type == "sortie" && !(sejour->isHidden == true)] | order(startDate asc) {
   date,
   startDate,
+  endDate,
   availableSpots,
   isFull,
+  isConfirmed,
   titleOverride,
   titleOverrideEn,
   "sejour": sejour-> {
@@ -76,7 +79,7 @@ export const sortiesQuery = groq`*[_type == "sortie" && !(sejour->isHidden == tr
     "subCategory": subCategory->slug.current,
     "subCategorySlug": subCategory->slug.current,
     massif,
-    level,
+    ${levelLabelProjection},
     season,
     duration,
     basePrice,
@@ -93,7 +96,7 @@ export const sejoursQuery = groq`*[_type == "sejour" && !(isHidden == true)] | o
   "subCategory": subCategory->slug.current,
   "subCategorySlug": subCategory->slug.current,
   massif,
-  level,
+  ${levelLabelProjection},
   season,
   duration,
   basePrice,
@@ -110,7 +113,7 @@ export const sejoursByActivityQuery = groq`*[_type == "sejour" && !(isHidden == 
   "subCategory": subCategory->slug.current,
   "subCategorySlug": subCategory->slug.current,
   massif,
-  level,
+  ${levelLabelProjection},
   season,
   duration,
   basePrice,
@@ -150,8 +153,11 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && !(isHidden == true)
   "gallery": gallery[]{imageName, "caption": coalesce(caption, asset->description), captionEn, alt, altEn, "url": asset->url, "originalFilename": asset->originalFilename, "extension": asset->extension},
   "upcomingSorties": *[_type == "sortie" && sejour._ref == ^._id && startDate >= now()] | order(startDate asc) {
     date,
+    startDate,
+    endDate,
     availableSpots,
-    isFull
+    isFull,
+    isConfirmed
   },
   "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": category->slug.current, "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order},
   title, titleEn,
@@ -224,7 +230,7 @@ export const sejourBySlugQuery = groq`*[_type == "sejour" && !(isHidden == true)
     "subCategory": subCategory->slug.current,
     "subCategorySlug": subCategory->slug.current,
     massif,
-    level,
+    ${levelLabelProjection},
     duration,
     basePrice,
     "image": image.asset->url
@@ -557,7 +563,7 @@ export const postBySlugQuery = groq`*[_type == "post" && !(isHidden == true) && 
     _type == "image" => { ..., "asset": asset-> }
   },
   "faqs": faqs[]->{_id, question, questionEn, answer, answerEn, "category": category->slug.current, "categoryTitle": category->title, "categoryTitleEn": category->titleEn, order},
-  // Hand-picked séjours first, then séjours whose tag rule is fully matched by this post's tags
+  // Hand-picked séjours first, then séjours with a tag rule matched by this post's tags (any or all of the rule's tags)
   "relatedActivities": coalesce(relatedActivities[!(@->isHidden == true)]-> {
     title,
     "slug": slug.current,
@@ -565,7 +571,7 @@ export const postBySlugQuery = groq`*[_type == "post" && !(isHidden == true) && 
     basePrice,
     "categorySlug": activityType,
     "subCategorySlug": subCategory->slug.current
-  }, []) + *[_type == "sejour" && !(_id in path("drafts.**")) && !(isHidden == true) && !(_id in ^.relatedActivities[]._ref) && count(autoRecommendRules[count(tags) > 0 && count(tags[@._ref in ^.^.^.tags[]._ref]) == count(tags)]) > 0] | order(title asc) {
+  }, []) + *[_type == "sejour" && !(_id in path("drafts.**")) && !(isHidden == true) && !(_id in coalesce(^.relatedActivities[]._ref, [])) && count(autoRecommendRules[count(tags) > 0 && select(mode == "any" => count(tags[@._ref in ^.^.^.tags[]._ref]) > 0, count(tags[@._ref in ^.^.^.tags[]._ref]) == count(tags))]) > 0] | order(title asc) {
     title,
     "slug": slug.current,
     "image": image.asset->url,
@@ -584,8 +590,9 @@ export const postBySlugQuery = groq`*[_type == "post" && !(isHidden == true) && 
 }`
 
 export const settingsQuery = groq`*[_type == "settings"][0]{
-  "technicalLevelIcons": technicalLevelIcons[]{ label, labelEn, "icon": icon.asset->url, description, descriptionEn },
-  "physicalLevelIcons": physicalLevelIcons[]{ label, labelEn, "icon": icon.asset->url, description, descriptionEn },
+  protectImages,
+  "technicalLevelIcons": technicalLevelIcons[]{ label, labelEn, discipline, number, "icon": icon.asset->url, description, descriptionEn },
+  "physicalLevelIcons": physicalLevelIcons[]{ label, labelEn, number, "icon": icon.asset->url, description, descriptionEn },
   siteName,
   clientPasscode,
   "logoLight": logoLight.asset->url,
@@ -746,7 +753,7 @@ export const resourceBySlugQuery = groq`*[_type == "resource" && slug.current ==
     "image": image.asset->url,
     basePrice,
     duration,
-    level,
+    ${levelLabelProjection},
     "categorySlug": activityType,
     "subCategorySlug": subCategory->slug.current
   },

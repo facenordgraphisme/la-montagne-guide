@@ -153,7 +153,7 @@ export default async function RootLayout({
               whatsappText={whatsappText}
             />
             <ScrollToTop />
-            <ImageProtection />
+            {settingsData?.protectImages && <ImageProtection />}
             {isDraftMode && (
               <>
                 <VisualEditing />

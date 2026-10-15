@@ -4,8 +4,10 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Calendar as CalendarIcon, MapPin, ArrowRight, BarChart3, Users, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Calendar as CalendarIcon, MapPin, ArrowRight, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
+import { sortiePeriod } from '@/utils/dates'
+import { SpotsIndicator, CornerRibbon } from './SortieBadges'
 
 interface Sejour {
   title: string
@@ -18,6 +20,7 @@ interface Sejour {
   subCategorySlug?: string
   massif: string
   level: string
+  levelEn?: string
   season: string | string[]
   duration: string
   basePrice: string
@@ -27,8 +30,10 @@ interface Sejour {
 interface Sortie {
   date: string
   startDate?: string
+  endDate?: string
   availableSpots: string
   isFull: boolean
+  isConfirmed?: boolean
   titleOverride?: string
   titleOverrideEn?: string
   sejour: Sejour
@@ -257,11 +262,9 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                             className={`object-cover transition-transform duration-700 group-hover:scale-110 ${dimmed ? 'grayscale' : ''}`}
                           />
                         )}
-                        {s.isFull && !s.isPassed && (
-                          <div className="pointer-events-none absolute top-7 -right-14 z-10 w-56 rotate-45 bg-red-600 py-2 text-center text-[11px] font-black uppercase tracking-[0.2em] text-white shadow-xl">
-                            {at('Séjour complet')}
-                          </div>
-                        )}
+                        {!s.isPassed && (s.isFull
+                          ? <CornerRibbon tone="full">{at('Séjour complet')}</CornerRibbon>
+                          : s.isConfirmed && <CornerRibbon tone="confirmed">{at({ fr: 'Départ assuré', en: 'Guaranteed departure' })}</CornerRibbon>)}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
                         <div className="absolute top-3 left-3 flex flex-wrap gap-2">
@@ -278,36 +281,34 @@ export default function SortiesFilterableList({ initialSorties }: SortiesFiltera
                         <div className="absolute bottom-3 left-4 right-4">
                           <div className="flex items-center gap-2 text-accent font-black mb-1">
                             <CalendarIcon size={13} />
-                            <span className="text-[11px] uppercase tracking-[0.2em]">{at(s.date)}</span>
+                            <span className="text-[11px] uppercase tracking-[0.2em]">{sortiePeriod(s, language)}</span>
                           </div>
                           <h3 className="text-lg font-black text-white uppercase tracking-tighter leading-tight line-clamp-2">
                             {title}
                           </h3>
+                          {(s.sejour?.massif || s.sejour?.level) && (
+                            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] font-bold uppercase tracking-widest text-white/80">
+                              {s.sejour?.massif && (
+                                <div className="flex items-center gap-1.5">
+                                  <MapPin size={12} className="text-accent" />
+                                  {at(s.sejour.massif)}
+                                </div>
+                              )}
+                              {s.sejour?.level && (
+                                <div className="flex items-center gap-1.5">
+                                  <BarChart3 size={12} className="text-accent" />
+                                  {language === 'en' && s.sejour.levelEn ? s.sejour.levelEn : getLevelLabel(s.sejour.level)}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
 
-                      <div className="p-5 flex-1 flex flex-col justify-between bg-card/5">
-                        <div className="flex flex-wrap gap-4 text-[10px] font-bold uppercase tracking-widest text-foreground/50 mb-4">
-                          {s.sejour?.massif && (
-                            <div className="flex items-center gap-1.5">
-                              <MapPin size={13} className="text-accent" />
-                              {at(s.sejour.massif)}
-                            </div>
-                          )}
-                          <div className="flex items-center gap-1.5">
-                            <Users size={13} className="text-accent" />
-                            {s.isPassed ? at('Date passée') : s.isFull ? at('Complet') : at(s.availableSpots)}
-                          </div>
-                          {s.sejour?.level && (
-                            <div className="flex items-center gap-1.5 text-highlight">
-                              <BarChart3 size={13} />
-                              {getLevelLabel(s.sejour.level)}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                          <div className="flex flex-col">
+                      <div className="p-5 flex-1 flex flex-col justify-end bg-card/5">
+                        <div className="flex items-center justify-between gap-3">
+                          <SpotsIndicator availableSpots={s.availableSpots} isFull={s.isFull} isPassed={s.isPassed} />
+                          <div className="flex flex-col items-end ml-auto">
                             <span className="text-[8px] font-black text-foreground/30 uppercase tracking-widest">{at('À partir de')}</span>
                             <span className="text-lg font-black text-foreground">{at(s.sejour?.basePrice)}</span>
                           </div>

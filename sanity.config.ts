@@ -19,6 +19,7 @@ import { StudioLayoutWithScrollButtons } from './src/sanity/components/ScrollBut
 import { MediaDetails } from './src/sanity/components/MediaDetails'
 import { DeleteTagEverywhereAction } from './src/sanity/actions/deleteTagEverywhere'
 import { ImageAssetSyncInput } from './src/sanity/components/ImageAssetSync'
+import { articleImagesSource } from './src/sanity/components/ArticleImagesSource'
 
 const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'your-project-id'
 const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET || 'production'
@@ -52,7 +53,10 @@ export default defineConfig({
     },
   ],
   schema,
-  form: { components: { input: ImageAssetSyncInput } },
+  form: {
+    components: { input: ImageAssetSyncInput },
+    image: { assetSources: (prev) => [...prev, articleImagesSource] },
+  },
   document: {
     actions: (prev, ctx) => {
       const extra: any[] = []

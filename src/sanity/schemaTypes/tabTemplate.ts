@@ -12,6 +12,7 @@ const tabContentOf = [
       { title: 'Centré', value: 'blockCenter' },
       { title: 'Justifié', value: 'blockJustify' },
       { title: 'Droite', value: 'blockRight' },
+      { title: 'Citation', value: 'blockquote' },
     ],
     marks: {
       decorators: [

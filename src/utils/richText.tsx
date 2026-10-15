@@ -51,7 +51,7 @@ const encartInnerComponents = {
 };
 
 // Consecutive "Encart" blocks form one card: the first is the title, the following ones its body text
-function groupEncarts(blocks: any[]) {
+export function groupEncarts(blocks: any[]) {
   const out: any[] = [];
   let group: any = null;
   for (const block of blocks) {
@@ -69,18 +69,26 @@ function groupEncarts(blocks: any[]) {
   return out;
 }
 
+// Card rendering for blocks grouped by groupEncarts — add to any PortableText `types`
+export const encartGroupComponent = ({ value }: any) => (
+  <div className="not-prose relative my-10 overflow-hidden rounded-[2rem] border border-highlight/30 bg-linear-to-br from-highlight/10 via-highlight/5 to-orange-400/10 px-8 py-6 shadow-xl">
+    <div className="absolute -right-4 -top-4 w-32 h-32 bg-highlight/10 rounded-full blur-3xl" />
+    <div className="relative">
+      <PortableText value={value.blocks} components={encartInnerComponents} />
+    </div>
+  </div>
+);
+
+export const blockquoteComponent = ({ children }: any) => (
+  <blockquote className="border-l-4 border-accent pl-6 py-4 my-8 italic text-xl text-foreground/80 bg-accent/5 rounded-r-2xl text-justify">
+    {children}
+  </blockquote>
+);
+
 const richTextComponents = {
   ...blockAlignComponents,
-  types: {
-    encartGroup: ({ value }: any) => (
-      <div className="not-prose relative my-10 overflow-hidden rounded-[2rem] border border-highlight/30 bg-linear-to-br from-highlight/10 via-highlight/5 to-orange-400/10 px-8 py-6 shadow-xl">
-        <div className="absolute -right-4 -top-4 w-32 h-32 bg-highlight/10 rounded-full blur-3xl" />
-        <div className="relative">
-          <PortableText value={value.blocks} components={encartInnerComponents} />
-        </div>
-      </div>
-    ),
-  },
+  block: { ...blockAlignComponents.block, blockquote: blockquoteComponent },
+  types: { encartGroup: encartGroupComponent },
 };
 
 export function renderRichText(value: any, defaultText = '') {

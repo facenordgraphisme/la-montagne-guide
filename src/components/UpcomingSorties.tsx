@@ -4,7 +4,9 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Calendar, Users, MapPin, Clock } from 'lucide-react'
+import { Calendar, MapPin, Clock } from 'lucide-react'
+import { sortiePeriod } from '@/utils/dates'
+import { SpotsIndicator, CornerRibbon } from './SortieBadges'
 
 interface Sejour {
   title: string
@@ -25,8 +27,10 @@ interface Sejour {
 interface Sortie {
   date: string
   startDate?: string
+  endDate?: string
   availableSpots: string
   isFull: boolean
+  isConfirmed?: boolean
   titleOverride?: string
   titleOverrideEn?: string
   sejour: Sejour
@@ -174,18 +178,16 @@ const UpcomingSorties = ({
                   <span className="px-4 py-1.5 bg-accent text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
                     {getCategoryDisplay(s.sejour?.activityType)}
                   </span>
-                  {s.isFull && (
-                    <span className="px-4 py-1.5 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg">
-                      {at('Complet')}
-                    </span>
-                  )}
                 </div>
+                {s.isFull
+                  ? <CornerRibbon tone="full">{at('Séjour complet')}</CornerRibbon>
+                  : s.isConfirmed && <CornerRibbon tone="confirmed">{at({ fr: 'Départ assuré', en: 'Guaranteed departure' })}</CornerRibbon>}
 
                 <div className="absolute inset-0 p-8 flex flex-col justify-end">
                   <div className="space-y-4 mb-6">
                     <div className="flex items-center gap-3 text-accent font-bold uppercase tracking-[0.2em] text-xs">
                       <Calendar size={14} />
-                      {at(s.date)}
+                      {sortiePeriod(s, language)}
                     </div>
                     <h3 className="text-3xl font-black text-foreground uppercase tracking-tighter leading-none">
                       {language === 'en'
@@ -201,11 +203,8 @@ const UpcomingSorties = ({
                         <Clock size={12} className="text-accent" />
                         {at(s.sejour?.duration)}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <Users size={12} className="text-accent" />
-                        {at(s.availableSpots)}
-                      </div>
                     </div>
+                    <SpotsIndicator availableSpots={s.availableSpots} isFull={s.isFull} />
                   </div>
 
                   {(() => {

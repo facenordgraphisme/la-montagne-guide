@@ -9,6 +9,7 @@ import { getServerTranslations, prefersFrench } from '@/i18n/server'
 import { autoFill, autoFillAll } from '@/lib/translate'
 import { ArrowLeft, BookOpen, Compass } from 'lucide-react'
 import { PortableText } from '@portabletext/react'
+import { groupEncarts, encartGroupComponent } from '@/utils/richText'
 import FAQAccordion from '@/components/FAQAccordion'
 import FaqJsonLd from '@/components/FaqJsonLd'
 import SejourTabs from '@/components/SejourTabs'
@@ -43,6 +44,7 @@ function makeBlockComponents(lang: string) {
       ),
     },
     types: {
+      encartGroup: encartGroupComponent,
       image: ({ value }: any) => {
         if (!value?.asset) return null
         const imgUrl = urlFor(value.asset).width(1200).auto('format').url()
@@ -167,7 +169,7 @@ export default async function EnResourceDetailPage({ params }: { params: Promise
 
             {displayContent && (
               <div className="prose-custom max-w-none text-foreground/80 leading-relaxed text-lg">
-                <PortableText value={displayContent} components={makeBlockComponents('en')} />
+                <PortableText value={groupEncarts(displayContent)} components={makeBlockComponents('en')} />
               </div>
             )}
 

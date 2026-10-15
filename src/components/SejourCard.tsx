@@ -17,6 +17,7 @@ interface SejourCardProps {
     subCategorySlug?: string
     massif?: string
     level?: string
+    levelEn?: string
     duration?: string
     basePrice?: string
     image?: string
@@ -71,7 +72,7 @@ const SejourCard = ({ sejour, activitySlug }: SejourCardProps) => {
             {sejour.level && (
               <span className="px-3 py-1 bg-background/80 text-foreground text-[10px] font-bold uppercase tracking-wider rounded-full backdrop-blur-md border border-white/10 flex items-center gap-1">
                 <BarChart3 size={10} className="text-accent" />
-                {getLevelLabel(sejour.level)}
+                {language === 'en' && sejour.levelEn ? sejour.levelEn : getLevelLabel(sejour.level)}
               </span>
             )}
           </div>

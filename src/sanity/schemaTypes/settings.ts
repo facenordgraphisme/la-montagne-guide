@@ -1,5 +1,6 @@
 import { defineField, defineType } from 'sanity'
 import { Settings } from 'lucide-react'
+import { LEVEL_DISCIPLINES, LEVEL_NUMBERS } from '../../utils/levels'
 
 const descriptionBlocks = [
   {
@@ -484,6 +485,7 @@ export const settingsType = defineType({
             { title: 'Centré', value: 'blockCenter' },
             { title: 'Justifié', value: 'blockJustify' },
             { title: 'Droite', value: 'blockRight' },
+            { title: 'Citation', value: 'blockquote' },
           ],
         }
       ],
@@ -575,6 +577,14 @@ export const settingsType = defineType({
 
     // DESIGN & APPARENCE
     defineField({
+      name: 'protectImages',
+      title: 'Bloquer le clic droit sur les photos',
+      description: "Empêche « Enregistrer l'image sous » et le glisser-déposer des photos sur le site. Décoché : les photos peuvent être enregistrées.",
+      type: 'boolean',
+      initialValue: false,
+      group: 'design',
+    }),
+    defineField({
       name: 'bgColorLight',
       title: 'Couleur de fond — Mode Clair (Hex)',
       type: 'string',
@@ -664,6 +674,7 @@ export const settingsType = defineType({
     defineField({
       name: 'technicalLevelIcons',
       title: 'Niveau technique — Icônes',
+      description: 'Un niveau par univers et par chiffre (1 à 4). Dans les séjours, on choisit seulement le chiffre.',
       type: 'array',
       group: 'levels',
       of: [{ type: 'levelIcon' }],
@@ -691,6 +702,21 @@ export const levelIconType = defineType({
     }),
     defineField({ name: 'labelEn', title: 'Libellé affiché (EN)', type: 'string' }),
     defineField({
+      name: 'discipline',
+      title: 'Univers',
+      type: 'string',
+      options: { list: LEVEL_DISCIPLINES },
+      // Physical levels are shared by every univers
+      hidden: ({ path }) => path[0] === 'physicalLevelIcons',
+    }),
+    defineField({
+      name: 'number',
+      title: 'Chiffre',
+      type: 'string',
+      options: { list: LEVEL_NUMBERS, layout: 'radio', direction: 'horizontal' },
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
       name: 'icon',
       title: 'Icône',
       type: 'image',
@@ -711,6 +737,11 @@ export const levelIconType = defineType({
       }] }),
   ],
   preview: {
-    select: { title: 'label', subtitle: 'labelEn', media: 'icon' },
+    select: { title: 'label', number: 'number', discipline: 'discipline', media: 'icon' },
+    prepare: ({ title, number, discipline, media }) => ({
+      title,
+      subtitle: [LEVEL_DISCIPLINES.find(d => d.value === discipline)?.title, number && `Niveau ${number}`].filter(Boolean).join(' · '),
+      media,
+    }),
   },
 })
