@@ -14,15 +14,18 @@ import { sortActivities } from "@/utils/activity";
 import { getLanguage } from "@/i18n/server";
 import { openGraphFor } from "@/lib/seo";
 
+// Only Montserrat (the font picked in Sanity settings) is preloaded; the others still load if chosen
 const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
+  preload: false,
 });
 
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
   variable: "--font-poppins",
+  preload: false,
 });
 
 const montserrat = Montserrat({
@@ -33,11 +36,13 @@ const montserrat = Montserrat({
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
+  preload: false,
 });
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  preload: false,
 });
 
 const FONT_VARIABLES: Record<string, string> = {

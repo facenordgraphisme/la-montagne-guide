@@ -54,7 +54,7 @@ const AboutSection = ({
   experience = 16,
   className = "bg-background"
 }: AboutProps) => {
-  const { at, t, translatePortableText } = useLanguage()
+  const { at, t, translatePortableText, language } = useLanguage()
   const displayExperience = experience === 14 || experience === 15 ? 16 : experience;
 
   return (
@@ -67,10 +67,14 @@ const AboutSection = ({
             viewport={{ once: true }}
             className="relative"
           >
-            <div className="aspect-[4/5] rounded-[40px] overflow-hidden">
-              <div 
-                className="w-full h-full bg-cover bg-center"
-                style={{ backgroundImage: `url('${image}')` }}
+            {/* next/image goes through the Sanity loader: a CSS background loaded the 6016px original (1.6 MB) */}
+            <div className="relative aspect-[4/5] rounded-[40px] overflow-hidden">
+              <Image
+                src={image}
+                alt={language === 'en' ? 'Nicolas Draperi, mountain guide' : 'Nicolas Draperi, guide de haute montagne'}
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover object-center"
               />
             </div>
             {/* Decorative element */}
@@ -119,7 +123,7 @@ const AboutSection = ({
 
                 <div className="flex items-center gap-3">
                   <Image 
-                    src="/images/uiagm-logo.png" 
+                    src="/images/uiagm-logo.webp"
                     alt="Logo UIAGM - IFMGA - IVBV" 
                     width={48} 
                     height={48} 

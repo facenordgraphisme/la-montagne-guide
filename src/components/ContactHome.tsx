@@ -39,7 +39,7 @@ const ContactHome = ({
                 {t('contact.button')}
               </Link>
               <div className="flex flex-col items-start md:items-start text-left">
-                <p className="text-[10px] font-black uppercase tracking-widest text-foreground/40 mb-1">{t('contact.directPhone')}</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-foreground/60 mb-1">{t('contact.directPhone')}</p>
                 <p className="text-2xl font-black text-foreground">
                   <ObfuscatedContact type="phone" value="+33 (0)6 75 07 97 08" />
                 </p>

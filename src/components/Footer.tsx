@@ -112,7 +112,7 @@ const Footer = ({ contactData, settingsData }: FooterProps) => {
           </div>
 
           <div>
-            <h4 className="font-bold mb-6 uppercase tracking-widest text-xs text-foreground/40">{t('nav.contact')}</h4>
+            <h2 className="font-bold mb-6 uppercase tracking-widest text-xs text-foreground/60">{t('nav.contact')}</h2>
             <ul className="space-y-4 text-foreground/70 font-medium">
               <li>
                 <ObfuscatedContact
@@ -131,7 +131,7 @@ const Footer = ({ contactData, settingsData }: FooterProps) => {
           </div>
         </div>
 
-        <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between gap-4 text-sm text-foreground/30 font-medium">
+        <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between gap-4 text-sm text-foreground/60 font-medium">
           <div>
             <p>© {new Date().getFullYear()} {(() => {
               const siteName = settingsData?.siteName || "La Montagne Guide"
@@ -139,7 +139,7 @@ const Footer = ({ contactData, settingsData }: FooterProps) => {
               // The copyright text often already starts with the site name
               return notice.includes(siteName) ? notice : `${siteName}. ${notice}`
             })()}</p>
-            <p className="mt-1.5 text-[11px] text-foreground/20">
+            <p className="mt-1.5 text-[11px] text-foreground/50">
               {at('Propulsé par')}{' '}
               <a
                 href="https://facenordgraphisme.fr"

@@ -56,7 +56,8 @@ const Hero = ({
     <section className="relative h-screen w-full overflow-hidden flex items-center justify-center">
       {/* Background Carousel */}
       <div className="absolute inset-0 z-0">
-        <AnimatePresence mode="wait">
+        {/* initial={false}: the first photo is painted straight from the server HTML, later ones cross-fade */}
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={currentBg}
             initial={{ opacity: 0, scale: 1.1 }}
@@ -79,12 +80,8 @@ const Hero = ({
       </div>
 
       <div className={`container relative z-10 px-6 pt-20 flex flex-col ${alignClass}`}>
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className={`text-[#ffffff] w-full max-w-4xl flex flex-col ${alignClass}`}
-        >
+        {/* CSS entrance, not framer-motion: the title is the LCP element and must not wait for hydration */}
+        <div className={`hero-enter text-[#ffffff] w-full max-w-4xl flex flex-col ${alignClass}`}>
           <span className={`text-[#f97316] font-black tracking-widest uppercase text-sm mb-4 block ${textAlign === 'left' ? 'text-left' : textAlign === 'right' ? 'text-right' : 'text-center'}`}>
             {at(subtitle)}
           </span>
@@ -111,7 +108,7 @@ const Hero = ({
               }
             </Link>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Progress Indicators */}

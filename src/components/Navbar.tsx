@@ -64,24 +64,29 @@ const Navbar = ({ sanityActivities, settingsData }: { sanityActivities?: any[], 
 
   return (
     <>
-      <motion.nav
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
+      {/* CSS entrance (nav-enter) instead of framer-motion, so the navbar and logo paint before hydration */}
+      <nav
         style={{ top: 'calc(var(--banner-height, 0px) + 24px)' }}
-        className="fixed left-1/2 -translate-x-1/2 z-[60] w-[95%] max-w-6xl glass rounded-full px-4 md:px-8 py-3 md:py-4 flex items-center justify-between shadow-2xl transition-[top] duration-300 ease-out"
+        className="nav-enter fixed left-1/2 -translate-x-1/2 z-[60] w-[95%] max-w-6xl glass rounded-full px-4 md:px-8 py-3 md:py-4 flex items-center justify-between shadow-2xl transition-[top] duration-300 ease-out"
       >
         <Link href="/" aria-label={language === 'en' ? 'La Montagne Guide, home' : 'La Montagne Guide, accueil'} className="flex items-center" onClick={() => setIsOpen(false)}>
-          {!mounted && <span className="block w-32 md:w-48 lg:w-56 aspect-[3/1]" aria-hidden />}
-          {mounted && (
-            <Image
-              src={theme === 'dark' ? "/logo.webp" : "/logo-black.webp"}
-              alt="La Montagne Guide"
-              width={240}
-              height={80}
-              className="w-32 h-auto md:w-48 lg:w-56 object-contain"
-              priority
-            />
-          )}
+          {/* Both logos are in the server HTML; CSS shows the one matching data-theme, so nothing waits for hydration */}
+          <Image
+            src="/logo.webp"
+            alt="La Montagne Guide"
+            width={240}
+            height={80}
+            className="logo-on-dark w-32 h-auto md:w-48 lg:w-56 object-contain"
+            priority
+          />
+          <Image
+            src="/logo-black.webp"
+            alt="La Montagne Guide"
+            width={240}
+            height={80}
+            className="logo-on-light w-32 h-auto md:w-48 lg:w-56 object-contain"
+            priority
+          />
         </Link>
 
         {/* Desktop Menu */}
@@ -139,7 +144,7 @@ const Navbar = ({ sanityActivities, settingsData }: { sanityActivities?: any[], 
               aria-label="Français"
               aria-pressed={language === 'fr'}
             >
-              <img src="https://flagcdn.com/w40/fr.png" alt="" className="w-full h-full object-cover" />
+              <img src="/flags/fr.svg" alt="" className="w-full h-full object-cover" />
             </button>
             <button
               onClick={() => setLanguage('en')}
@@ -148,7 +153,7 @@ const Navbar = ({ sanityActivities, settingsData }: { sanityActivities?: any[], 
               aria-label="English"
               aria-pressed={language === 'en'}
             >
-              <img src="https://flagcdn.com/w40/gb.png" alt="" className="w-full h-full object-cover" />
+              <img src="/flags/gb.svg" alt="" className="w-full h-full object-cover" />
             </button>
           </div>
 
@@ -176,7 +181,7 @@ const Navbar = ({ sanityActivities, settingsData }: { sanityActivities?: any[], 
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
-      </motion.nav>
+      </nav>
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
@@ -249,14 +254,14 @@ const Navbar = ({ sanityActivities, settingsData }: { sanityActivities?: any[], 
                   onClick={() => setLanguage('fr')}
                   className={`flex flex-col items-center gap-2 transition-all ${language === 'fr' ? 'scale-110' : 'opacity-40'}`}
                 >
-                  <img src="https://flagcdn.com/w80/fr.png" alt=""className="w-10 h-10 rounded-full object-cover ring-2 ring-accent/50" />
+                  <img src="/flags/fr.svg" alt="" className="w-10 h-10 rounded-full object-cover ring-2 ring-accent/50" />
                   <span className="text-[10px] font-bold uppercase tracking-widest text-white">Français</span>
                 </button>
                 <button 
                   onClick={() => setLanguage('en')}
                   className={`flex flex-col items-center gap-2 transition-all ${language === 'en' ? 'scale-110' : 'opacity-40'}`}
                 >
-                  <img src="https://flagcdn.com/w80/gb.png" alt=""className="w-10 h-10 rounded-full object-cover ring-2 ring-accent/50" />
+                  <img src="/flags/gb.svg" alt="" className="w-10 h-10 rounded-full object-cover ring-2 ring-accent/50" />
                   <span className="text-[10px] font-bold uppercase tracking-widest text-white">English</span>
                 </button>
               </div>
