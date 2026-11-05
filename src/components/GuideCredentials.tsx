@@ -1,13 +1,11 @@
 import Image from 'next/image'
 import Link from '@/components/LocaleLink'
-import { Award, BadgeCheck, MapPin, ShieldCheck, Mountain } from 'lucide-react'
+import { Award, MapPin, Mountain } from 'lucide-react'
 import { client } from '@/sanity/lib/live'
 import { guideQuery } from '@/sanity/lib/queries'
 import { urlFor } from '@/sanity/lib/image'
 import { getServerTranslations } from '@/i18n/server'
 
-// Only published in the guide page's rich text, so kept here for the factual blocks
-export const PRO_CARD_NUMBER = '00513ED0180'
 export const GUIDE_PERSON_ID = 'https://www.la-montagne-guide.fr/le-guide#nicolas-draperi'
 
 type Props = {
@@ -29,8 +27,6 @@ export default async function GuideCredentials({ variant = 'compact', className 
     { icon: Award, label: L('Diplôme', 'Qualification'), value: L(`Guide de haute montagne ${diploma}`, `${diploma} mountain guide`) },
     { icon: Mountain, label: L('Expérience', 'Experience'), value: L(`Plus de ${years} ans`, `Over ${years} years`) },
     { icon: MapPin, label: L('Basé à', 'Based in'), value: L('Champcella, Hautes-Alpes (Écrins, Queyras)', 'Champcella, Hautes-Alpes, France (Écrins, Queyras)') },
-    { icon: BadgeCheck, label: L('Carte professionnelle', 'Professional licence'), value: `n° ${PRO_CARD_NUMBER}` },
-    { icon: ShieldCheck, label: L('Assurance', 'Insurance'), value: L('Responsabilité civile professionnelle', 'Professional liability insurance') },
   ]
 
   if (variant === 'full') {
