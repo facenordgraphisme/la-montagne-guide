@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import Link from 'next/link'
+import Link from '@/components/LocaleLink'
 import Image from 'next/image'
 
 import { PortableText } from '@portabletext/react'
@@ -126,7 +126,7 @@ const AboutSection = ({
                     className="object-contain w-12 h-12"
                   />
                   <div className="text-[9px] font-black text-foreground/50 uppercase tracking-widest leading-tight">
-                    Guide de Haute Montagne<br/>
+                    {at('Guide de Haute Montagne')}<br/>
                     <span className="text-accent">UIAGM / IFMGA</span>
                   </div>
                 </div>

@@ -1,7 +1,8 @@
+import { sharedPageAlternates } from '@/lib/seo';
 import type { Metadata } from 'next';
 import React from 'react'
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/LocaleLink';
 import { client } from "@/sanity/lib/live";
 import { guideQuery, settingsQuery } from "@/sanity/lib/queries";
 import { PortableText } from "@portabletext/react";
@@ -51,6 +52,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
+    alternates: await sharedPageAlternates('/le-guide'),
   };
 }
 

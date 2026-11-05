@@ -7,6 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${at('Mentions Légales')} | La Montagne Guide`,
     description: at("Mentions légales et informations obligatoires concernant le site La Montagne Guide."),
+    alternates: { canonical: '/mentions-legales' },
   };
 }
 

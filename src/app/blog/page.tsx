@@ -6,6 +6,7 @@ import { client } from "@/sanity/lib/live";
 import { postsPageQuery, categoryTagsQuery, massifTagsQuery, settingsQuery } from "@/sanity/lib/queries";
 
 import { getServerTranslations } from '@/i18n/server';
+import { sharedPageAlternates } from '@/lib/seo';
 
 const PAGE_SIZE = 50;
 
@@ -23,7 +24,17 @@ export async function generateMetadata({ searchParams }: BlogPageProps): Promise
   const description = (lang === 'en' ? settings?.blogMetaDescriptionEn || settings?.blogMetaDescription : settings?.blogMetaDescription)
     || at("Récits d'alpinisme, de ski de rando et d'escalade dans les Écrins et les Alpes : conseils, topos et actus de Nicolas Draperi, guide de haute montagne.");
 
+  // Filters and searches are not landing pages; each pagination page is its own page, the main path to older articles
+  const basePath = lang === 'en' ? '/en/blog' : '/blog';
+  const isFiltered = Boolean(params.category || params.massif || params.q);
+
   return {
+    alternates: isFiltered
+      ? { canonical: basePath }
+      : pageNumber > 1
+        ? { canonical: `${basePath}?page=${pageNumber}` }
+        : await sharedPageAlternates('/blog'),
+    robots: isFiltered ? { index: false, follow: true } : undefined,
     title: `${baseTitle}${pageNumber > 1 ? ` - ${at('Page')} ${pageNumber}` : ''}${baseTitle.includes('La Montagne Guide') ? '' : ' | La Montagne Guide'}`,
     description,
   };
@@ -31,7 +42,7 @@ export async function generateMetadata({ searchParams }: BlogPageProps): Promise
 
 export default async function BlogPage({ searchParams }: BlogPageProps) {
   const params = await searchParams;
-  const { at } = await getServerTranslations();
+  const { at, lang } = await getServerTranslations();
 
   const category = typeof params.category === 'string' ? params.category : undefined;
   const massif = typeof params.massif === 'string' ? params.massif : undefined;
@@ -42,7 +53,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   const end = start + PAGE_SIZE;
 
   const [{ posts, total }, categories, massifs] = await Promise.all([
-    client.fetch(postsPageQuery, { start, end, category: category ?? null, massif: massif ?? null, q: q ?? null }),
+    client.fetch(postsPageQuery, { start, end, category: category ?? null, massif: massif ?? null, q: q ?? null, enOnly: lang === 'en' }),
     client.fetch(categoryTagsQuery),
     client.fetch(massifTagsQuery),
   ]);

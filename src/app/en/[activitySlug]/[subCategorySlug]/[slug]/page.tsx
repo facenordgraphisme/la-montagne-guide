@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 import React from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from '@/components/LocaleLink'
 import { client } from '@/sanity/lib/live'
 import { sejourBySlugQuery, sejourBySlugEnQuery, sejourSlugEnQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from '@/sanity/lib/queries'
-import { notFound, redirect } from 'next/navigation'
+import { notFound, permanentRedirect, redirect } from 'next/navigation'
+import { alternatesFor } from '@/lib/seo'
 import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Users, CalendarDays, Info, FileDown } from 'lucide-react'
-import { getServerTranslations, prefersFrench } from '@/i18n/server'
+import { getServerTranslations } from '@/i18n/server'
 import { autoFill, autoFillAll } from '@/lib/translate'
 import SejourTabs from '@/components/SejourTabs'
 import RichContent from '@/components/RichContent'
@@ -67,13 +68,7 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
   return {
     title,
     description,
-    alternates: {
-      canonical: `/en/${ref.activitySlug}/${ref.subCategorySlug}/${slug}`,
-      languages: {
-        fr: `/${ref.activitySlug}/${ref.subCategorySlug}/${ref.slug}`,
-        en: `/en/${ref.activitySlug}/${ref.subCategorySlug}/${slug}`,
-      },
-    },
+    alternates: alternatesFor('en', `/${ref.activitySlug}/${ref.subCategorySlug}/${ref.slug}`, `/en/${ref.activitySlug}/${ref.subCategorySlug}/${slug}`),
     openGraph: { title, description, locale: 'en_US', alternateLocale: 'fr_FR' },
   }
 }
@@ -87,7 +82,20 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
     const normalizedSlug = slug.normalize('NFD').replace(/[̀-ͯ]/g, '')
     if (normalizedSlug !== slug) ref = await client.fetch(sejourBySlugEnQuery, { slug: normalizedSlug })
   }
-  if (!ref) notFound()
+  if (!ref) {
+    // French slug under /en (language switch, internal link): go to the English URL, or to the French page if there is none
+    const fr = await client.fetch(sejourBySlugQuery, { slug })
+    if (!fr) notFound()
+    const base = `/${fr.activityType}/${fr.subCategory}`
+    if (fr.slugEn) permanentRedirect(encodeURI(`/en${base}/${fr.slugEn}`))
+    redirect(encodeURI(`${base}/${slug}`))
+  }
+
+  // One URL per stay: the query ignores activity and univers, so any other path redirects to the real one
+  if (ref.activitySlug && ref.subCategorySlug
+    && (decodeSlug(activitySlug) !== ref.activitySlug || decodeSlug(subCategorySlug) !== ref.subCategorySlug)) {
+    permanentRedirect(encodeURI(`/en/${ref.activitySlug}/${ref.subCategorySlug}/${slug}`))
+  }
 
   const [rawSejour, settingsData] = await Promise.all([
     client.fetch(sejourBySlugQuery, { slug: ref.slug }),
@@ -96,7 +104,6 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
   if (!rawSejour) notFound()
 
   const { at, lang, translatePortableText } = await getServerTranslations('en')
-  if (await prefersFrench()) redirect(`/${ref.activitySlug}/${ref.subCategorySlug}/${ref.slug}`)
 
   let sejour = await autoFill(rawSejour, [['title', 'titleEn'], ['imageAlt', 'imageAltEn']], 'en')
   if (sejour.tabs?.length) {

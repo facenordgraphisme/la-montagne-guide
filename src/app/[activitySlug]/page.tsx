@@ -1,18 +1,21 @@
 import type { Metadata } from 'next';
 import React from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/LocaleLink';
 import { notFound } from 'next/navigation';
 import { client } from "@/sanity/lib/live";
 import {
   activityBySlugQuery,
   activitySlugsQuery,
   postBySlugQuery,
+  postBySlugEnQuery,
   postSlugsQuery
 } from "@/sanity/lib/queries";
 import { urlFor, getVanityImageUrl } from "@/sanity/lib/image";
 import { getServerTranslations } from '@/i18n/server';
-import { redirect } from 'next/navigation';
+import { permanentRedirect } from 'next/navigation';
+import { decodeSlug } from '@/lib/localePath';
+import { alternatesFor, sharedPageAlternates } from '@/lib/seo';
 import { PortableText } from '@portabletext/react';
 import FAQAccordion from "@/components/FAQAccordion";
 import FaqJsonLd from '@/components/FaqJsonLd';
@@ -198,7 +201,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ activitySlug: string }> }): Promise<Metadata> {
-  const { activitySlug } = await params;
+  const activitySlug = decodeSlug((await params).activitySlug);
   const { at, lang } = await getServerTranslations();
 
   const activity = await client.fetch(activityBySlugQuery, { slug: activitySlug });
@@ -207,12 +210,14 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
     const introText = activity.introEn && lang === 'en' ? activity.introEn : activity.intro;
     const descBlocks = lang === 'en' && activity.descriptionEn?.length ? activity.descriptionEn : activity.description;
     const autoDescription = introText ? at(introText) : (descBlocks ? toPlainText(descBlocks).substring(0, 160) : '');
-    const title = (lang === 'en' ? activity.metaTitleEn || activity.metaTitle : activity.metaTitle) || autoTitle;
-    const description = (lang === 'en' ? activity.metaDescriptionEn || activity.metaDescription : activity.metaDescription) || autoDescription;
+    // No French fallback in English: the generated English title beats a French SEO title
+    const title = (lang === 'en' ? activity.metaTitleEn : activity.metaTitle) || autoTitle;
+    const description = (lang === 'en' ? activity.metaDescriptionEn : activity.metaDescription) || autoDescription;
     const ogImage = activity.image || undefined;
     return {
       title,
       description,
+      alternates: await sharedPageAlternates(`/${activitySlug}`),
       openGraph: {
         title,
         description,
@@ -230,9 +235,12 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
   const title = (lang === 'en' ? (post.metaTitleEn || post.metaTitle) : post.metaTitle) || autoTitle;
   const description = autoDescription || (lang === 'en' ? (post.metaDescriptionEn || post.metaDescription) : post.metaDescription) || '';
   const ogImage = post.image || undefined;
+  // A slugEn shared by several posts only belongs to the first one
+  const enOwner = post.slugEn ? await client.fetch(postBySlugEnQuery, { slug: post.slugEn }) : null;
   return {
     title,
     description,
+    alternates: alternatesFor('fr', `/${post.slug}`, enOwner?.slug === post.slug ? `/en/${post.slugEn}` : null),
     openGraph: {
       title,
       description,
@@ -243,7 +251,7 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
 }
 
 export default async function GenericRootPage({ params }: { params: Promise<{ activitySlug: string }> }) {
-  const { activitySlug } = await params;
+  const activitySlug = decodeSlug((await params).activitySlug);
   const { at, t, lang, translatePortableText } = await getServerTranslations();
 
   const activity = await client.fetch(activityBySlugQuery, { slug: activitySlug });
@@ -359,11 +367,11 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
   } else {
     // RENDER BLOG POST DETAIL PAGE
     let post = await client.fetch(postBySlugQuery, { slug: activitySlug });
-    if (!post) notFound();
-
-    // Redirect EN visitors to the English URL if slugEn exists
-    if (lang === 'en' && post.slugEn) {
-      redirect(`/en/${post.slugEn}`)
+    if (!post) {
+      // English slug without the /en prefix (language switch): send it to the French article
+      const ref = await client.fetch(postBySlugEnQuery, { slug: activitySlug });
+      if (ref) permanentRedirect(encodeURI(`/${ref.slug}`));
+      notFound();
     }
 
     post = await autoFill(post, [['title', 'titleEn'], ['excerpt', 'excerptEn'], ['imageAlt', 'imageAltEn']], lang);

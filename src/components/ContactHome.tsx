@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
+import Link from '@/components/LocaleLink'
 import { useLanguage } from '@/context/LanguageContext'
 import ObfuscatedContact from "./ObfuscatedContact"
 import { renderRichText } from '@/utils/richText'

@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from '@/components/LocaleLink'
 import { MapPin, BarChart3, Clock } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 

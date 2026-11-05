@@ -1,6 +1,6 @@
 'use client'
 
-import Link from 'next/link';
+import Link from '@/components/LocaleLink';
 import Image from 'next/image';
 import { Calendar } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
@@ -33,7 +33,7 @@ export default function BlogCard({ post }: BlogCardProps) {
   const href = language === 'en' && post.slugEn ? `/en/${post.slugEn}` : `/${post.slug}`
 
   return (
-    <Link href={href} className="group block">
+    <Link href={href} noLocale={!post.slugEn} className="group block">
       <div className="glass overflow-hidden rounded-[2rem] border border-border bg-card/5 transition-all duration-500 hover:bg-card/10 hover:border-accent/40 hover:scale-[1.02] h-full flex flex-col">
         {/* Image Container */}
         <div className="relative h-64 overflow-hidden">

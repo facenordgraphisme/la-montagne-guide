@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import Link from '@/components/LocaleLink'
 import { ArrowLeft, Compass, Mail } from 'lucide-react'
 import { client } from '@/sanity/lib/live'
 import { activitiesQuery, settingsQuery } from '@/sanity/lib/queries'

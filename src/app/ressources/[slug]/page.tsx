@@ -2,10 +2,11 @@ import type { Metadata } from 'next';
 import React from 'react'
 import Image from 'next/image';
 import { urlFor } from '@/sanity/lib/image'
-import Link from 'next/link';
+import Link from '@/components/LocaleLink';
 import { client } from "@/sanity/lib/live";
-import { resourceBySlugQuery, resourcesQuery } from "@/sanity/lib/queries";
-import { notFound, redirect } from 'next/navigation';
+import { resourceBySlugQuery, resourceBySlugEnQuery, resourcesQuery } from "@/sanity/lib/queries";
+import { notFound, permanentRedirect } from 'next/navigation';
+import { alternatesFor } from '@/lib/seo';
 import { getServerTranslations } from '@/i18n/server';
 import { autoFill, autoFillAll } from '@/lib/translate';
 import { ArrowLeft, BookOpen, Clock, Compass } from 'lucide-react';
@@ -124,6 +125,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title,
     description,
+    alternates: alternatesFor('fr', `/ressources/${slug}`, res.slugEn ? `/en/ressources/${res.slugEn}` : null),
   };
 }
 
@@ -132,11 +134,11 @@ export default async function ResourceDetailPage({ params }: { params: Promise<{
   let data = await client.fetch(resourceBySlugQuery, { slug });
   const { at, lang } = await getServerTranslations();
 
-  if (!data) notFound();
-
-  // Redirect EN visitors to the English URL if slugEn exists
-  if (lang === 'en' && data.slugEn) {
-    redirect(`/en/ressources/${data.slugEn}`)
+  if (!data) {
+    // English slug without the /en prefix (language switch): send it to the French page
+    const ref = await client.fetch(resourceBySlugEnQuery, { slug });
+    if (ref) permanentRedirect(encodeURI(`/ressources/${ref.slug}`));
+    notFound();
   }
 
   data = await autoFill(data, [['title', 'titleEn'], ['intro', 'introEn'], ['imageAlt', 'imageAltEn']], lang);

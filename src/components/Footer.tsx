@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import Link from 'next/link'
+import Link from '@/components/LocaleLink'
 import Image from 'next/image'
 import { useTheme } from 'next-themes'
 import { usePathname } from 'next/navigation'
@@ -135,7 +135,7 @@ const Footer = ({ contactData, settingsData }: FooterProps) => {
           <div>
             <p>© {new Date().getFullYear()} {(() => {
               const siteName = settingsData?.siteName || "La Montagne Guide"
-              const notice = language === 'en' && settingsData?.copyrightEn ? settingsData.copyrightEn : (settingsData?.copyright || at('Tous droits réservés.'))
+              const notice = language === 'en' ? (settingsData?.copyrightEn || 'All rights reserved.') : (settingsData?.copyright || 'Tous droits réservés.')
               // The copyright text often already starts with the site name
               return notice.includes(siteName) ? notice : `${siteName}. ${notice}`
             })()}</p>
@@ -152,9 +152,9 @@ const Footer = ({ contactData, settingsData }: FooterProps) => {
             </p>
           </div>
           <div className="flex gap-8">
-            <Link href="/mentions-legales" className="hover:text-accent transition-colors">{at('Mentions Légales')}</Link>
+            <Link href="/mentions-legales" noLocale className="hover:text-accent transition-colors">{at('Mentions Légales')}</Link>
             <Link href="/ressources/conditions-de-vente" className="hover:text-accent transition-colors">{at('CGV')}</Link>
-            <Link href="/confidentialite" className="hover:text-accent transition-colors">{at('Confidentialité')}</Link>
+            <Link href="/confidentialite" noLocale className="hover:text-accent transition-colors">{at('Confidentialité')}</Link>
           </div>
         </div>
       </div>

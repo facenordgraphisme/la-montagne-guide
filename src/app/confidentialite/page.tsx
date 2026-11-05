@@ -7,6 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${at('Politique de Confidentialité')} | La Montagne Guide`,
     description: at("Politique de confidentialité et protection des données personnelles de La Montagne Guide."),
+    alternates: { canonical: '/confidentialite' },
   };
 }
 

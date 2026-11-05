@@ -1,6 +1,8 @@
+import { sharedPageAlternates } from '@/lib/seo';
+import { activitySummaryEn } from '@/utils/activity';
 import type { Metadata } from 'next';
 import React from 'react'
-import Link from 'next/link';
+import Link from '@/components/LocaleLink';
 import { client } from "@/sanity/lib/live";
 import { activitiesQuery, settingsQuery } from "@/sanity/lib/queries";
 import Image from 'next/image';
@@ -25,9 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: {
-      canonical: '/activites',
-    },
+    alternates: await sharedPageAlternates('/activites'),
   };
 }
 
@@ -38,7 +38,7 @@ export default async function ActivitesPage() {
     client.fetch(activitiesQuery),
     client.fetch(settingsQuery)
   ]);
-  const { at, t, translatePortableText } = await getServerTranslations();
+  const { at, t, lang, translatePortableText } = await getServerTranslations();
   
   const fallback = [
     {
@@ -114,7 +114,7 @@ export default async function ActivitesPage() {
                   {at(p.title)}
                 </h3>
                 <p className="text-foreground/70 mb-8 flex-1 leading-relaxed line-clamp-3">
-                  {toPlainText(translatePortableText(p.description) || at(p.description))}
+                  {(lang === 'en' && activitySummaryEn(p)) || toPlainText(translatePortableText(p.description) || at(p.description))}
                 </p>
 
                 <div className="flex items-center justify-between mt-auto">

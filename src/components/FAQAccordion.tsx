@@ -82,8 +82,8 @@ export default function FAQAccordion({ faqs, hideHeader = false, initialVisible 
   const filteredItems = !showCategories || selectedCategory === 'all'
     ? items
     : items.filter(item => item.category === selectedCategory)
-  const visibleItems = initialVisible && !showAll ? filteredItems.slice(0, initialVisible) : filteredItems
-  const hiddenCount = filteredItems.length - visibleItems.length
+  const visibleCount = initialVisible && !showAll ? initialVisible : filteredItems.length
+  const hiddenCount = Math.max(0, filteredItems.length - visibleCount)
 
   return (
     <section className="py-20 w-full relative">
@@ -129,8 +129,8 @@ export default function FAQAccordion({ faqs, hideHeader = false, initialVisible 
 
         {/* FAQ Accordion List */}
         <div className="space-y-4">
-          <AnimatePresence mode="popLayout">
-            {visibleItems.map((item) => {
+          <AnimatePresence mode="popLayout" initial={false}>
+            {filteredItems.map((item, index) => {
               const isOpen = activeId === item._id
               const question = language === 'en' ? (item.questionEn || item.question) : item.question
               const answer = language === 'en' ? (item.answerEn || item.answer) : item.answer
@@ -143,7 +143,7 @@ export default function FAQAccordion({ faqs, hideHeader = false, initialVisible 
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.98 }}
                   transition={{ duration: 0.3 }}
-                  className={`glass border rounded-3xl overflow-hidden transition-all duration-300 ${
+                  className={`glass border rounded-3xl overflow-hidden transition-all duration-300 ${index >= visibleCount ? 'hidden' : ''} ${
                     isOpen
                       ? 'border-accent/40 bg-foreground/[0.03] shadow-[0_4px_30px_rgba(0,242,254,0.05)]'
                       : 'border-foreground/5 bg-foreground/[0.01] hover:border-foreground/10 hover:bg-foreground/[0.02]'
@@ -151,6 +151,7 @@ export default function FAQAccordion({ faqs, hideHeader = false, initialVisible 
                 >
                   <button
                     onClick={() => toggleItem(item._id)}
+                    aria-expanded={isOpen}
                     className="w-full flex items-center justify-between gap-6 px-6 md:px-8 py-5 text-left text-base md:text-lg font-bold text-foreground transition-colors duration-200"
                   >
                     <span className="flex items-center gap-3">
@@ -162,21 +163,13 @@ export default function FAQAccordion({ faqs, hideHeader = false, initialVisible 
                     </span>
                   </button>
 
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: 'easeInOut' }}
-                        className="overflow-hidden"
-                      >
-                        <div className="px-6 md:px-8 pb-6 text-sm md:text-base text-foreground/70 leading-relaxed border-t border-foreground/5 pt-4">
-                          <p>{answer}</p>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                    <div className="overflow-hidden min-h-0">
+                      <div className="px-6 md:px-8 pb-6 text-sm md:text-base text-foreground/70 leading-relaxed border-t border-foreground/5 pt-4">
+                        <p>{answer}</p>
+                      </div>
+                    </div>
+                  </div>
                 </motion.div>
               )
             })}

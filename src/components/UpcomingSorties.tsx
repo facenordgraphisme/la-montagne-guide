@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from '@/components/LocaleLink'
 import { Calendar, MapPin, Clock } from 'lucide-react'
 import { sortiePeriod } from '@/utils/dates'
 import { SpotsIndicator, CornerRibbon } from './SortieBadges'

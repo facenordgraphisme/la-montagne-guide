@@ -1,6 +1,6 @@
 import React from 'react'
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/LocaleLink';
 import { client } from "@/sanity/lib/live";
 import { activityBySlugQuery, activitiesQuery } from "@/sanity/lib/queries";
 import { notFound } from 'next/navigation';

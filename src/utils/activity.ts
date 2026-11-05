@@ -1,3 +1,11 @@
+import { toPlainText } from '@/utils/richText';
+
+// Card summary in English, null when the activity has no English text
+export function activitySummaryEn(activity: any): string | null {
+  if (activity?.descriptionEn?.length) return toPlainText(activity.descriptionEn);
+  return activity?.introEn?.trim() || null;
+}
+
 export function sortActivities(activities: any[], activitiesOrder?: { _id: string }[]) {
   if (!activities) return [];
   if (!activitiesOrder || activitiesOrder.length === 0) {

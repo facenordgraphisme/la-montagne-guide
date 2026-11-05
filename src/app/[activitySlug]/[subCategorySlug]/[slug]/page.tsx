@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import React from 'react'
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from '@/components/LocaleLink';
 import { client } from "@/sanity/lib/live";
-import { sejourBySlugQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from "@/sanity/lib/queries";
-import { notFound, redirect } from 'next/navigation';
+import { sejourBySlugQuery, sejourBySlugEnQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from "@/sanity/lib/queries";
+import { notFound, permanentRedirect, redirect } from 'next/navigation';
+import { alternatesFor } from '@/lib/seo';
 import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Users, CalendarDays, Info, FileDown } from 'lucide-react';
 
 import { getServerTranslations } from '@/i18n/server';
@@ -70,9 +71,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const description = (lang === 'en' ? (sejour.metaDescriptionEn || sejour.metaDescription) : sejour.metaDescription) || autoDescription;
   const ogImage = sejour.image || undefined;
 
+  const base = `/${sejour.activityType}/${sejour.subCategory}`;
   return {
     title,
     description,
+    alternates: alternatesFor('fr', `${base}/${slug}`, sejour.slugEn ? `/en${base}/${sejour.slugEn}` : null),
     openGraph: {
       title,
       description,
@@ -101,11 +104,17 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
 
   const { at, t, lang, translatePortableText } = await getServerTranslations();
 
-  if (!rawSejour) notFound();
+  if (!rawSejour) {
+    // English slug without the /en prefix (language switch): send it to the French page
+    const ref = await client.fetch(sejourBySlugEnQuery, { slug });
+    if (ref) permanentRedirect(encodeURI(`/${ref.activitySlug}/${ref.subCategorySlug}/${ref.slug}`));
+    notFound();
+  }
 
-  // Redirect EN visitors to the English URL if slugEn exists
-  if (lang === 'en' && rawSejour.slugEn) {
-    redirect(`/en/${activitySlug}/${subCategorySlug}/${rawSejour.slugEn}`)
+  // One URL per stay: the query ignores activity and univers, so any other path redirects to the real one
+  if (rawSejour.activityType && rawSejour.subCategory
+    && (decodeSlug(activitySlug) !== rawSejour.activityType || decodeSlug(subCategorySlug) !== rawSejour.subCategory)) {
+    permanentRedirect(encodeURI(`/${rawSejour.activityType}/${rawSejour.subCategory}/${slug}`));
   }
 
   let sejour = await autoFill(rawSejour, [['title', 'titleEn'], ['imageAlt', 'imageAltEn']], lang);

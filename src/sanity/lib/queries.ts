@@ -406,6 +406,7 @@ export const contactQuery = groq`*[_type == "contact"][0] {
   "image": coalesce(image.asset->url, *[_type == "home"][0].heroImages[0].asset->url),
   "imageAlt": image.alt,
   description,
+  descriptionEn,
   email,
   phone,
   location
@@ -444,7 +445,8 @@ export const postsPageQuery = groq`{
   "posts": *[_type == "post" && !(isHidden == true)
     && (!defined($category) || $category in tags[]->slug.current || activityType->slug.current == $category)
     && (!defined($massif) || $massif in tags[]->slug.current)
-    && (!defined($q) || title match $q + "*" || excerpt match $q + "*")
+    && (!$enOnly || defined(slugEn))
+    && (!defined($q) || title match $q + "*" || excerpt match $q + "*" || titleEn match $q + "*" || excerptEn match $q + "*")
   ] | order(publishedAt desc) [$start...$end] {
     title,
     titleEn,
@@ -461,7 +463,8 @@ export const postsPageQuery = groq`{
   "total": count(*[_type == "post" && !(isHidden == true)
     && (!defined($category) || $category in tags[]->slug.current || activityType->slug.current == $category)
     && (!defined($massif) || $massif in tags[]->slug.current)
-    && (!defined($q) || title match $q + "*" || excerpt match $q + "*")
+    && (!$enOnly || defined(slugEn))
+    && (!defined($q) || title match $q + "*" || excerpt match $q + "*" || titleEn match $q + "*" || excerptEn match $q + "*")
   ])
 }`
 
@@ -702,6 +705,7 @@ export const resourcesQuery = groq`*[_type == "resource"] | order(_createdAt des
   title,
   titleEn,
   "slug": slug.current,
+  slugEn,
   category,
   intro,
   introEn,
@@ -768,7 +772,7 @@ export const resourceBySlugQuery = groq`*[_type == "resource" && slug.current ==
 
 // ── EN slug lookup queries ───────────────────────────────────────────────────
 
-export const postBySlugEnQuery = groq`*[_type == "post" && !(isHidden == true) && slugEn == $slug][0] { "slug": slug.current }`
+export const postBySlugEnQuery = groq`*[_type == "post" && !(isHidden == true) && slugEn == $slug] | order(_createdAt asc) [0] { "slug": slug.current }`
 
 export const resourceBySlugEnQuery = groq`*[_type == "resource" && slugEn == $slug][0] { "slug": slug.current }`
 

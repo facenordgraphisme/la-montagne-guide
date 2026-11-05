@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { PortableText } from '@portabletext/react'
 import type { PortableTextComponents } from '@portabletext/react'
 import { Download, FileText } from 'lucide-react'
-import Link from 'next/link'
+import Link from '@/components/LocaleLink'
 import Image from 'next/image'
 import { urlFor } from '@/sanity/lib/image'
 import { useLanguage } from '@/context/LanguageContext'
@@ -142,8 +142,6 @@ export default function SejourTabs({ tabs }: SejourTabsProps) {
 
   if (visibleTabs.length === 0) return null
 
-  const current = visibleTabs.find(t => t.id === activeTab)
-
   return (
     <div className="glass rounded-[40px] border border-border shadow-xl overflow-hidden">
       {/* Tab buttons */}
@@ -164,20 +162,23 @@ export default function SejourTabs({ tabs }: SejourTabsProps) {
       </div>
 
       {/* Tab content */}
-      {current && (
-        <div className="px-8 py-8 prose-custom max-w-none animate-in fade-in duration-300">
-          {current.content && current.content.length > 0 && (
-            <PortableText value={groupEncarts(current.content)} components={portableTextComponents} />
+      {visibleTabs.map(tab => (
+        <div
+          key={tab.id}
+          className={`px-8 py-8 prose-custom max-w-none animate-in fade-in duration-300 ${tab.id === activeTab ? '' : 'hidden'}`}
+        >
+          {tab.content && tab.content.length > 0 && (
+            <PortableText value={groupEncarts(tab.content)} components={portableTextComponents} />
           )}
 
-          {current.faqs?.some(Boolean) && (
-            <FAQAccordion faqs={current.faqs} hideHeader />
+          {tab.faqs?.some(Boolean) && (
+            <FAQAccordion faqs={tab.faqs} hideHeader />
           )}
 
-          {current.pdf && (
+          {tab.pdf && (
             <div className="mt-8">
               <a
-                href={current.pdf}
+                href={tab.pdf}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-primary inline-flex items-center gap-3 !text-white !no-underline"
@@ -189,7 +190,7 @@ export default function SejourTabs({ tabs }: SejourTabsProps) {
             </div>
           )}
         </div>
-      )}
+      ))}
     </div>
   )
 }

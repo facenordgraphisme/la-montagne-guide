@@ -17,6 +17,12 @@ import { homeQuery, sortiesQuery, testimonialsQuery, blogTeaserQuery, activities
 import { getServerTranslations } from '@/i18n/server';
 import { autoFillAll } from '@/lib/translate';
 import { sortActivities } from "@/utils/activity";
+import { sharedPageAlternates } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return { alternates: await sharedPageAlternates('/') };
+}
 
 export default async function Home() {
   const homeData = await client.fetch(homeQuery);

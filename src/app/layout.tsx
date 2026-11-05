@@ -2,16 +2,16 @@ import type { Metadata } from "next";
 import { Outfit, Poppins, Montserrat, Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { cookies, draftMode } from 'next/headers';
+import { draftMode } from 'next/headers';
 import { VisualEditing } from 'next-sanity/visual-editing';
 import DraftModeBanner from '@/components/DraftModeBanner';
 
 import { client } from "@/sanity/lib/live";
 import { contactQuery, activitiesQuery, settingsQuery } from "@/sanity/lib/queries";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import CanonicalHeader from "@/components/CanonicalHeader";
 
 import { sortActivities } from "@/utils/activity";
+import { getLanguage } from "@/i18n/server";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -49,12 +49,11 @@ const FONT_VARIABLES: Record<string, string> = {
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const [settingsData, cookieStore] = await Promise.all([
+    const [settingsData, activeLanguage] = await Promise.all([
       client.fetch(settingsQuery),
-      cookies(),
+      getLanguage(),
     ]);
 
-    const activeLanguage = cookieStore.get('language')?.value || 'fr';
     const locale = activeLanguage === 'en' ? 'en_GB' : 'fr_FR';
 
     return {
@@ -97,9 +96,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
   const isDraftMode = (await draftMode()).isEnabled;
-  const lang = cookieStore.get('language')?.value || 'fr';
+  const lang = await getLanguage();
 
   const [contactData, activitiesData, settingsData] = await Promise.all([
     client.fetch(contactQuery),
@@ -142,7 +140,6 @@ export default async function RootLayout({
                 }
               ` }} />
             )}
-            <CanonicalHeader />
             <AnnouncementBanner settings={settingsData} />
             <Navbar sanityActivities={sortedActivities} settingsData={settingsData} />
             {children}

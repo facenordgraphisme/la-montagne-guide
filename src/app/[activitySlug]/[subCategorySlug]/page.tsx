@@ -7,11 +7,12 @@ import { notFound } from 'next/navigation';
 import SejourCard from "@/components/SejourCard";
 import FAQAccordion from "@/components/FAQAccordion";
 import FaqJsonLd from '@/components/FaqJsonLd';
-import Link from 'next/link';
+import Link from '@/components/LocaleLink';
 import { ArrowLeft } from 'lucide-react';
 import { PortableText } from '@portabletext/react';
 
 import { getServerTranslations } from '@/i18n/server';
+import { sharedPageAlternates } from '@/lib/seo';
 
 function blocksToText(blocks: any, lang: string): string {
   if (!blocks) return '';
@@ -70,13 +71,15 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
   const plainTextDescription = blocksToText({ fr: currentUnivers.description, en: currentUnivers.descriptionEn }, lang);
   const autoDescription = plainTextDescription ? plainTextDescription.substring(0, 160) : '';
 
-  const title = (lang === 'en' ? currentUnivers.metaTitleEn || currentUnivers.metaTitle : currentUnivers.metaTitle) || autoTitle;
-  const description = (lang === 'en' ? currentUnivers.metaDescriptionEn || currentUnivers.metaDescription : currentUnivers.metaDescription) || autoDescription;
+  // No French fallback in English: the generated English title beats a French SEO title
+  const title = (lang === 'en' ? currentUnivers.metaTitleEn : currentUnivers.metaTitle) || autoTitle;
+  const description = (lang === 'en' ? currentUnivers.metaDescriptionEn : currentUnivers.metaDescription) || autoDescription;
   const ogImage = currentUnivers.image || activity.image || undefined;
 
   return {
     title,
     description,
+    alternates: await sharedPageAlternates(`/${activitySlug}/${subCategorySlug}`),
     openGraph: {
       title,
       description,

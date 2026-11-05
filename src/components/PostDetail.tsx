@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from '@/components/LocaleLink'
 import { PortableText } from '@portabletext/react'
 import { Calendar, ArrowLeft, ChevronLeft, ChevronRight, FileText, Compass } from 'lucide-react'
 import { urlFor, getVanityImageUrl } from '@/sanity/lib/image'
@@ -175,13 +175,13 @@ export default async function PostDetail({ post: rawPost, forceLang }: Props) {
               {(post.prevPost || post.nextPost) && (
                 <div className="flex items-center justify-between border-b border-border/40 pb-6 mb-8 gap-4">
                   {post.prevPost ? (
-                    <Link href={postLink(post.prevPost)} className="group flex items-center gap-2 text-foreground/60 hover:text-accent transition-colors text-sm max-w-[48%] text-left">
+                    <Link href={postLink(post.prevPost)} noLocale={!post.prevPost.slugEn} className="group flex items-center gap-2 text-foreground/60 hover:text-accent transition-colors text-sm max-w-[48%] text-left">
                       <ChevronLeft size={18} className="shrink-0 transition-transform group-hover:-translate-x-1" />
                       <span className="font-semibold line-clamp-1">{postLabel(post.prevPost)}</span>
                     </Link>
                   ) : <div />}
                   {post.nextPost ? (
-                    <Link href={postLink(post.nextPost)} className="group flex items-center gap-2 text-foreground/60 hover:text-accent transition-colors text-sm max-w-[48%] text-right justify-end ml-auto">
+                    <Link href={postLink(post.nextPost)} noLocale={!post.nextPost.slugEn} className="group flex items-center gap-2 text-foreground/60 hover:text-accent transition-colors text-sm max-w-[48%] text-right justify-end ml-auto">
                       <span className="font-semibold line-clamp-1">{postLabel(post.nextPost)}</span>
                       <ChevronRight size={18} className="shrink-0 transition-transform group-hover:translate-x-1" />
                     </Link>
@@ -267,7 +267,7 @@ export default async function PostDetail({ post: rawPost, forceLang }: Props) {
               {(post.prevPost || post.nextPost) && (
                 <div className="flex items-center justify-between border-t border-border/40 pt-8 mt-16 gap-4">
                   {post.prevPost ? (
-                    <Link href={postLink(post.prevPost)} className="group flex flex-col gap-1 text-left max-w-[48%]">
+                    <Link href={postLink(post.prevPost)} noLocale={!post.prevPost.slugEn} className="group flex flex-col gap-1 text-left max-w-[48%]">
                       <span className="text-[10px] font-black uppercase text-accent tracking-widest flex items-center gap-1">
                         <ChevronLeft size={12} className="transition-transform group-hover:-translate-x-1" />
                         {at('Précédent')}
@@ -276,7 +276,7 @@ export default async function PostDetail({ post: rawPost, forceLang }: Props) {
                     </Link>
                   ) : <div />}
                   {post.nextPost ? (
-                    <Link href={postLink(post.nextPost)} className="group flex flex-col gap-1 text-right max-w-[48%] items-end ml-auto">
+                    <Link href={postLink(post.nextPost)} noLocale={!post.nextPost.slugEn} className="group flex flex-col gap-1 text-right max-w-[48%] items-end ml-auto">
                       <span className="text-[10px] font-black uppercase text-accent tracking-widest flex items-center gap-1">
                         {at('Suivant')}
                         <ChevronRight size={12} className="transition-transform group-hover:translate-x-1" />

@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from '@/components/LocaleLink'
 import { useLanguage } from '@/context/LanguageContext'
 import { getVanityImageUrl } from '@/sanity/lib/image'
 
@@ -98,7 +98,7 @@ const BlogTeaser = ({
             const displayExcerpt = language === 'en' ? (post.excerptEn || post.excerpt) : post.excerpt;
             const postHref = language === 'en' && post.slugEn ? `/en/${post.slugEn}` : `/${post.slug}`
             return (
-            <Link key={i} href={postHref} className="group block">
+            <Link key={i} href={postHref} noLocale={!post.slugEn} className="group block">
               <div className="relative aspect-[16/10] rounded-[32px] overflow-hidden mb-6 shadow-lg">
                 {post.image && (
                   <Image

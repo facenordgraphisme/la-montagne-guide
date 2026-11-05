@@ -1,3 +1,4 @@
+import { sharedPageAlternates } from '@/lib/seo';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { Mail, Phone, MapPin } from 'lucide-react';
@@ -14,14 +15,15 @@ export async function generateMetadata(): Promise<Metadata> {
   const [data] = await Promise.all([
     client.fetch(contactQuery),
   ]);
-  const { at } = await getServerTranslations();
+  const { at, lang } = await getServerTranslations();
 
   const title = `${at(data?.title || 'Contact')} | La Montagne Guide`;
-  const description = data?.description ? at(data.description) : "Contactez Nicolas Draperi, guide de haute montagne. Projet de sommet, question technique, demande d'information.";
+  const description = lang === 'en' ? (data?.descriptionEn || "Got a question, a mountain idea or a project on your mind? Get in touch and we'll talk it through!") : data?.description ? at(data.description) : "Contactez Nicolas Draperi, guide de haute montagne. Projet de sommet, question technique, demande d'information.";
 
   return {
     title,
     description,
+    alternates: await sharedPageAlternates('/contact'),
   };
 }
 
@@ -73,7 +75,9 @@ export default async function ContactPage() {
             <h1 className="text-5xl md:text-6xl font-black tracking-tighter uppercase leading-[0.95] mb-6">
               {heading}
             </h1>
-            {contact.description && (
+            {lang === 'en' ? (
+              <p className="text-foreground/60 mb-8 text-left">{contact.descriptionEn || "Got a question, a mountain idea or a project on your mind? Get in touch and we'll talk it through!"}</p>
+            ) : contact.description && (
               <p className="text-foreground/60 mb-8 text-left">{at(contact.description)}</p>
             )}
 

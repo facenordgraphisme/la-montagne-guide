@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import React from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
-import { notFound, redirect } from 'next/navigation'
+import Link from '@/components/LocaleLink'
+import { notFound, permanentRedirect, redirect } from 'next/navigation'
+import { alternatesFor } from '@/lib/seo'
 import { client } from '@/sanity/lib/live'
 import { resourceBySlugQuery, resourceBySlugEnQuery, resourceSlugEnQuery } from '@/sanity/lib/queries'
-import { getServerTranslations, prefersFrench } from '@/i18n/server'
+import { getServerTranslations } from '@/i18n/server'
 import { autoFill, autoFillAll } from '@/lib/translate'
 import { ArrowLeft, BookOpen, Compass } from 'lucide-react'
 import { PortableText } from '@portabletext/react'
@@ -94,10 +95,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title,
     description,
-    alternates: {
-      canonical: `/en/ressources/${slug}`,
-      languages: { fr: `/ressources/${ref.slug}`, en: `/en/ressources/${slug}` },
-    },
+    alternates: alternatesFor('en', `/ressources/${ref.slug}`, `/en/ressources/${slug}`),
     openGraph: { title, description, locale: 'en_US', alternateLocale: 'fr_FR' },
   }
 }
@@ -106,13 +104,18 @@ export default async function EnResourceDetailPage({ params }: { params: Promise
   const { slug } = await params
 
   const ref = await client.fetch(resourceBySlugEnQuery, { slug })
-  if (!ref) notFound()
+  if (!ref) {
+    // French slug under /en (language switch, internal link): go to the English URL, or to the French page if there is none
+    const fr = await client.fetch(resourceBySlugQuery, { slug })
+    if (!fr) notFound()
+    if (fr.slugEn) permanentRedirect(encodeURI(`/en/ressources/${fr.slugEn}`))
+    redirect(encodeURI(`/ressources/${slug}`))
+  }
 
   let data = await client.fetch(resourceBySlugQuery, { slug: ref.slug })
   if (!data) notFound()
 
   const { at, lang } = await getServerTranslations('en')
-  if (await prefersFrench()) redirect(`/ressources/${ref.slug}`)
 
   data = await autoFill(data, [['title', 'titleEn'], ['intro', 'introEn'], ['imageAlt', 'imageAltEn']], lang)
   if (data.tabs?.length) {

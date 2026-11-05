@@ -1,3 +1,4 @@
+import { sharedPageAlternates } from '@/lib/seo';
 import type { Metadata } from 'next';
 import React from 'react'
 import { client } from "@/sanity/lib/live";
@@ -24,9 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: {
-      canonical: '/prochaines-sorties',
-    },
+    alternates: await sharedPageAlternates('/prochaines-sorties'),
   };
 }
 

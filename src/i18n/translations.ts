@@ -99,6 +99,7 @@ export const sanityTranslations: Record<string, string> = {
   "entre ciel et terre. gravissez les sommets pour vous envoler en parapente.": "Between sky and earth. Climb the summits to take flight in a paraglider.",
   "l'aventure au-delà des frontières. expéditions sur mesure dans les plus beaux massifs du monde.": "Adventure beyond borders. Tailor-made expeditions in the world's most beautiful massifs.",
   "que ce soit pour gravir un sommet mythique, s'initier à l'escalade ou tracer dans la poudreuse, je vous accompagne dans vos projets les plus fous avec une expertise forgée par des années d'expédition.": "Whether it's to climb a mythical summit, learn to climb, or trace in the powder, I accompany you in your wildest projects with expertise forged by years of expedition.",
+  "guide de haute montagne": "Mountain Guide",
   "guide de haute montagne diplômé uiagm": "UIAGM qualified high mountain guide",
   "connaissance approfondie des alpes": "In-depth knowledge of the Alps",
   "activités adaptées à tous les niveaux": "Activities adapted to all levels",

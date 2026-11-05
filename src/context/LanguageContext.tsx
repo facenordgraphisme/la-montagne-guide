@@ -1,9 +1,10 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext } from 'react'
 import { usePathname } from 'next/navigation'
 
 import { sanityTranslations } from '@/i18n/translations'
+import { isEnPath, toEnPath, toFrPath } from '@/lib/localePath'
 import en from '@/i18n/dictionaries/en.json'
 import fr from '@/i18n/dictionaries/fr.json'
 
@@ -35,28 +36,14 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname()
-  // /en/ URLs are always English, even on first render (crawlers have no localStorage)
-  const routeLang: Language | null = pathname === '/en' || pathname?.startsWith('/en/') ? 'en' : null
-  const [storedLanguage, setLanguageState] = useState<Language>('fr')
-  const language = routeLang ?? storedLanguage
+  // The URL decides the language, so crawlers and visitors always see the same thing
+  const language: Language = isEnPath(pathname) ? 'en' : 'fr'
 
-  useEffect(() => {
-    const savedLang = localStorage.getItem('language') as Language
-    if (savedLang) setLanguageState(savedLang)
-  }, [])
-
+  // Pages resolve a slug from the other language and redirect to their own (see the [slug] routes)
   const setLanguage = (lang: Language) => {
-    setLanguageState(lang)
-    localStorage.setItem('language', lang)
-    
-    // Google Translate Cookie (kept for backward compatibility if script is ever added)
-    document.cookie = `googtrans=/fr/${lang}; path=/; domain=${window.location.hostname}`
-    document.cookie = `googtrans=/fr/${lang}; path=/`
-    
-    // Set a standard cookie for server-side if needed later
-    document.cookie = `language=${lang}; path=/; max-age=31536000`
-    
-    window.location.reload()
+    if (lang === language) return
+    const current = pathname || '/'
+    window.location.assign(lang === 'en' ? toEnPath(current) : toFrPath(current))
   }
 
   // Translation function for dictionary keys (e.g., 'nav.activities')

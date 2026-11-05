@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import Link from 'next/link'
+import Link from '@/components/LocaleLink'
 import { ExternalLink, X } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'
 

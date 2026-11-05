@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
-import Link from 'next/link';
+import Link from '@/components/LocaleLink';
 import Image from 'next/image';
 import { Search } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
@@ -12,6 +12,7 @@ interface Resource {
   title: string;
   titleEn: string;
   slug: string;
+  slugEn?: string;
   category: string;
   intro: string;
   introEn: string;
@@ -116,7 +117,7 @@ export default function ResourcesListClient({ resources, generalFaqs, categories
 
             return (
               <Link 
-                href={`/ressources/${res.slug}`} 
+                href={language === 'en' && res.slugEn ? `/en/ressources/${res.slugEn}` : `/ressources/${res.slug}`} 
                 key={res._id} 
                 className="group glass rounded-[40px] overflow-hidden flex flex-col h-full hover:border-accent transition-all duration-500 shadow-lg"
               >

@@ -1,4 +1,4 @@
-import { cookies } from 'next/headers'
+import { headers } from 'next/headers'
 import { sanityTranslations } from './translations'
 import en from './dictionaries/en.json'
 import fr from './dictionaries/fr.json'
@@ -16,15 +16,10 @@ Object.entries(sanityTranslations).forEach(([k, v]) => {
   normalizedDictionary[normalize(k)] = v
 })
 
-export async function getLanguage() {
-  const cookieStore = await cookies()
-  return (cookieStore.get('language')?.value || 'fr') as 'fr' | 'en'
-}
-
-// True only when the visitor explicitly chose French; crawlers send no cookie and must get /en/ pages in English
-export async function prefersFrench() {
-  const cookieStore = await cookies()
-  return cookieStore.get('language')?.value === 'fr'
+// The URL decides the language: src/proxy.ts sets this header on /en/*
+export async function getLanguage(): Promise<'fr' | 'en'> {
+  const headerStore = await headers()
+  return headerStore.get('x-lang') === 'en' ? 'en' : 'fr'
 }
 
 export async function getServerTranslations(forceLang?: 'fr' | 'en') {

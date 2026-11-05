@@ -35,6 +35,7 @@ export const contactType = defineType({
       title: 'Description',
       type: 'text',
     }),
+    defineField({ name: 'descriptionEn', title: 'Description (EN)', type: 'text' }),
     defineField({
       name: 'email',
       title: 'Email de contact',

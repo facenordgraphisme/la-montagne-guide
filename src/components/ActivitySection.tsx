@@ -1,9 +1,10 @@
 'use client'
 
+import { activitySummaryEn } from '@/utils/activity'
 import React from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import Link from 'next/link'
+import Link from '@/components/LocaleLink'
 
 const activities = [
   {
@@ -64,7 +65,7 @@ const ActivitySection = ({
   data = [],
   className = "bg-background"
 }: ActivitySectionProps) => {
-  const { at, t, translatePortableText } = useLanguage()
+  const { at, t, language, translatePortableText } = useLanguage()
   
   const activities = [
     {
@@ -152,7 +153,7 @@ const ActivitySection = ({
                     {at(activity.title)}
                   </h3>
                   <p className="text-sm text-white/80 line-clamp-2 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    {toPlainText(translatePortableText(activity.description) || at(activity.description))}
+                    {(language === 'en' && activitySummaryEn(activity)) || toPlainText(translatePortableText(activity.description) || at(activity.description))}
                   </p>
                   <div className="mt-6 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-accent transition-colors text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">

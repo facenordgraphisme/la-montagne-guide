@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
+import Link from '@/components/LocaleLink'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Megaphone, Bell, Flame } from 'lucide-react'
 import { useLanguage } from '@/context/LanguageContext'

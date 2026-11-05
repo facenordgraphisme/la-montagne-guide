@@ -1,11 +1,12 @@
 import React from 'react'
+import { sharedPageAlternates } from '@/lib/seo';
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { client } from "@/sanity/lib/live";
 import { sortieBySlugQuery } from "@/sanity/lib/queries";
 import { Calendar, MapPin, Clock, Euro, Users, ArrowLeft } from 'lucide-react'
-import Link from 'next/link'
+import Link from '@/components/LocaleLink'
 import { getServerTranslations } from '@/i18n/server';
 
 interface SortiePageProps {
@@ -26,6 +27,7 @@ export async function generateMetadata({ params }: SortiePageProps): Promise<Met
   return {
     title: `${at(sortie.title)} | La Montagne Guide`,
     description: sortie.description ? at(sortie.description).substring(0, 160) : '',
+    alternates: await sharedPageAlternates(`/prochaines-sorties/${slug}`),
   }
 }
 
