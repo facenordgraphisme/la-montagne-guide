@@ -6,7 +6,7 @@ import Link from '@/components/LocaleLink';
 import { client } from "@/sanity/lib/live";
 import { resourceBySlugQuery, resourceBySlugEnQuery, resourcesQuery } from "@/sanity/lib/queries";
 import { notFound, permanentRedirect } from 'next/navigation';
-import { alternatesFor } from '@/lib/seo';
+import { alternatesFor, openGraphFor } from '@/lib/seo';
 import { getServerTranslations } from '@/i18n/server';
 import { autoFill, autoFillAll } from '@/lib/translate';
 import { ArrowLeft, BookOpen, Clock, Compass } from 'lucide-react';
@@ -126,6 +126,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title,
     description,
     alternates: alternatesFor('fr', `/ressources/${slug}`, res.slugEn ? `/en/ressources/${res.slugEn}` : null),
+    openGraph: await openGraphFor({ title, description, image: res.image, url: `/ressources/${slug}` }),
   };
 }
 

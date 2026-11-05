@@ -3,9 +3,9 @@ import React from 'react'
 import Image from 'next/image'
 import Link from '@/components/LocaleLink'
 import { client } from '@/sanity/lib/live'
-import { sejourBySlugQuery, sejourBySlugEnQuery, sejourSlugEnQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from '@/sanity/lib/queries'
+import { activityBySlugQuery, sejourBySlugQuery, sejourBySlugEnQuery, sejourSlugEnQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from '@/sanity/lib/queries'
 import { notFound, permanentRedirect, redirect } from 'next/navigation'
-import { alternatesFor } from '@/lib/seo'
+import { alternatesFor, openGraphFor } from '@/lib/seo'
 import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Users, CalendarDays, Info, FileDown } from 'lucide-react'
 import { getServerTranslations } from '@/i18n/server'
 import { autoFill, autoFillAll } from '@/lib/translate'
@@ -22,6 +22,7 @@ import { renderRichText, toPlainText } from '@/utils/richText'
 import { sortiePeriod } from '@/utils/dates'
 import GuideCredentials, { GUIDE_PERSON_ID } from '@/components/GuideCredentials'
 import HeroContactCta from '@/components/HeroContactCta'
+import { BreadcrumbJsonLd } from '@/components/StructuredLists'
 
 function FicheRow({ icon, label, value, tooltip }: { icon: React.ReactNode; label: string; value: React.ReactNode; tooltip?: string }) {
   if (!value) return null
@@ -71,7 +72,7 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
     title,
     description,
     alternates: alternatesFor('en', `/${ref.activitySlug}/${ref.subCategorySlug}/${ref.slug}`, `/en/${ref.activitySlug}/${ref.subCategorySlug}/${slug}`),
-    openGraph: { title, description, locale: 'en_US', alternateLocale: 'fr_FR' },
+    openGraph: await openGraphFor({ title, description, image: sejour.image, url: `/en/${ref.activitySlug}/${ref.subCategorySlug}/${slug}` }),
   }
 }
 
@@ -185,9 +186,16 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
     provider: { '@type': 'Person', '@id': GUIDE_PERSON_ID, name: 'Nicolas Draperi', jobTitle: 'Mountain Guide (UIAGM / IFMGA)', url: 'https://www.la-montagne-guide.fr/le-guide' },
   }
 
+  const parentActivity = await client.fetch(activityBySlugQuery, { slug: activitySlug })
+
   return (
     <main className="relative min-h-screen bg-background text-foreground transition-colors duration-300">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <BreadcrumbJsonLd items={[
+        { name: parentActivity?.titleEn || parentActivity?.title || at(activitySlug), path: `/${activitySlug}` },
+        { name: parentActivity?.univers?.find((u: any) => u.slug === subCategorySlug)?.titleEn || (sejour.subCategoryTitle ? at(sejour.subCategoryTitle) : subCategorySlug), path: `/${activitySlug}/${subCategorySlug}` },
+        { name: sejour.titleEn || sejour.title, path: `/en/${activitySlug}/${subCategorySlug}/${slug}` },
+      ]} />
       <FaqJsonLd faqs={tabs.flatMap((tab: any) => tab.faqs || [])} lang={"en"} />
 
       {/* Hero */}

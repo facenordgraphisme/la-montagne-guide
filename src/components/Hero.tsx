@@ -67,7 +67,7 @@ const Hero = ({
           >
             <Image
               src={backgrounds[currentBg]}
-              alt="Hero Background"
+              alt=""
               fill
               priority={currentBg === 0}
               className="object-cover"
@@ -120,6 +120,8 @@ const Hero = ({
           <button
             key={i}
             onClick={() => setCurrentBg(i)}
+            aria-label={language === 'en' ? `Show photo ${i + 1}` : `Afficher la photo ${i + 1}`}
+            aria-current={i === currentBg}
             className={`h-1 rounded-full transition-all duration-500 ${i === currentBg ? 'w-12 bg-accent' : 'w-4 bg-white/20 hover:bg-white/40'}`}
           />
         ))}

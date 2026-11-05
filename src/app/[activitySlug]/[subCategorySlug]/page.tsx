@@ -12,7 +12,8 @@ import { ArrowLeft } from 'lucide-react';
 import { PortableText } from '@portabletext/react';
 
 import { getServerTranslations } from '@/i18n/server';
-import { sharedPageAlternates } from '@/lib/seo';
+import { sharedPageAlternates, openGraphFor, canonicalOf, SITE_URL } from '@/lib/seo';
+import { BreadcrumbJsonLd, ItemListJsonLd } from '@/components/StructuredLists';
 import GuideCredentials from '@/components/GuideCredentials';
 import HeroContactCta from '@/components/HeroContactCta';
 
@@ -78,15 +79,12 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
   const description = (lang === 'en' ? currentUnivers.metaDescriptionEn : currentUnivers.metaDescription) || autoDescription;
   const ogImage = currentUnivers.image || activity.image || undefined;
 
+  const alternates = await sharedPageAlternates(`/${activitySlug}/${subCategorySlug}`);
   return {
     title,
     description,
-    alternates: await sharedPageAlternates(`/${activitySlug}/${subCategorySlug}`),
-    openGraph: {
-      title,
-      description,
-      images: ogImage ? [{ url: ogImage }] : undefined,
-    },
+    alternates,
+    openGraph: await openGraphFor({ title, description, image: ogImage, url: canonicalOf(alternates) }),
   };
 }
 
@@ -115,8 +113,20 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
     return s.subCategory === subCategorySlug;
   });
 
+  const activityName = at({ fr: activity.title, en: activity.titleEn });
+  const universName = at({ fr: currentUnivers.title, en: currentUnivers.titleEn });
+  // English listing: English URL when the stay has one, French page otherwise
+  const sejourPath = (s: any) => lang === 'en' && s.slugEn
+    ? `/en/${activitySlug}/${subCategorySlug}/${s.slugEn}`
+    : lang === 'en' ? `${SITE_URL}/${activitySlug}/${subCategorySlug}/${s.slug}` : `/${activitySlug}/${subCategorySlug}/${s.slug}`;
+
   return (
     <main className="relative min-h-screen bg-background text-foreground transition-colors duration-300">
+      <BreadcrumbJsonLd items={[{ name: activityName, path: `/${activitySlug}` }, { name: universName, path: `/${activitySlug}/${subCategorySlug}` }]} />
+      <ItemListJsonLd
+        name={universName}
+        items={filteredSejours.map((s: any) => ({ name: lang === 'en' ? (s.titleEn || s.title) : s.title, path: sejourPath(s) }))}
+      />
 
       {/* Hero Header with Background Image */}
       <section className="relative h-[85vh] flex items-center justify-center overflow-hidden">
@@ -148,7 +158,7 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
         <div className="container relative z-10 px-6 pt-32 text-center">
           <Link
             href={`/${activitySlug}`}
-            className="inline-flex items-center gap-2 text-white/60 font-bold mb-12 hover:text-accent transition-all duration-300 group"
+            className="inline-flex items-center gap-2 text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] font-bold mb-12 hover:text-accent transition-all duration-300 group"
           >
             <ArrowLeft size={16} />
             {at('RETOUR À')} {at({ fr: activity.title, en: activity.titleEn }).toUpperCase()}

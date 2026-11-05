@@ -59,11 +59,12 @@ export default function ContactForm() {
           <input type="hidden" name="name" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2">
+              <label htmlFor="contact-first_name" className="block text-xs font-bold uppercase tracking-widest text-foreground/60 mb-2">
                 {at('Prénom')}
               </label>
               <input
                 type="text"
+                id="contact-first_name"
                 name="first_name"
                 required
                 autoComplete="given-name"
@@ -71,11 +72,12 @@ export default function ContactForm() {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2">
+              <label htmlFor="contact-last_name" className="block text-xs font-bold uppercase tracking-widest text-foreground/60 mb-2">
                 {at('Nom')}
               </label>
               <input
                 type="text"
+                id="contact-last_name"
                 name="last_name"
                 required
                 autoComplete="family-name"
@@ -84,35 +86,40 @@ export default function ContactForm() {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2">
+            <label htmlFor="contact-email" className="block text-xs font-bold uppercase tracking-widest text-foreground/60 mb-2">
               {at('Email')}
             </label>
             <input
               type="email"
-              name="email"
+              id="contact-email"
+                name="email"
               required
+              autoComplete="email"
               className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 focus:outline-none focus:border-accent transition-colors text-foreground"
               placeholder="votre@email.com"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2">
+            <label htmlFor="contact-phone" className="block text-xs font-bold uppercase tracking-widest text-foreground/60 mb-2">
               {at('Téléphone')} <span className="text-foreground/20 normal-case font-normal">{at('(optionnel)')}</span>
             </label>
             <input
               type="tel"
-              name="phone"
+              id="contact-phone"
+                name="phone"
+              autoComplete="tel"
               className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 focus:outline-none focus:border-accent transition-colors text-foreground"
               placeholder="+33 6 00 00 00 00"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-foreground/40 mb-2">
+            <label htmlFor="contact-message" className="block text-xs font-bold uppercase tracking-widest text-foreground/60 mb-2">
               {at('Message')}
             </label>
             <textarea
               rows={6}
-              name="message"
+              id="contact-message"
+                name="message"
               required
               className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 focus:outline-none focus:border-accent transition-colors resize-none text-foreground"
               placeholder={at('Décrivez votre projet...')}

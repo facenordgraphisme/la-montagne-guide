@@ -1,5 +1,5 @@
 import React from 'react'
-import { sharedPageAlternates } from '@/lib/seo';
+import { sharedPageAlternates, openGraphFor, canonicalOf } from '@/lib/seo';
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
@@ -24,10 +24,14 @@ export async function generateMetadata({ params }: SortiePageProps): Promise<Met
     }
   }
 
+  const title = `${at(sortie.title)} | La Montagne Guide`
+  const description = sortie.description ? at(sortie.description).substring(0, 160) : ''
+  const alternates = await sharedPageAlternates(`/prochaines-sorties/${slug}`)
   return {
-    title: `${at(sortie.title)} | La Montagne Guide`,
-    description: sortie.description ? at(sortie.description).substring(0, 160) : '',
-    alternates: await sharedPageAlternates(`/prochaines-sorties/${slug}`),
+    title,
+    description,
+    alternates,
+    openGraph: await openGraphFor({ title, description, image: sortie.image, url: canonicalOf(alternates) }),
   }
 }
 

@@ -193,6 +193,8 @@ export default function PostComments({ postId, initialComments }: PostCommentsPr
                     type="button"
                     key={star}
                     onClick={() => setRating(star)}
+                    aria-label={`${star}/5`}
+                    aria-pressed={rating === star}
                     onMouseEnter={() => setHoverRating(star)}
                     onMouseLeave={() => setHoverRating(0)}
                     className="p-1 hover:scale-110 transition-transform text-highlight"

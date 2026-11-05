@@ -3,9 +3,9 @@ import React from 'react'
 import Image from 'next/image';
 import Link from '@/components/LocaleLink';
 import { client } from "@/sanity/lib/live";
-import { sejourBySlugQuery, sejourBySlugEnQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from "@/sanity/lib/queries";
+import { activityBySlugQuery, sejourBySlugQuery, sejourBySlugEnQuery, postsBySejourQuery, postsByActivityQuery, postsByTagsQuery, settingsQuery } from "@/sanity/lib/queries";
 import { notFound, permanentRedirect, redirect } from 'next/navigation';
-import { alternatesFor } from '@/lib/seo';
+import { alternatesFor, openGraphFor } from '@/lib/seo';
 import { MapPin, BarChart3, Clock, Euro, ArrowLeft, Calendar, Users, CalendarDays, Info, FileDown } from 'lucide-react';
 
 import { getServerTranslations } from '@/i18n/server';
@@ -23,6 +23,7 @@ import { renderRichText, toPlainText } from '@/utils/richText';
 import { sortiePeriod } from '@/utils/dates';
 import GuideCredentials, { GUIDE_PERSON_ID } from '@/components/GuideCredentials';
 import HeroContactCta from '@/components/HeroContactCta';
+import { BreadcrumbJsonLd } from '@/components/StructuredLists';
 
 function FicheRow({ icon, label, value, tooltip }: {
   icon: React.ReactNode
@@ -71,18 +72,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const title = (lang === 'en' ? (sejour.metaTitleEn || sejour.metaTitle) : sejour.metaTitle) || autoTitle;
   const description = (lang === 'en' ? (sejour.metaDescriptionEn || sejour.metaDescription) : sejour.metaDescription) || autoDescription;
-  const ogImage = sejour.image || undefined;
-
   const base = `/${sejour.activityType}/${sejour.subCategory}`;
   return {
     title,
     description,
     alternates: alternatesFor('fr', `${base}/${slug}`, sejour.slugEn ? `/en${base}/${sejour.slugEn}` : null),
-    openGraph: {
-      title,
-      description,
-      images: ogImage ? [{ url: ogImage }] : undefined,
-    },
+    openGraph: await openGraphFor({ title, description, image: sejour.image, url: `${base}/${slug}` }),
   };
 }
 
@@ -220,12 +215,20 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
     }
   };
 
+  const parentActivity = await client.fetch(activityBySlugQuery, { slug: activitySlug });
+  const sejourPath = `/${activitySlug}/${subCategorySlug}/${slug}`;
+
   return (
     <main className="relative min-h-screen bg-background text-foreground transition-colors duration-300">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <BreadcrumbJsonLd items={[
+        { name: at({ fr: parentActivity?.title, en: parentActivity?.titleEn }) || at(activitySlug), path: `/${activitySlug}` },
+        { name: sejour.subCategoryTitle ? at(sejour.subCategoryTitle) : subCategorySlug, path: `/${activitySlug}/${subCategorySlug}` },
+        { name: at({ fr: sejour.title, en: sejour.titleEn }), path: sejourPath },
+      ]} />
       <FaqJsonLd faqs={tabs.flatMap((tab: any) => tab.faqs || [])} lang={lang} />
 
       {/* Hero Header */}

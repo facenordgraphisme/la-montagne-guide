@@ -12,6 +12,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 
 import { sortActivities } from "@/utils/activity";
 import { getLanguage } from "@/i18n/server";
+import { openGraphFor } from "@/lib/seo";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -54,8 +55,6 @@ export async function generateMetadata(): Promise<Metadata> {
       getLanguage(),
     ]);
 
-    const locale = activeLanguage === 'en' ? 'en_GB' : 'fr_FR';
-
     return {
       metadataBase: new URL('https://www.la-montagne-guide.fr'),
       title: activeLanguage === 'en' ? settingsData?.seoTitleEn : settingsData?.seoTitle,
@@ -65,11 +64,7 @@ export async function generateMetadata(): Promise<Metadata> {
           { url: '/favicon.svg', type: 'image/svg+xml' }
         ]
       },
-      openGraph: {
-        locale,
-        alternateLocale: activeLanguage === 'en' ? 'fr_FR' : 'en_GB',
-        images: settingsData?.seoImage ? [{ url: settingsData.seoImage }] : [],
-      },
+      openGraph: await openGraphFor({}),
     };
   } catch {
     return {

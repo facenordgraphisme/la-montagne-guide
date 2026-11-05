@@ -3,8 +3,9 @@ import { notFound, permanentRedirect, redirect } from 'next/navigation'
 import { client } from '@/sanity/lib/live'
 import { activityBySlugQuery, postBySlugEnQuery, postBySlugQuery, postSlugEnQuery } from '@/sanity/lib/queries'
 import PostDetail from '@/components/PostDetail'
+import { BreadcrumbJsonLd } from '@/components/StructuredLists'
 import { decodeSlug } from '@/lib/localePath'
-import { alternatesFor } from '@/lib/seo'
+import { alternatesFor, openGraphFor } from '@/lib/seo'
 import ActivityOrPostPage, { generateMetadata as activityMetadata } from '@/app/[activitySlug]/page'
 
 type Props = { params: Promise<{ activitySlug: string }> }
@@ -24,17 +25,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return {}
   const titleStr = post.metaTitleEn || post.titleEn || post.title
   const title = titleStr.includes('La Montagne Guide') ? titleStr : `${titleStr} | La Montagne Guide`
-  const description = post.excerptEn || post.excerpt || post.metaDescriptionEn || post.metaDescription || ''
+  // A meta description written in Sanity wins over the excerpt
+  const description = post.metaDescriptionEn || post.excerptEn || post.excerpt || ''
   return {
     title,
     description,
     alternates: alternatesFor('en', `/${ref.slug}`, `/en/${slug}`),
-    openGraph: {
-      title,
-      description,
-      locale: 'en_US',
-      alternateLocale: 'fr_FR',
-    },
+    openGraph: await openGraphFor({ title, description, image: post.image, url: `/en/${slug}`, type: 'article' }),
   }
 }
 
@@ -49,7 +46,12 @@ export default async function EnActivityOrPostPage({ params }: Props) {
   if (ref) {
     const post = await client.fetch(postBySlugQuery, { slug: ref.slug })
     if (!post) notFound()
-    return <PostDetail post={post} forceLang="en" />
+    return (
+      <>
+        <BreadcrumbJsonLd items={[{ name: 'Blog', path: '/blog' }, { name: post.titleEn || post.title, path: `/en/${slug}` }]} />
+        <PostDetail post={post} forceLang="en" />
+      </>
+    )
   }
 
   // French slug under /en (language switch, internal link): go to the English URL, or to the French page if there is none

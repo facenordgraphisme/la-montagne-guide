@@ -15,7 +15,7 @@ import { urlFor, getVanityImageUrl } from "@/sanity/lib/image";
 import { getServerTranslations } from '@/i18n/server';
 import { permanentRedirect } from 'next/navigation';
 import { decodeSlug } from '@/lib/localePath';
-import { alternatesFor, sharedPageAlternates } from '@/lib/seo';
+import { alternatesFor, sharedPageAlternates, openGraphFor, canonicalOf } from '@/lib/seo';
 import { PortableText } from '@portabletext/react';
 import FAQAccordion from "@/components/FAQAccordion";
 import FaqJsonLd from '@/components/FaqJsonLd';
@@ -27,6 +27,7 @@ import { toPlainText } from '@/utils/richText';
 import { autoFill } from '@/lib/translate';
 import GuideCredentials from '@/components/GuideCredentials';
 import HeroContactCta from '@/components/HeroContactCta';
+import { BreadcrumbJsonLd, ItemListJsonLd } from '@/components/StructuredLists';
 
 
 
@@ -215,16 +216,12 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
     // No French fallback in English: the generated English title beats a French SEO title
     const title = (lang === 'en' ? activity.metaTitleEn : activity.metaTitle) || autoTitle;
     const description = (lang === 'en' ? activity.metaDescriptionEn : activity.metaDescription) || autoDescription;
-    const ogImage = activity.image || undefined;
+    const alternates = await sharedPageAlternates(`/${activitySlug}`);
     return {
       title,
       description,
-      alternates: await sharedPageAlternates(`/${activitySlug}`),
-      openGraph: {
-        title,
-        description,
-        images: ogImage ? [{ url: ogImage }] : undefined,
-      },
+      alternates,
+      openGraph: await openGraphFor({ title, description, image: activity.image, url: canonicalOf(alternates) }),
     };
   }
 
@@ -235,20 +232,15 @@ export async function generateMetadata({ params }: { params: Promise<{ activityS
   const rawExcerpt = lang === 'en' ? (post.excerptEn || post.excerpt) : post.excerpt;
   const autoDescription = rawExcerpt ? at(rawExcerpt) : '';
   const title = (lang === 'en' ? (post.metaTitleEn || post.metaTitle) : post.metaTitle) || autoTitle;
-  const description = autoDescription || (lang === 'en' ? (post.metaDescriptionEn || post.metaDescription) : post.metaDescription) || '';
-  const ogImage = post.image || undefined;
+  // A meta description written in Sanity wins over the excerpt
+  const description = (lang === 'en' ? post.metaDescriptionEn : post.metaDescription) || autoDescription || '';
   // A slugEn shared by several posts only belongs to the first one
   const enOwner = post.slugEn ? await client.fetch(postBySlugEnQuery, { slug: post.slugEn }) : null;
   return {
     title,
     description,
     alternates: alternatesFor('fr', `/${post.slug}`, enOwner?.slug === post.slug ? `/en/${post.slugEn}` : null),
-    openGraph: {
-      title,
-      description,
-      type: 'article',
-      images: ogImage ? [{ url: ogImage }] : undefined,
-    },
+    openGraph: await openGraphFor({ title, description, image: post.image, url: `/${post.slug}`, type: 'article' }),
   };
 }
 
@@ -260,9 +252,16 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
   if (activity) {
     // RENDER ACTIVITY LANDING PAGE
     const univers = activity.univers || [];
+    const activityName = at({ fr: activity.title, en: activity.titleEn });
+    const universSlugOf = (univ: any) => univ.slug || univ.title.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, '-');
 
     return (
       <main className="relative min-h-screen bg-background text-foreground transition-colors duration-300">
+        <BreadcrumbJsonLd items={[{ name: activityName, path: `/${activitySlug}` }]} />
+        <ItemListJsonLd
+          name={activityName}
+          items={univers.map((univ: any) => ({ name: at({ fr: univ.title, en: univ.titleEn }), path: `/${activitySlug}/${universSlugOf(univ)}` }))}
+        />
         <section className="relative h-[70vh] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 z-0">
             {activity.image && (
@@ -408,6 +407,7 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <BreadcrumbJsonLd items={[{ name: 'Blog', path: '/blog' }, { name: at({ fr: post.title, en: post.titleEn }), path: `/${post.slug}` }]} />
 
         <section className="relative py-20 md:py-28 bg-muted/10 border-b border-border/50">
           <div className="container relative z-10 px-6 max-w-3xl mx-auto">

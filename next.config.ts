@@ -14,6 +14,20 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // HSTS is already sent by Vercel. SAMEORIGIN keeps the Studio's Presentation preview (same domain) working.
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()' },
+        ],
+      },
+    ]
+  },
   async redirects() {
     return [
       { source: '/alpinisme/stages-alpinisme', destination: '/alpinisme/stage-alpinisme', permanent: true },

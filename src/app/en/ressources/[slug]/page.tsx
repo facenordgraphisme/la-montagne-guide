@@ -3,7 +3,7 @@ import React from 'react'
 import Image from 'next/image'
 import Link from '@/components/LocaleLink'
 import { notFound, permanentRedirect, redirect } from 'next/navigation'
-import { alternatesFor } from '@/lib/seo'
+import { alternatesFor, openGraphFor } from '@/lib/seo'
 import { client } from '@/sanity/lib/live'
 import { resourceBySlugQuery, resourceBySlugEnQuery, resourceSlugEnQuery } from '@/sanity/lib/queries'
 import { getServerTranslations } from '@/i18n/server'
@@ -96,7 +96,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title,
     description,
     alternates: alternatesFor('en', `/ressources/${ref.slug}`, `/en/ressources/${slug}`),
-    openGraph: { title, description, locale: 'en_US', alternateLocale: 'fr_FR' },
+    openGraph: await openGraphFor({ title, description, image: data.image, url: `/en/ressources/${slug}` }),
   }
 }
 

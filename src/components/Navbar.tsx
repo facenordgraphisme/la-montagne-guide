@@ -70,7 +70,8 @@ const Navbar = ({ sanityActivities, settingsData }: { sanityActivities?: any[], 
         style={{ top: 'calc(var(--banner-height, 0px) + 24px)' }}
         className="fixed left-1/2 -translate-x-1/2 z-[60] w-[95%] max-w-6xl glass rounded-full px-4 md:px-8 py-3 md:py-4 flex items-center justify-between shadow-2xl transition-[top] duration-300 ease-out"
       >
-        <Link href="/" className="flex items-center" onClick={() => setIsOpen(false)}>
+        <Link href="/" aria-label={language === 'en' ? 'La Montagne Guide, home' : 'La Montagne Guide, accueil'} className="flex items-center" onClick={() => setIsOpen(false)}>
+          {!mounted && <span className="block w-32 md:w-48 lg:w-56 aspect-[3/1]" aria-hidden />}
           {mounted && (
             <Image
               src={theme === 'dark' ? "/logo.webp" : "/logo-black.webp"}
@@ -131,19 +132,23 @@ const Navbar = ({ sanityActivities, settingsData }: { sanityActivities?: any[], 
         <div className="flex items-center gap-2 md:gap-4">
           {/* Language Switcher */}
           <div className="flex items-center gap-2 mr-4 px-3 py-1 bg-foreground/5 rounded-full border border-border">
-            <button 
+            <button
               onClick={() => setLanguage('fr')}
               className={`w-6 h-6 rounded-full overflow-hidden transition-all duration-300 ${language === 'fr' ? 'ring-2 ring-accent scale-110' : 'opacity-40 hover:opacity-100'}`}
               title="Français"
+              aria-label="Français"
+              aria-pressed={language === 'fr'}
             >
-              <img src="https://flagcdn.com/w40/fr.png" alt="FR" className="w-full h-full object-cover" />
+              <img src="https://flagcdn.com/w40/fr.png" alt="" className="w-full h-full object-cover" />
             </button>
-            <button 
+            <button
               onClick={() => setLanguage('en')}
               className={`w-6 h-6 rounded-full overflow-hidden transition-all duration-300 ${language === 'en' ? 'ring-2 ring-accent scale-110' : 'opacity-40 hover:opacity-100'}`}
               title="English"
+              aria-label="English"
+              aria-pressed={language === 'en'}
             >
-              <img src="https://flagcdn.com/w40/gb.png" alt="EN" className="w-full h-full object-cover" />
+              <img src="https://flagcdn.com/w40/gb.png" alt="" className="w-full h-full object-cover" />
             </button>
           </div>
 
@@ -152,6 +157,9 @@ const Navbar = ({ sanityActivities, settingsData }: { sanityActivities?: any[], 
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="p-2 rounded-full hover:bg-foreground/5 transition-colors text-foreground"
+              aria-label={theme === 'dark'
+                ? (language === 'en' ? 'Switch to light mode' : 'Passer en mode clair')
+                : (language === 'en' ? 'Switch to dark mode' : 'Passer en mode sombre')}
             >
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
@@ -162,7 +170,8 @@ const Navbar = ({ sanityActivities, settingsData }: { sanityActivities?: any[], 
           <button 
             className="lg:hidden p-2 text-foreground"
             onClick={() => setIsOpen(!isOpen)}
-            aria-label="Toggle menu"
+            aria-label={isOpen ? (language === 'en' ? 'Close menu' : 'Fermer le menu') : (language === 'en' ? 'Open menu' : 'Ouvrir le menu')}
+            aria-expanded={isOpen}
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -183,6 +192,7 @@ const Navbar = ({ sanityActivities, settingsData }: { sanityActivities?: any[], 
               <div className="w-full flex flex-col items-center">
                 <button 
                   onClick={() => setIsActivitiesOpen(!isActivitiesOpen)}
+                  aria-expanded={isActivitiesOpen}
                   className="w-full flex items-center justify-between py-4 text-xl font-semibold border-b border-foreground/10"
                 >
                   {labelActivities}
@@ -239,14 +249,14 @@ const Navbar = ({ sanityActivities, settingsData }: { sanityActivities?: any[], 
                   onClick={() => setLanguage('fr')}
                   className={`flex flex-col items-center gap-2 transition-all ${language === 'fr' ? 'scale-110' : 'opacity-40'}`}
                 >
-                  <img src="https://flagcdn.com/w80/fr.png" alt="FR" className="w-10 h-10 rounded-full object-cover ring-2 ring-accent/50" />
+                  <img src="https://flagcdn.com/w80/fr.png" alt=""className="w-10 h-10 rounded-full object-cover ring-2 ring-accent/50" />
                   <span className="text-[10px] font-bold uppercase tracking-widest text-white">Français</span>
                 </button>
                 <button 
                   onClick={() => setLanguage('en')}
                   className={`flex flex-col items-center gap-2 transition-all ${language === 'en' ? 'scale-110' : 'opacity-40'}`}
                 >
-                  <img src="https://flagcdn.com/w80/gb.png" alt="EN" className="w-10 h-10 rounded-full object-cover ring-2 ring-accent/50" />
+                  <img src="https://flagcdn.com/w80/gb.png" alt=""className="w-10 h-10 rounded-full object-cover ring-2 ring-accent/50" />
                   <span className="text-[10px] font-bold uppercase tracking-widest text-white">English</span>
                 </button>
               </div>

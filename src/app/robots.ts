@@ -8,6 +8,5 @@ export default function robots(): MetadataRoute.Robots {
       disallow: ['/studio', '/api/'],
     },
     sitemap: 'https://www.la-montagne-guide.fr/sitemap.xml',
-    host: 'https://www.la-montagne-guide.fr',
   }
 }
