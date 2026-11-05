@@ -25,6 +25,8 @@ import PostComments from '@/components/PostComments';
 import { formatFriendlyDate } from '@/utils/date';
 import { toPlainText } from '@/utils/richText';
 import { autoFill } from '@/lib/translate';
+import GuideCredentials from '@/components/GuideCredentials';
+import HeroContactCta from '@/components/HeroContactCta';
 
 
 
@@ -280,6 +282,7 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
             <p className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto leading-relaxed font-medium text-center">
               {at({ fr: activity.intro, en: activity.introEn }) || toPlainText(activity.description)?.substring(0, 200)}
             </p>
+            <HeroContactCta className="mt-8" />
           </div>
         </section>
 
@@ -351,6 +354,8 @@ export default async function GenericRootPage({ params }: { params: Promise<{ ac
                 <p className="text-xl text-foreground/40 font-medium">{at('Les univers de cette activité seront bientôt disponibles.')}</p>
               </div>
             )}
+
+            <GuideCredentials className="mt-16" />
           </div>
         </section>
 

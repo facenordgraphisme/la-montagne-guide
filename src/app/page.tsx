@@ -19,6 +19,10 @@ import { autoFillAll } from '@/lib/translate';
 import { sortActivities } from "@/utils/activity";
 import { sharedPageAlternates } from "@/lib/seo";
 import type { Metadata } from "next";
+import { GUIDE_PERSON_ID } from "@/components/GuideCredentials";
+
+// Google Business Profile "Nicolas Draperi, Guide de Haute Montagne"
+const GOOGLE_BUSINESS_URL = "https://share.google/iYPaQqxoluAYaBsCH";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { alternates: await sharedPageAlternates('/') };
@@ -72,7 +76,10 @@ export default async function Home() {
       "addressCountry": "FR"
     } : undefined,
     "priceRange": "$$",
+    "areaServed": ["Hautes-Alpes", "Massif des Écrins", "Queyras", "Alpes"],
+    "founder": { "@id": GUIDE_PERSON_ID },
     "sameAs": [
+      GOOGLE_BUSINESS_URL,
       settingsData?.instagram,
       settingsData?.facebook,
       settingsData?.youtube

@@ -20,6 +20,8 @@ import { SejourLevels } from '@/components/SejourLevels'
 import { findLevelIcon, levelDiscipline } from '@/utils/levels'
 import { renderRichText, toPlainText } from '@/utils/richText'
 import { sortiePeriod } from '@/utils/dates'
+import GuideCredentials, { GUIDE_PERSON_ID } from '@/components/GuideCredentials'
+import HeroContactCta from '@/components/HeroContactCta'
 
 function FicheRow({ icon, label, value, tooltip }: { icon: React.ReactNode; label: string; value: React.ReactNode; tooltip?: string }) {
   if (!value) return null
@@ -180,7 +182,7 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
       priceCurrency: 'EUR',
       description: 'Base rate',
     } : undefined,
-    provider: { '@type': 'Person', name: 'Nicolas Draperi', jobTitle: 'Mountain Guide' },
+    provider: { '@type': 'Person', '@id': GUIDE_PERSON_ID, name: 'Nicolas Draperi', jobTitle: 'Mountain Guide (UIAGM / IFMGA)', url: 'https://www.la-montagne-guide.fr/le-guide' },
   }
 
   return (
@@ -225,6 +227,7 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter uppercase leading-[1.0] text-white">
             {sejour.titleEn || sejour.title}
           </h1>
+          <HeroContactCta className="mt-8" />
         </div>
       </section>
 
@@ -245,6 +248,8 @@ export default async function EnSejourDetail({ params }: { params: Promise<{ act
               ) : sejour.content ? (
                 <RichContent value={translatePortableText(sejour.content)} />
               ) : null}
+
+              <GuideCredentials />
             </div>
 
             {/* Sidebar */}

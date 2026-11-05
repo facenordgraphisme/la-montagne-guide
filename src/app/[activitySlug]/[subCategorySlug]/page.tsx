@@ -13,6 +13,8 @@ import { PortableText } from '@portabletext/react';
 
 import { getServerTranslations } from '@/i18n/server';
 import { sharedPageAlternates } from '@/lib/seo';
+import GuideCredentials from '@/components/GuideCredentials';
+import HeroContactCta from '@/components/HeroContactCta';
 
 function blocksToText(blocks: any, lang: string): string {
   if (!blocks) return '';
@@ -155,6 +157,7 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
           <h1 className="text-6xl md:text-9xl font-black tracking-tighter uppercase leading-[0.8] text-white mb-12">
             {at({ fr: currentUnivers.title, en: currentUnivers.titleEn })}
           </h1>
+          <HeroContactCta className="-mt-4 mb-16" />
         </div>
       </section>
 
@@ -224,6 +227,8 @@ export default async function UniversePage({ params }: { params: Promise<{ activ
               <p className="text-foreground/40 font-medium">{at('Nous préparons de nouveaux séjours d\'exception pour cet univers.')}</p>
             </div>
           )}
+
+          <GuideCredentials className="mt-16" />
         </div>
       </section>
 

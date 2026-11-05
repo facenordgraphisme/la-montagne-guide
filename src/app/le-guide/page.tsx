@@ -12,6 +12,7 @@ import FAQAccordion from "@/components/FAQAccordion";
 import FaqJsonLd from '@/components/FaqJsonLd';
 
 import { getServerTranslations } from '@/i18n/server';
+import GuideCredentials, { GUIDE_PERSON_ID } from '@/components/GuideCredentials';
 
 const blockAlignComponents = {
   block: {
@@ -83,8 +84,28 @@ export default async function GuidePage() {
   };
 
   const guide = data || fallback;
+  const personPhoto = data?.sections?.find((s: any) => s?.image)?.image;
+  const personJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": GUIDE_PERSON_ID,
+    "name": "Nicolas Draperi",
+    "jobTitle": lang === 'en' ? "Mountain Guide (UIAGM / IFMGA)" : "Guide de haute montagne UIAGM / IFMGA",
+    "url": "https://www.la-montagne-guide.fr/le-guide",
+    "image": personPhoto ? urlFor(personPhoto).width(800).url() : undefined,
+    "address": { "@type": "PostalAddress", "addressLocality": "Champcella", "addressRegion": "Hautes-Alpes", "addressCountry": "FR" },
+    "hasCredential": {
+      "@type": "EducationalOccupationalCredential",
+      "name": "UIAGM / IFMGA",
+      "credentialCategory": lang === 'en' ? "Mountain guide qualification" : "Diplôme de guide de haute montagne",
+      "recognizedBy": { "@type": "Organization", "name": "UIAGM / IFMGA" }
+    },
+    "worksFor": { "@type": "LocalBusiness", "name": "La Montagne Guide", "url": "https://www.la-montagne-guide.fr" },
+    "sameAs": [settingsData?.instagram, settingsData?.facebook, settingsData?.youtube].filter(Boolean)
+  };
   return (
     <main className="relative min-h-screen">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
 
       {/* Header Section */}
       <section className="relative pt-48 pb-20 overflow-hidden">
@@ -100,6 +121,8 @@ export default async function GuidePage() {
           </div>
         </div>
       </section>
+
+      <GuideCredentials variant="full" className="-mt-8" />
 
       {/* Main Bio Sections */}
       {guide.sections && guide.sections.length > 0 ? (

@@ -21,6 +21,8 @@ import { SejourLevels } from '@/components/SejourLevels';
 import { findLevelIcon, levelDiscipline } from '@/utils/levels';
 import { renderRichText, toPlainText } from '@/utils/richText';
 import { sortiePeriod } from '@/utils/dates';
+import GuideCredentials, { GUIDE_PERSON_ID } from '@/components/GuideCredentials';
+import HeroContactCta from '@/components/HeroContactCta';
 
 function FicheRow({ icon, label, value, tooltip }: {
   icon: React.ReactNode
@@ -211,8 +213,10 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
     } : undefined,
     "provider": {
       "@type": "Person",
+      "@id": GUIDE_PERSON_ID,
       "name": "Nicolas Draperi",
-      "jobTitle": "Guide de Haute Montagne"
+      "jobTitle": lang === 'en' ? "Mountain Guide (UIAGM / IFMGA)" : "Guide de haute montagne UIAGM / IFMGA",
+      "url": "https://www.la-montagne-guide.fr/le-guide"
     }
   };
 
@@ -265,6 +269,7 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter uppercase leading-[1.0] text-white">
             {at({ fr: sejour.title, en: sejour.titleEn })}
           </h1>
+          <HeroContactCta className="mt-8" />
         </div>
       </section>
 
@@ -286,6 +291,8 @@ export default async function SejourDetail({ params }: { params: Promise<{ activ
               ) : sejour.content ? (
                 <RichContent value={translatePortableText(sejour.content)} />
               ) : null}
+
+              <GuideCredentials />
             </div>
 
             {/* Sidebar — 2 blocs distincts */}
