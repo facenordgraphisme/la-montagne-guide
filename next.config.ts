@@ -1,5 +1,34 @@
 import type { NextConfig } from "next";
 
+// Old slug (still in Google's index) -> current Sanity slug. Matched by WordPress post id,
+// archived title and publish date. Keep until Sanity stores old slugs itself.
+const RENAMED_POSTS: Record<string, string> = {
+  '4-jours-dans-les-ecrins': '4-jours-alpinisme-ecrins',
+  'barrah-tribord-toute': 'barrah-tribord-toute-wadi-rum',
+  'black-magic': 'black-magic-wadi-rum',
+  'cat-fish-corner': 'cat-fish-corner-wadi-rum',
+  'crete-reychard': 'ski-randonnee-puy-saint-vincent-crete-reychard',
+  'deux-jours-poudreland': 'deux-jours-poudreuse-serre-chevalier',
+  'ecole-glace-3': 'ecole-glace-crampons-ecrins',
+  'grandes-voies': 'grandes-voies-hautes-alpes',
+  'hors-piste-serre-che': 'hors-piste-serre-chevalier-montagnolle',
+  'initiation-alpinisme-place-aux-pietons': 'initiation-alpinisme-week-end',
+  'initiation-poudreuse': 'initiation-poudreuse-week-end-ski-randonnée',
+  'initiation-seuls-au-monde': 'initiation-alpinisme -seuls-au-monde',
+  'initiation-ski-de-rando-cochette': 'initiation-ski-de-rando-cochette-briançon',
+  'la-tete-dans-les-nuages': 'initiation-alpinisme-ecrins-arsine-roche-faurio',
+  'mont-rose-2': 'cosmiques-mont-rose-alpinisme',
+  'pelas-vernet': 'ski-blanche-face-ouest-couloir-pelas-vernet',
+  'ptit-tour-a-jacquette': 'ski-randonnee-jacquette-marcelette-ceillac',
+  'retour-dans-le-raide': 'grande-voie-Cap-Canaille',
+  'roche-faurio-2': 'roche-faurio-ecole-glace',
+  'roche-faurio-3': 'roche-faurio-ascension',
+  'roche-paillon-emile-pic-2': 'roche-paillon-emile-pic-traversee-neige',
+  'tete-aval': 'tete-aval-polichinelle-pilier-rouge',
+  'tete-raisins-2': 'ski-randonnee-tete-des-raisins-freissinieres',
+  'un-mont-blanc': 'mont-blanc-trois-jours-tete-rousse-gouter',
+}
+
 const nextConfig: NextConfig = {
   // Title, canonical and hreflang always in <head>: when streamed they can land after </head>, even for Googlebot
   htmlLimitedBots: /.*/,
@@ -39,6 +68,13 @@ const nextConfig: NextConfig = {
       { source: '/ski/freerando', destination: '/ski/ski-hors-piste', permanent: true },
       { source: '/ski/freeride-', destination: '/ski/ski-hors-piste', permanent: true },
       { source: '/ski/ski-de-pente-raide', destination: '/ski/ski-alpinisme', permanent: true },
+      { source: '/ski/freerando/sejour-freerando-hautes-alpes', destination: '/ski/raid-ski-sejours/freerando-hautes-alpes', permanent: true },
+      // Posts renamed in Sanity in November 2026 (old WordPress slug -> current slug)
+      ...Object.entries(RENAMED_POSTS).map(([from, to]) => ({
+        source: `/${from}`,
+        destination: `/${encodeURIComponent(to)}`,
+        permanent: true,
+      })),
       {
         source: '/prestations/:slug',
         destination: '/:slug',

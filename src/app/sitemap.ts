@@ -3,7 +3,10 @@ import { client } from '@/sanity/lib/client'
 
 const SITE = 'https://www.la-montagne-guide.fr'
 
-export const revalidate = 3600
+// Rendered on each request so a renamed slug shows up without a rebuild;
+// the Sanity read itself is cached 60 s and purged by the webhook
+export const dynamic = 'force-dynamic'
+const revalidate = 60
 
 const PUBLISHED = '!(_id in path("drafts.**")) && !(isHidden == true) && defined(slug.current)'
 
