@@ -3,6 +3,12 @@ import type { NextRequest } from 'next/server'
 
 const PRODUCTION_DOMAIN = 'www.la-montagne-guide.fr'
 
+// Slugs that only changed case: next.config redirects ignore case, so they are matched here
+const CASE_RENAMES: Record<string, string> = {
+  '/voie-pic-sans-nom-Zenabibes': '/voie-pic-sans-nom-zenabibes',
+  '/grande-voie-Cap-Canaille': '/grande-voie-cap-canaille',
+}
+
 export function proxy(request: NextRequest) {
   const host = request.headers.get('host') || ''
 
@@ -17,6 +23,13 @@ export function proxy(request: NextRequest) {
     // Tell Google not to index this URL
     response.headers.set('X-Robots-Tag', 'noindex, nofollow')
     return response
+  }
+
+  const renamed = CASE_RENAMES[request.nextUrl.pathname]
+  if (renamed) {
+    const url = request.nextUrl.clone()
+    url.pathname = renamed
+    return NextResponse.redirect(url, { status: 308 })
   }
 
   // The URL decides the language: /en/* is English, everything else is French.

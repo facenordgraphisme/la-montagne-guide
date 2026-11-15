@@ -13,20 +13,29 @@ const RENAMED_POSTS: Record<string, string> = {
   'grandes-voies': 'grandes-voies-hautes-alpes',
   'hors-piste-serre-che': 'hors-piste-serre-chevalier-montagnolle',
   'initiation-alpinisme-place-aux-pietons': 'initiation-alpinisme-week-end',
-  'initiation-poudreuse': 'initiation-poudreuse-week-end-ski-randonnée',
-  'initiation-seuls-au-monde': 'initiation-alpinisme -seuls-au-monde',
-  'initiation-ski-de-rando-cochette': 'initiation-ski-de-rando-cochette-briançon',
+  'initiation-poudreuse': 'initiation-poudreuse-week-end-ski-randonnee',
+  'initiation-seuls-au-monde': 'initiation-alpinisme-seuls-au-monde',
+  'initiation-ski-de-rando-cochette': 'initiation-ski-de-rando-cochette-briancon',
   'la-tete-dans-les-nuages': 'initiation-alpinisme-ecrins-arsine-roche-faurio',
   'mont-rose-2': 'cosmiques-mont-rose-alpinisme',
   'pelas-vernet': 'ski-blanche-face-ouest-couloir-pelas-vernet',
   'ptit-tour-a-jacquette': 'ski-randonnee-jacquette-marcelette-ceillac',
-  'retour-dans-le-raide': 'grande-voie-Cap-Canaille',
+  'retour-dans-le-raide': 'grande-voie-cap-canaille',
   'roche-faurio-2': 'roche-faurio-ecole-glace',
   'roche-faurio-3': 'roche-faurio-ascension',
   'roche-paillon-emile-pic-2': 'roche-paillon-emile-pic-traversee-neige',
   'tete-aval': 'tete-aval-polichinelle-pilier-rouge',
   'tete-raisins-2': 'ski-randonnee-tete-des-raisins-freissinieres',
   'un-mont-blanc': 'mont-blanc-trois-jours-tete-rousse-gouter',
+  // Slugs with accents or a space, cleaned on 2026-11-15 (case-only renames live in proxy.ts:
+  // redirects here match case-insensitively and would loop)
+  'initiation-alpinisme -seuls-au-monde': 'initiation-alpinisme-seuls-au-monde',
+  'initiation-ski-de-rando-cochette-briançon': 'initiation-ski-de-rando-cochette-briancon',
+  'crete-seyte-ski-de-randonnée': 'crete-seyte-ski-de-randonnee',
+  'ski-de-rando-mission-sauvetage-Montgenèvre': 'ski-de-rando-mission-sauvetage-montgenevre',
+  'initiation-ski-randonnée-briançon': 'initiation-ski-randonnee-briancon',
+  'initiation-poudreuse-week-end-ski-randonnée': 'initiation-poudreuse-week-end-ski-randonnee',
+  'dôme-des-ecrins-avec-troupe': 'dome-des-ecrins-avec-troupe',
 }
 
 const nextConfig: NextConfig = {
@@ -71,7 +80,7 @@ const nextConfig: NextConfig = {
       { source: '/ski/freerando/sejour-freerando-hautes-alpes', destination: '/ski/raid-ski-sejours/freerando-hautes-alpes', permanent: true },
       // Posts renamed in Sanity in November 2026 (old WordPress slug -> current slug)
       ...Object.entries(RENAMED_POSTS).map(([from, to]) => ({
-        source: `/${from}`,
+        source: `/${encodeURIComponent(from)}`,
         destination: `/${encodeURIComponent(to)}`,
         permanent: true,
       })),
