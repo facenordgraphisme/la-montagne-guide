@@ -58,6 +58,8 @@ export default defineConfig({
     image: { assetSources: (prev) => [...prev, articleImagesSource] },
   },
   document: {
+    // Questionnaire responses only come from the site
+    newDocumentOptions: (prev) => prev.filter((t) => t.templateId !== 'questionnaireResponse'),
     actions: (prev, ctx) => {
       const extra: any[] = []
       if (['post', 'sejour', 'resource', 'tag', 'univers', 'activity'].includes(ctx.schemaType)) {

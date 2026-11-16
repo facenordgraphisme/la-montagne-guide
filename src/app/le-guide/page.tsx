@@ -12,7 +12,7 @@ import FAQAccordion from "@/components/FAQAccordion";
 import FaqJsonLd from '@/components/FaqJsonLd';
 
 import { getServerTranslations } from '@/i18n/server';
-import GuideCredentials, { GUIDE_PERSON_ID } from '@/components/GuideCredentials';
+import { GUIDE_PERSON_ID } from '@/components/GuideCredentials';
 
 const blockAlignComponents = {
   block: {
@@ -121,8 +121,6 @@ export default async function GuidePage() {
           </div>
         </div>
       </section>
-
-      <GuideCredentials variant="full" className="-mt-8" />
 
       {/* Main Bio Sections */}
       {guide.sections && guide.sections.length > 0 ? (

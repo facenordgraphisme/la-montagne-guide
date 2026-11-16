@@ -13,7 +13,7 @@ const PUBLISHED = '!(_id in path("drafts.**")) && !(isHidden == true) && defined
 // A slugEn shared by several posts belongs to the oldest one (same rule as postBySlugEnQuery)
 const query = `{
   "activities": *[_type == "activity" && !(_id in path("drafts.**")) && defined(slug.current)]{ "slug": slug.current, _updatedAt },
-  "univers": *[_type == "univers" && ${PUBLISHED} && defined(activity->slug.current)]{ "slug": slug.current, "activity": activity->slug.current, _updatedAt },
+  "univers": *[_type == "univers" && ${PUBLISHED} && defined(activity->slug.current) && count(*[_type == "sejour" && ${PUBLISHED} && subCategory._ref == ^._id]) > 0]{ "slug": slug.current, "activity": activity->slug.current, _updatedAt },
   "sejours": *[_type == "sejour" && ${PUBLISHED} && defined(subCategory->slug.current)]{
     "slug": slug.current, slugEn, _updatedAt,
     "univers": subCategory->slug.current,

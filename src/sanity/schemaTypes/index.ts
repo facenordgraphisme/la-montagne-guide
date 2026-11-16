@@ -17,6 +17,7 @@ import { resourceType } from './resource'
 import { ctaType } from './cta'
 import { resourceCategoryType } from './resourceCategory'
 import { tabTemplateType } from './tabTemplate'
+import { questionnaireType, questionnaireResponseType } from './questionnaire'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -39,5 +40,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     resourceCategoryType,
     ctaType,
     tabTemplateType,
+    questionnaireType,
+    questionnaireResponseType,
   ],
 }

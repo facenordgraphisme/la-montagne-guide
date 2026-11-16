@@ -1,5 +1,5 @@
 import type { StructureResolver } from 'sanity/structure'
-import { Home, UserRound, Mail, Settings, Compass, Layers, Mountain, BookOpen, Tag, LayoutTemplate, FileText } from 'lucide-react'
+import { Home, UserRound, Mail, Settings, Compass, Layers, Mountain, BookOpen, Tag, LayoutTemplate, FileText, ClipboardList, Inbox } from 'lucide-react'
 
 // A post counts as done if either its published or draft version is ticked
 const PROGRESS_QUERY = `{
@@ -147,8 +147,67 @@ export const structure: StructureResolver = (S, context) =>
               list('images-to-review', `▫️ Images à revoir (${c.total - c.images})`, '_type == "post" && !(imagesReviewed == true)'),
             ])
         }),
+
+      S.divider(),
+
+      // Questionnaires d'inscription (pages privées) et leurs réponses
+      S.listItem()
+        .title('Questionnaires')
+        .id('questionnaires')
+        .icon(ClipboardList)
+        .child(
+          S.list()
+            .title('Questionnaires')
+            .items([
+              S.listItem()
+                .title('Questionnaires')
+                .icon(ClipboardList)
+                .child(
+                  S.documentTypeList('questionnaire')
+                    .title('Questionnaires')
+                    .child((questionnaireId) =>
+                      S.list()
+                        .title('Questionnaire')
+                        .items([
+                          S.listItem()
+                            .title('Modifier le questionnaire')
+                            .icon(ClipboardList)
+                            .child(S.document().schemaType('questionnaire').documentId(questionnaireId)),
+                          S.listItem()
+                            .title('Réponses reçues')
+                            .icon(Inbox)
+                            .child(
+                              S.documentTypeList('questionnaireResponse')
+                                .title('Réponses')
+                                .filter('_type == "questionnaireResponse" && questionnaire._ref == $questionnaireId')
+                                .params({ questionnaireId })
+                                .defaultOrdering([{ field: 'submittedAt', direction: 'desc' }])
+                            ),
+                        ])
+                    )
+                ),
+              S.divider(),
+              S.listItem()
+                .title('🆕 Réponses à traiter')
+                .icon(Inbox)
+                .child(
+                  S.documentTypeList('questionnaireResponse')
+                    .title('Réponses à traiter')
+                    .filter('_type == "questionnaireResponse" && !(handled == true)')
+                    .defaultOrdering([{ field: 'submittedAt', direction: 'desc' }])
+                ),
+              S.listItem()
+                .title('Toutes les réponses')
+                .icon(Inbox)
+                .child(
+                  S.documentTypeList('questionnaireResponse')
+                    .title('Toutes les réponses')
+                    .defaultOrdering([{ field: 'submittedAt', direction: 'desc' }])
+                ),
+            ])
+        ),
       // Regular document types, filtered to exclude singletons and types already reachable via la navigation hiérarchique ci-dessus
       ...S.documentTypeListItems().filter(
-        (listItem) => !['home', 'guide', 'contact', 'settings', 'activity', 'univers', 'sejour', 'tabTemplate', 'resource', 'resourceCategory', 'post'].includes(listItem.getId() || '')
+        (listItem) => !['home', 'guide', 'contact', 'settings', 'activity', 'univers', 'sejour', 'tabTemplate', 'resource', 'resourceCategory', 'post', 'questionnaire', 'questionnaireResponse'].includes(listItem.getId() || '')
       ),
     ])

@@ -9,12 +9,11 @@ import { getServerTranslations } from '@/i18n/server'
 export const GUIDE_PERSON_ID = 'https://www.la-montagne-guide.fr/le-guide#nicolas-draperi'
 
 type Props = {
-  // full: factual summary on /le-guide. compact: reassurance block on hubs, univers and stays
-  variant?: 'full' | 'compact'
+  // Reassurance block on hubs, univers and stays
   className?: string
 }
 
-export default async function GuideCredentials({ variant = 'compact', className = '' }: Props) {
+export default async function GuideCredentials({ className = '' }: Props) {
   const [guide, { at, t, lang }] = await Promise.all([client.fetch(guideQuery), getServerTranslations()])
 
   const years = String(guide?.experience || '15+').match(/\d+/)?.[0] || '15'
@@ -28,35 +27,6 @@ export default async function GuideCredentials({ variant = 'compact', className 
     { icon: Mountain, label: L('Expérience', 'Experience'), value: L(`Plus de ${years} ans`, `Over ${years} years`) },
     { icon: MapPin, label: L('Basé à', 'Based in'), value: L('Champcella, Hautes-Alpes (Écrins, Queyras)', 'Champcella, Hautes-Alpes, France (Écrins, Queyras)') },
   ]
-
-  if (variant === 'full') {
-    return (
-      <section className={`py-12 ${className}`}>
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl glass rounded-[40px] border border-border p-8 md:p-12">
-            <h2 className="text-xs font-black uppercase tracking-widest text-accent mb-4">{L('En bref', 'At a glance')}</h2>
-            <p className="text-lg md:text-xl text-foreground/80 leading-relaxed mb-8 !text-left">
-              {L(
-                `Nicolas Draperi est guide de haute montagne diplômé ${diploma}, basé à Champcella dans les Hautes-Alpes, entre les Écrins et le Queyras. Il encadre l'alpinisme, le ski de randonnée, l'escalade et la cascade de glace, dans les Alpes et lors de voyages à l'étranger, avec plus de ${years} ans d'expérience.`,
-                `Nicolas Draperi is a ${diploma} certified mountain guide based in Champcella, in the French Hautes-Alpes, between the Écrins and the Queyras. He guides mountaineering, ski touring, rock climbing and ice climbing across the Alps and on trips abroad, with over ${years} years of experience.`
-              )}
-            </p>
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5">
-              {facts.map(({ icon: Icon, label, value }) => (
-                <div key={label} className="flex items-start gap-3">
-                  <Icon size={20} className="text-accent shrink-0 mt-0.5" aria-hidden />
-                  <div>
-                    <dt className="text-[11px] font-bold uppercase tracking-widest text-foreground/50">{label}</dt>
-                    <dd className="font-semibold text-foreground">{value}</dd>
-                  </div>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </div>
-      </section>
-    )
-  }
 
   return (
     <aside className={`glass rounded-[40px] border border-border p-6 md:p-8 ${className}`} aria-label={L('Votre guide', 'Your guide')}>

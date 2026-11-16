@@ -310,7 +310,7 @@ export const activitiesQuery = groq`*[_type == "activity"] | order(title asc) {
   universBadge, universBadgeEn,
   universTitle, universTitleEn,
   universDescription, universDescriptionEn,
-  "univers": *[_type == "univers" && !(isHidden == true) && activity._ref == ^._id] {
+  "univers": *[_type == "univers" && !(isHidden == true) && activity._ref == ^._id && count(*[_type == "sejour" && !(isHidden == true) && subCategory._ref == ^._id]) > 0] {
     title, titleEn,
     "slug": slug.current,
     description, descriptionEn,
@@ -339,7 +339,7 @@ export const activityBySlugQuery = groq`*[_type == "activity" && slug.current ==
   universBadge, universBadgeEn,
   universTitle, universTitleEn,
   universDescription, universDescriptionEn,
-  "univers": *[_type == "univers" && !(isHidden == true) && activity._ref == ^._id] {
+  "univers": *[_type == "univers" && !(isHidden == true) && activity._ref == ^._id && count(*[_type == "sejour" && !(isHidden == true) && subCategory._ref == ^._id]) > 0] {
     title, titleEn,
     "slug": slug.current,
     description, descriptionEn,
@@ -790,3 +790,13 @@ export const sejourSlugEnQuery = groq`*[_type == "sejour" && !(isHidden == true)
   "subCategorySlug": subCategory->slug.current
 }`
 
+
+// Private sign-up forms (/inscription/[slug]): not listed anywhere, reached by link only
+export const questionnaireBySlugQuery = groq`*[_type == "questionnaire" && slug.current == $slug][0] {
+  _id,
+  title, titleEn,
+  intro, introEn,
+  confirmation, confirmationEn,
+  closed,
+  steps[]{ _key, title, titleEn, questions[]{ _key, label, labelEn, help, helpEn, kind, required, options[]{ _key, label, labelEn } } }
+}`
