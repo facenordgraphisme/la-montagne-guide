@@ -85,6 +85,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, summary: lines.join('\n').replace(/\n{3,}/g, '\n\n') })
   } catch (error) {
     console.error('Questionnaire submission error:', error)
-    return NextResponse.json({ error: 'server' }, { status: 500 })
+    // Sanity's status code and short reason (never contains the token): makes production issues diagnosable
+    const e = error as { statusCode?: number; message?: string }
+    return NextResponse.json(
+      { error: 'server', status: e?.statusCode, detail: String(e?.message || '').slice(0, 200) },
+      { status: 500 }
+    )
   }
 }
